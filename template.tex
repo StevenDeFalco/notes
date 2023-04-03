@@ -1,0 +1,52 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+
+% Packages...
+\usepackage{listings} % to make nicely formatted code blocks
+\usepackage{hyperref} % to get hot links in the table of contents
+
+
+% Custom commands
+
+% ctrl+b to bold the following text
+% usage: ctrl+b ==> ^B{bolded text}
+\newcommand{}[1]{\textbf{#1}}  
+
+% \b to create a new list item
+% usage: \b this is a bullet in my list
+\renewcommand{\b}{\item[$\circ$]}
+
+% \newlist to start an itemized list
+% usage: \newlist \\ \b bullet 1 ...
+\newcommand{\newlist}{\begin{itemize}}
+
+% \listend to end an itemized list
+% usage: ... \b {last bullet} \\ \endlist
+\renewcommand{\endlist}{\end{itemize}}
+
+% \code to format inline strings of code
+% usage: \code{print("Hello world!")}
+\newcommand{\code}[1]{\texttt{#1}}
+
+
+% Heading information
+\title{CODE: COURSE Notes}
+\author{Steven DeFalco}
+\date{\today}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+% Notes start here
+
+
+\end{document}
