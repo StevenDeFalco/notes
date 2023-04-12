@@ -4,7 +4,8 @@
 % Packages...
 \usepackage{listings} % to make nicely formatted code blocks
 \usepackage{hyperref} % to get hot links in the table of contents
-\usepackage{xcolor} % to define custom colors
+\usepackage{xcolor}   % to define custom colors
+\usepackage{titlesec} % to make custom section formatting 
 
 
 % Custom commands
@@ -29,18 +30,34 @@
 % usage: \code{print("Hello world!")}
 \newcommand{\code}[1]{\texttt{#1}}
 
+% custom colors for the code
+\definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{light-gray}{gray}{0.95}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
 \lstset{
-    backgroundcolor = \color{light-gray},
+    backgroundcolor=\color{light-gray},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,       
+    numbersep=10pt,                  
+    tabsize=2,
     frame=tb,
-    numbers = left,
-    numberstyle=\tiny\color{black},
-    numbersep=10pt,
     stepnumber=1,
-    title=\lstname,
-    columns=fixed,
+    title=\lstname
 }
 
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
 % Heading information
 \title{CS392: Systems Programming Notes}
@@ -156,7 +173,7 @@ int openat(int dirfd, const char* pathname,
            int flags, mode_t mode);
 \end{lstlisting}
 
-\noindent where \code{dirfd} is a file descriptor of a directory, and pathname is the \bold{relative path} under that directory. For example, to open a file at the absolute path of \code{\\usr\\sh\\myfile}, you can use \code{open()}:
+\noindent where \code{dirfd} is a file descriptor of a directory, and pathname is the \bold{relative path} under that directory. For example, to open a file at the absolute path of \code{/usr/sh/myfile}, you can use \code{open()}:
 
 \begin{lstlisting}[language=C]
 int fd = open("/usr/sh/myfile", O_RDWR);
@@ -185,10 +202,237 @@ ssize_t read(int fd, void* buf, size_t count);
 ssize_t write(int fd, const void* buf, size_t count);
 \end{lstlisting}
 
+\noindent The function \code{read()} attempts to read up to \code{count} bytes from file descriptor \code{fd} into the buffer starting at \code{buf}. THe other direction applies to \code{write()}. The functions return the number of bytes read or written if scucessful, 0 if it reaches the end of the file, and -1 if there is an error. It is good practice to always check the retrun value of \code{write()} to make sure it matches the expected number. See the following for an appropriate implementation.
 
+\begin{lstlisting}[language=C]
+char* tr = "Hello!";
+if (write(fd, str, 6) != 6) { 
+    fprintf(stderr, "File failed to write.\n");
+}
+\end{lstlisting}
+
+\subsubsection{File Reposition}
+
+For each file opened, the kernel keeps a record for current file offsets, i.e. which byte of the file we're currently at. THe \code{lseek()} function can b used to chnage the current location \bold{within} a file.
+
+\begin{lstlisting}[language=C]
+off_t lssek(int fd, off_t offset, int whence);
+\end{lstlisting}
+
+\noindent where \code{off\_t} is offset in bytes and \code{whence} can be one of three places (declared as macros):
+
+\newlist
+\b \code{SEEK\_SET}: relocate to the beginning of the file (offset of zero) + \code{offset}. Essentially just \code{offset}'
+\b \code{SEEK\_END}: relocate to the end of the file (or, the size of the file) + \code{offset};
+\b \code{SEEK\_CUR}: relocate to its current location within the file + \code{offset}
+\endlist
+
+\noindent \bold{File holes} can be created when the content of the file is no longer contiguous due to changing the file pointer with an \code{lseek()} command. 
+
+\subsubsection{Buffering}
+
+Since everything including hardware in UNIX is considered a file, to utilize those hardwares, we have to connect them to the file systems. SOme devices need immediate access without delay, such as RAM, keyboard, monitor, etc. These devices are called \bold{character special devices}. Some other devices, however, woudl be better to "cache" some data first in order to avoid longer access time, and these are called \bold{block special devices} such as the hard drive. \\
+
+\noindent Recall that getting access to a file on a hard drive is very slow. Therefore, we use the idea of "cache" and create a "buffer cache" (aka "buffer") between the hard drive and the file system. Whenever we \code{open()} a file, the data contained in this file will be copied into the cache. This "buffer cache" is in the main memory and is a structure maintained by the kernel. During the booting of the system, the kernel will allocate a couple of buffers in a certain location of the memory. Each of the buffers includes a data area, and a buffer header to identify this buffer. 
+
+\subsubsection{Streams}
+
+Whenever we want to operate on a file, we create a channel to connect our program and the file. On the low level, we know that the channel is a file descriptor created by calling \code{open()}. On a higher (user) level, the channel we use is an object of \code{FILE*}, declared in the standard C library \code{<stdio.h>}. This connection is called a \bold{stream}. \\ 
+
+\noindent Recall that to open a file using \code{<stdio.h>} we use \code{fopen()} with \code{FILE*}. This function does the system call \code{open()} for us, and associates this stream with the file descriptor. You can get the file descriptor number of a stream using the \code{fileno()} function. If we want to open a file using an existing file descriptor, we can use the \code{fdopen()} function, which will create a \code{FILE} struct and associate it with the file descriptor. 
+
+\subsubsection{Stream Buffering}
+
+In user space, we also need buffered stream between our program and system call. This is because we want to avoid using system calls too often, so we buffer some data from our program, and only when the buffer is full do we use system call. For example: Say we want to use \code{fprintf()} to write a string to a file. When our program reaches the \code{fprintf()} line, from our perspective the operation of writing to the file is done, i.e., the string is already written to the file. This is not necessarily true, however, because this only means it's written to the \bold{stdio buffer}, not the actual file. \\
+
+\noindent C standard I/O library \code{stdio} provides three buffering modes, fully buffered, line buffered, and unbuffered. \\
+
+\paragraph{Fully Buffered}
+
+This is typically used with files, such as reading from and writing to a file. The actual I/O happens in two situations: 
+
+\newlist
+\b Reading: buffer is emtpty and needs to be filled;
+\b Writing: buffer is full and needs to be emptied;
+\endlist
+
+\noindent When the stream buffer is full, the content inside the buffer will be actually written to the disk or the hard drive. This process is called \bold{flushing}. Flushing can be automatic (such as when the buffer is full or we closed the file), but can also be manual by using \code{fflush()} function:
+
+\begin{lstlisting}[language=C]
+int fflush(FILE* stream;
+\end{lstlisting}
+
+\paragraph{Line Buffered}
+
+Line buffered will flush everything from buffer to the destination when a line is finished, i.e., when a newline character '\textbackslash n' is entered. Line buffered is still buffered, and therefore, the buffer has a limit. If the buffer is full and there's still no newline character entered, everything has to be flushed so the final data might be shorter than you actually input. 
+
+\paragraph{Unbuffered}
+
+Unbuffered means I/O takes place immediately. One example is \code{stderr}, which is never buffered. This means whenever we write something to \code{stderr}, it'll be put into an actual file on the drive immediately 
+
+\paragraph{Controlling Buffer}
+
+There are some functions we can use to control the stream buffer:
+
+\begin{lstlisting}[language=C]
+int setvbuf(FILE* stream, char* buf, int mode, size_t size);
+void setbuf(FILE* stream, char* buf);
+void setbuffer(FILE* stream, char* buf, size_t size);
+void setlinebuf(FILE* stream);
+\end{lstlisting}
+
+\noindent The \code{mode} argument \code{setvbuf()} can be one of the following macros:
+
+\newlist
+\b \code{\_IONBF}: unbuffered;
+\b \code{\_IOLBF}: line buffered;
+\b \code{\_IOFBF}: fully buffered;
+\endlist
+
+\noindent If you want to use \code{stdio} stream buffer, pass \code{NULL} to \code{buf}; otherwise you can use your own buffer by declaring a \code{char} array with length of \code{size}.
 
 \newpage
 \section{Processes}
+
+\subsection{Introduction}
+
+When we invoke a program, the actual instance of that program becomes a \bold{process}. A process usually starts when it's executed and ends when it returns from \code{main()} or calls other system calls to exit.
+
+\subsubsection{Process Image}
+
+The layout of a process is called a \bold{process image}.Each process image is split into two poriotns; the user-addressable and the kernel-addressable. The kernel-addressable portions are all maintained in the kernel space of the memory, while the user-addressable portions the user space. Additionally, each process also has a process structure (PCB) to store all its status information. 
+
+\paragraph{Process structures}
+
+The kernel maintains a process structure for every running process called the \bold{process control block (PCB}, meaning whenever we start running a program, the kernel creates an object of the structure. This structure contains all the information that the kernel needs to manage the process. In Linux, this structure is called task structure. There are many fields of which the most important is Process ID or \bold{PID}. Each process has its own unique PID, and the kernel assigns PID to the process when it starts running. \\
+
+\noindent In Linux, the PID's type is \code{pid\_t}. If your C program needs to know its PID when running, you can use the following function: 
+
+\begin{lstlisting}[language=C]
+pid_t getpid();
+\end{lstlisting}
+
+\paragraph{Memory Maps}
+
+There is a memory map for each process. Memory maps are used to indicate where all segments start. The variables are declared as \code{unsigned long} and are virtual memory addresses; they depict where each segment starts and ends. 
+
+\subsubsection{The \code{/proc/} Virtual File System}
+
+For every running process, the system also maintains a virtual file system under the directory \code{/proc/}. We say it's vritual because it doesn't take any physical disk space; it's in the form of a file just for the convenience of inspecting running process status. 
+
+\subsubsection{Process States}
+
+For each process, there are five possible states:
+
+\newlist
+\b \bold{Running (R)}: those who are actively using CPU
+\b \bold{Uninterruptible Sleep (D)}: they are not doing anything and thus don't use CPU. They do not take up memory space, though. For example, when a program is waiting for user input
+\b \bold{Interruptible Sleeping (S)}: it is similar to uninterruptible sleep state, except that it'll respond to signals
+\b \bold{Stopped (T)}: it's similar to sleeping, but it's done manually. We can manually bring a stopped process back to running state
+\b \bold{Zombie (Z)}: they are finished so they do not take any resources such as CPU and memory, but for some reason they still appear in the process table
+\endlist
+
+\subsubsection{System Process Hierarchy}
+
+Upon booting, Linux systems first launch a process called \code{init}, which is a system and service manager. This is the very first process of the entire system, and therefore it has a PID of 1. \code{init} then launches all other processes and becomes the ultimate parent of all other processes. Eventually, all the processes create a hierarchy in the system. 
+
+\subsection{Process Control}
+
+\subsubsection{Creating a Process}
+
+Whenever we invoke a program from terminal, we have actually created a process. We can create a process from our program by using \code{fork()}: 
+
+\begin{lstlisting}[language=c]
+pid_t fork();
+\end{lstlisting}
+
+\noindent the program that calls \code{fork()} is called the parent process, while the program invoked by \code{fork()} is called the child process. A \bold{child process} at the moment of successful call of \code{fork()} is just a copy of the parent - same code, same data, same everything. In the \code{fork()} function, the parent retruns its child's PID, while the child will return 0. Therefore, a successful \code{fork()} always returns twice: once in the parent and once in the child. You can use \code{getppid()} to get the parent process' PID: 
+
+\begin{lstlisting}[language=c]
+#include <unistd.h>
+pid_t getppid();
+\end{lstlisting}
+
+\subsubsection{Parent vs. Child Processes}
+
+There are several attributes inherited by the child process from the parent, but also differences. \\
+
+\bold{Properties inherited by child:}
+
+\newlist
+\b real user ID, real goup ID, effective user ID, effective group ID
+\b supplementary group IDs
+\b process group ID
+\b session ID
+\b controlling terminal
+\b the set-uder-ID and set-group-ID flags
+\b current working directory
+\b root directory
+\b file mode creation mask
+\b signal ask and dispositions
+\b the close-on-exec flag for any open file descriptors
+\b environment
+\b attached shared memory segments
+\b memory mappings
+\b resource limits
+\endlist
+
+\bold{Differences between parent and child}
+
+\newlist
+\b the return values from \code{fork()} are different
+\b the process IDs are different
+\b the two processes have different parent process IDs
+\b the child's process timer values are set to 0
+\b file locks set by parent are not inherited by the child
+\b pending alarms are cleared for the child
+\b the set of pending signals for the child is set to the empty set
+\endlist
+
+\subsubsection{Avoid Zombies}
+
+To avoid zombies, the functions we want to use in the parent process are:
+
+\begin{lstlisting}[language=c]
+#include <sys/types.h>
+#include <sys/wait.h>
+pid_t wait(int* status);
+\end{lstlisting}
+
+\noindent When a process starts executing \code{wait()}, if it has no children, \code{wait()} returns immediatelyt witha  -1. If this process has a child or multiple child processes, it will halt at the line where \code{wait()} is called, until one of its child processes has finihsed. Once a child process has finished, the parent process will resume executing from \code{wait()}, and the return value of \code{wait()} is the PID of that terminated child process. The parameter of \code{wait()} is an integer pointer. 
+
+\paragraph{The \code{waitpid()} Function}
+
+Another function we could use is \code{waitpid()}:
+
+\begin{lstlisting}[language=c]
+#include <sys/types.h>
+#include <sys/wait.h>
+pid_t waitpid(pid_t pid, int* status, int options);
+\end{lstlisting}
+
+\noindent It is very similary to \code{wait()}, but it's more flexible. The first argument, \code{pid}, can be one of the following:
+
+\newlist
+\b \code{< -1}: Wait for any child process whose process ID is equal to the absolute value of PID
+\b \code{-1}: As long as one of the child process terminates, the parent stops waiting for others
+\b \code{0}: Wait for any child process whose process group ID is equal to that of the calling process
+\b \code{> 0}: Wait for the child whose process ID is equal to the value of \code{pid}
+\endlist
+
+\noindent Argument \code{options} can be one or more (by using the OR operator) of the following macros:
+
+\newlist
+\b \code{WCONTINUED}: returns if a stopped child has been resumed by delivery of \code{SIGCONT}
+\b \code{WNOHANG}: returns immediately if no child has exited
+\b \code{WUNTRACED}: returns if a child has stopped
+\endlist
+
+\subsection{Executing Programs}
+
+
+
+\newpage
 \section{Inter-Process Communication (IPC)}
 \section{Threads}
 
