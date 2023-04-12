@@ -1,0 +1,743 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\title{CS492: Operating Systems \\ Notes}
+\author{Steven DeFalco}
+\date{Spring 2023}
+
+\begin{document}
+
+%simple functions to speed up note-taking
+\renewcommand{\i}{\item}
+\newcommand{\bl}{\begin{itemize}}
+\newcommand{\el}{\end{itemize}}
+\renewcommand{\b}[1]{\textbf{#1}}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+\subsection{Operating System Concepts and Structure}
+
+    The \textbf{operating system} offers functionality through \textbf{system calls}. When a system call is made, the kernel runs appropriate code in the \textbf{priveleged mode}. \\
+
+    \noindent A group of system calls implements \textbf{services} such as file system serives and process management services. \\
+
+    \subsubsection{Process vs. Program}
+
+    \noindent A \textbf{process} is a user-level abstraction to execute a program on behalf of a user. Process is a kernel abstraction in which the program is going to run. Each process has its own \textbf{address space}. A \textbf{program} is a series of binary CPU instructions stored in a file. A program requires resources to be executed (such as CPU or memory). The operating system needs to represent an instance of a program in execution and that is a process. 
+
+    \subsubsection{Address Space}
+
+    \noindent \textbf{Address space} is the range of valid memory address for a given process. Address space can be read and/or written and/or executed. Each process has its own separate address space which consists of...
+    
+    \begin{center}
+        \b{Text} - binary program code \\
+
+        \b{Stack} - function calls data \\
+
+        \b{Heap} - dunamically allocated data \\
+    \end{center}
+
+    \subsubsection{Files}
+
+    \noindent A \textbf{file} is an abstraction of a (possible) real storage device such as a hard disk. You can read/write data from/to a file by providing postion and an amount of data to transfer. In UNIX, everything is considered a file. Files are maintained in \textbf{directories} which keep a name for each file they contain. Directories and files form a hierarchy. 
+
+    \begin{quote}
+    
+    \textbf{Block Special Files} can be written and read from block by block. (e.g. disk)
+
+    \textbf{Character Special Files} can be written and read from byte by byte. (e.g. serial port)
+
+    \textbf{Pipes} are pseudo files allowing for multiple process to communicate over a FIFO channel. 
+
+    \end{quote}
+
+    \noindent \textbf{Device drivers} are software inside the kernel that knows how to initialize and communicate with specific hardware devices. 
+
+    \subsubsection{System Calls}
+
+    \textbf{System calls} are the interface the kernel offers to applications to issue service requests. They are highly specific to the operating system and hardware; therefore, you should use system calls included in the C standard library. If you use C system calls then your code will be portable because C will use the correct internal system call depending on the operating system without requiring the programmer to use the operating system specific call. 
+
+    \subsubsection{Kernels}
+
+    \textbf{Monolithic kernel} is a very large collection of C functions linked together into a single very large executable binary program that executes in kernel mode.
+
+    \begin{itemize}
+    \item every function can call every other function
+    \item a single bug will crash everything
+    \item historically how most kernels were implemented
+    \end{itemize}
+
+    \noindent \textbf{Microkernel} splits the kernel into small well-defined modules. 
+
+
+    \begin{itemize}
+    \item Only one kernel runs in kernel mode: the microkernel
+    \item the rest of the modules run as relatively powerless ordinary user processes
+    \item a single bug cannot crash the entire system
+    \item there is more overhead communication between the modules
+    \end{itemize}
+
+    \noindent \textbf{Hybrid kernel} is a compromise between a microkernel and a monolithic kernel
+
+\subsection{Computer Hardware}
+
+    \textbf{Central Processing Unit (CPU)}
+
+    \begin{itemize}
+    \item fetches instructions from memory and executes them
+    \item each CPU has a specific set of instructions and thus different instruction sets on different CPUs will not be interchangeable
+    \item has different \textbf{registers}
+    \begin{itemize}
+        \item \b{General} register for genera data
+        \item \b{Program} counter to store the memory address of the next CPU instruction to execute
+        \item \b{Stack pointer} to store the address of the top of the stack
+        \item \b{Program status word}: readable/writable bits that store the state of the CPU and different conditions that resulted from the previous instruction
+    \end{itemize}
+    \end{itemize}
+
+    \noindent \textbf{Memory}
+
+    \noindent In order of decreasing speed and increasing capacity: registers, cahce, main memory, magnetic disk, tape
+
+    \begin{itemize}
+    \item the cache temporarily holds a piece of data from a slower memory into a faster memory
+    \end{itemize}
+
+    \noindent \textbf{Hardware multithreading} is when you run multiple processes on a single core. Each core has two (or more) sets of registers. Switches between two different sets of registers on each instruction (where needed) to eliminate waiting for data. \\
+
+    \noindent \textbf{Flash memory} stores data even when the electricity is removed (SSD). \\
+
+    \noindent An \textbf{interrupt} is an electric signal on the bus. Interrupt processing involves taking the interrupt, running the kernel interrupt handler, and returning to the user process. The CPU checks for interrupts in-between instructions. When there is an interrupt, the CPU will jump to a unique function in the kernel (the interrupt handler), the kernel handles the interrupt, then the CPU resumes the original process. 
+
+\subsection{Introduction to Linux}
+
+    The C standard library contains the implementation of all the functions required by the definition of the C programming language. The kernel provides an API which is also made of C functions, called system calls. Calling a system call cannot be done directly in a user program written in C because it requires use of a special assembly instruction that switches the CPU to kernel mode. Libc includes C functions (wrappers) which have the same names as the system calls which internally do the real system call for you. If such a wrapper is not available for a given system call, libc also provides the \emph{syscall} function that allows you to call a system call using its system call number. \\
+
+    \noindent \textbf{POSIX (Portable Operating System Interface)} defines a portable interface including multiple aspects of the OS interface to maintain compatibility between different OSes. \\
+
+    \subsubsection{Create your own kernel}
+
+    \begin{enumerate}
+    \item Configure the kernel by hand (\texttt{make menuconfig})
+    \item Compile the kernel (\texttt{make -h \$(nproc) all})
+    \item Install the modules (\texttt{sudo make INSTALL\_MOD\_STRIP=1 modules\_install})
+    \item Install the kernel (\texttt{sudo make install})
+    \end{enumerate}
+    
+    \noindent \textbf{Modules} are a piece of compiled C code added to the kernel while the kernel is already running, in kernel mode. Modules shorten the development cycle because modules can be loaded and unloaded without having to reboot the system. To load a module that you've made use \texttt{sudo insmod ./<module-name>.ko} and to remove the module use \texttt{sudo rmmod <module-name>}. Modules have the visibility of all the kernel, so you can use all global variables and exported functions. 
+
+\subsection{System Calls}
+
+    \textbf{System calls} are the only way a process can enter the kernel. Used to request OS services and priveleged operations such as accesing the hardware, creating other processes, and changing security permissions. System calls switch the execution context of the GPU from user mode to kernel mode. \\
+
+    \noindent \textbf{Syscall trap} / Interrupt / Exception
+
+    \begin{itemize}
+    \item hardware stacks program counter
+    \item hardware loads new program counter from interrupt vector
+    \item assembly language procedure saves registers
+    \item assembly language procedure sets up new stack
+    \item C interrupt service runs
+    \item scheduler decides which process is to run next
+    \item C procedure returns to the assembly code
+    \item assembly language procedure starts up new current process
+    \end{itemize}
+
+    \subsubsection{To add a syscall in Linux}
+
+    \begin{enumerate}
+    \item Write your syscall function in either an existing file or a new file. Modify the makefile (\texttt{obj-y += my\_syscall.o})
+    \item Add your syscall in the architecture specific syscall table (
+    \texttt{arch/x86/entry/syscall/syscall\_64.tbl})
+    \item Add your ssycall prototype (\texttt{include/linux/syscalls.h})
+    \item Recompile, reinstall, reboot the kernel
+    \item Test using the syscall function: invoking the system call from a user-mode program to trigger your code
+    \end{enumerate}
+
+\newpage
+\section{Processes and Threads}
+
+\subsection{Introduction to Processes}
+
+    Multiple processes can run the same program. A single CPU can run only one process at a time. \\
+
+    \noindent \textbf{Multiple processes (multiprogramming)} increases CPU utilization. This consists of overlapping one process's computation with another's wait and also reduces latency (more interactive). To distinguish multiple processes of the same program, each process has a different \textbf{process identifier (PID)}. \\
+
+    \noindent A \textbf{context switch} pauses execution of one process and continues with the execution of another process. The order in which processes execute is not fixed and may not be reproducible. Thus, programmers cannot make time assumptions and must write their code as if it is the only thing that will be running on the CPU. \\
+
+    \noindent Each process has the following key components: 
+
+    \begin{itemize}
+    \item \textbf{stack} stores function arguments and local variables
+    \item \textbf{heap} stores dynamically allocated memory
+    \item \textbf{executable program} is made up of the initialized data segment and the text segment (CPU instructions from program file)
+    \item \textbf{execution context} contains program counter, stack pointer, CPU registers, etc...
+    \end{itemize}
+
+    \noindent \textbf{Memory layout randomization} mixes the location of each part in memory so that the OS is more secure. It will be harder to locate specific processes in memory if it is randomized. There will also be unusable memory in the process that is there to kill the process if anything tries to access the unusable memory. \\
+
+    \noindent \textbf{Stack} is built with stack frames and includes local (function) variables). Function parameters are passed on the stack. (LIFO) \\
+
+    \noindent \textbf{Heap} is used if it is not known how much data you will need at runtime. Dynamically allocated with random access. \\ 
+
+    \noindent \textbf{Processes} are created during system initialization, from already running processes, due to user interaction, or execution of a scheduled batch job. UNIX process philosophy is to create a new process which is an identical copy of the current process (fork) and then in the new process load the other program. \\
+
+    \noindent \texttt{fork()} is a syscall used to create a new process
+
+    \begin{itemize}
+    \item the proces that calls the \texttt{fork()} syscall is called the \textbf{parent process}
+    \item the newly created process is called the \textbf{child process}
+    \item the child is an identical copy of the parent (runs the exact same code)
+    \begin{itemize}
+    \item child process returns a zero value
+    \item parent process reutrns the PID of the new child
+    \end{itemize}
+    \item If C code contains a sequence of $n$ consecutive \texttt{fork()} calls, $2^n$ processes will be created
+    \item most UNIX systems have a limit on the number of processes a given user can have at the same time (\texttt{ulimit -a})
+    \end{itemize}
+    
+    \noindent A processes \textbf{execution state} is what the process is currently doing...
+
+    \begin{itemize}
+    \item \textbf{Running} - executing instructions on the CPU, it is the process that currently has control of the CPU, cannot have more processes running than number of cores/CPUs
+    \item \textbf{Ready} - waitng to be assigned to CPU: ready to execute, but another process is executing on the CPU
+    \item \textbf{Waiting/blocked} - waiting for an event: cannot make progress until event happens (most processes are in this state)
+    \end{itemize}
+
+    \noindent Types of \textbf{process termination}
+    \begin{itemize}
+    \item Normal exit (voluntary)
+    \item Error exit (voluntary)
+    \item Fatal error (involuntary) is used when there is a fatal program bug
+    \end{itemize}
+
+    \noindent \textbf{Orphan} processes are children processes whose parents have been terminated. Can be adopted by another process, or can be killed automatically when parent is killed (for security reasons). \\
+
+    \noindent Kernel maintains a table called the \textbf{process table}. Is stored in the kernel memory and is invisble to processes. Has one entry per process (process's PID is an index into this table). The entry is called the \textbf{process control block (PCB)}: contains all information about a process. \\
+
+    \noindent When a \textbf{context switch} occurs
+    
+    \bl
+    \i hardware stacks program counter
+    \i hardware loads new program counter from interrupt vector
+    \i assembly language procedure saves registers 
+    \i assembly language procedure sets up new stack
+    \i C interrupt service runs
+    \i scheduler decides which process is to run next
+    \i C procdure returns to the assembly code
+    \i assembly language procedure starts up new current process
+    \el
+
+\subsection{Processes in Linux}
+
+    Every process has a user and a kernel part in its virtual address space. User space is running the program; kernel space is running kernel code on behalf of the program (kernel space is invisble to the program). There will be both a user-space and kernel-space \textbf{execution context} and thus there will be 2 PCs, 2 stack pointer, 2 stacks, etc... \\
+
+    \noindent In Linux, a process is a \textbf{task} represented by a \texttt{task\_struct} inside the kernel's memory. This is the \textbf{proces control block} for a linux task. A task struct includes:
+
+    \bl
+    \i scheduling parameters
+    \i memory image
+    \i signals
+    \i CPU registers
+    \i system call state
+    \i file descriptor table
+    \i accounting
+    \i kernel stack
+    \el
+
+    \noindent \texttt{fork()} is limited to creating processes only. On Linux, task creation in general can be done by the \texttt{clone()} syscall. When \texttt{clone()} is called... 
+
+    \bl
+    \i new child starts executing function
+    \i may use a new stack
+    \i has \texttt{sharing\_flags} to describe the amount of sharing between the caller and the callee
+    \i blurs the disctinction between process and thread creation 
+    \bl
+    \i if you share nothing then it's the same as \texttt{fork()}
+    \i if you share everything then it's the same as thread creation
+    \el
+    \el
+
+    \noindent Internally, both \texttt{fork()} and \texttt{clone()} call the kernel function \texttt{kernel\_clone()}.
+
+\subsection{Threads}
+
+    A \textbf{thread} cannot exist without a process. A process is a "container" for threads. A process may contain one (the default) or more threads. Thread tells you what part of the program is currently being executed. \textbf{Thread} is an independent sequential execution stream within a process; programs use one or more threads per process. Items that are \textbf{shared per process} include the following:
+
+    \bl
+    \i address space
+    \i global variables
+    \i open files
+    \i child processes
+    \i pending alarms
+    \i signals and signal handlers
+    \i acccounting information
+    \el
+
+    \noindent Items that are \textbf{shared per thread} (private to each thread) include the following:
+
+    \bl
+    \i program counter
+    \i registers 
+    \i stack
+    \i state
+    \el
+    
+    \noindent Some of the advantages of threads:  \\
+    \textbf{Performance} - shared address space and therefore no communication overhead between threads. Thread creation can be 10-100 times faster than process creation. \\
+    \textbf{Efficiency} - allows a program to overlap I/O and communication. Allows one process to use multiple cores. \\
+
+    \noindent \textbf{Amdahl's Law} identifies performance gains from adding additional cores to an application that has both serial and parallel components. \textbf{Serial} components can only be executed by a single thread. \textbf{Parallel} components can be executed by multiple threads. 
+    $$speedup \leq \frac{1}{S + \frac{(1-S)}{N}}$$
+    where S is the serial portion and N is the number of processing cores. Note that the serial portion of an application has disproportionate effect on performance gained by adding additional cores / CPUs. \\
+
+    All threads in a single process share the same address space. Global variables are shared between threads. Multiple threads may access the same global variable concurrently and programers are responsible to coordinate access (synchronization algorithms). Each thread gets its own local variables (in stack). Each process starts with a single "main" thread; the first thread can create new threads. Any thread can end at any point; if the main thread returns from the \texttt{main()} function, the \texttt{exit()} system call is called and the whole process terminates. \\
+    
+    \subsubsection{PCB}
+
+    When making threads, the kernel will break the PCB into two pieces.
+
+    \begin{enumerate}
+    \i Information about program execution is stored in \textbf{Thread Control Block (TCB)}. This includes the program counter, CPU registers, scheduling information, and pending I/O information. 
+    \i Other information is stored in the \textbf{Process Control Block (PCB)}. This includes memory management information and accounting information. 
+    \end{enumerate}
+
+    \subsubsection{Threads Implemented in User Space}
+
+    \textbf{Pros}:
+    \bl
+    \i \textbf{Portable}: can be used on any OS
+    \i a user-level threads library can be implemented on an OS that does not support threads
+    \i thread switching is at least an order of magnitude faster than trapping to the kernel
+    \i thread scheduling is very fast: no process context switching, no kernel trap, no flushing of memory cache
+    \i each process can have its own thread scheduling algorithm
+    \el
+
+    \noindent \textbf{Cons}:
+    \bl
+    \i \textbf{Doesn't support real parallelism}: kernel will schedule process on single core regardless of number of threads and therefore cannot take advantage of multicore/multiprocessor systems
+    \i if one thread makes a blocking system call then the kernel suspends the whole process
+    \i threads need to voluntarily give up the CPU to each other for multiprogramming so user code is more complex
+    \el
+
+    \subsubsection{Threads Implemented in Kernel Space}
+
+    \textbf{Pros}:
+    \bl
+    \i \textbf{supports real parallelism} (multicore/multiprocessor systems)
+    \i no run-time thread system needed in each process
+    \i no thread table in each process
+    \i block system calls are not a problem (the kernel can schedule another thread)
+    \el
+
+    \noindent \textbf{Cons}:
+    \bl
+    \i \textbf{slower than user-space threads}: if thread operations are common, much more kernel overhead will be incurred because of the many system calls required
+    \i if you fork a multithreaded process, do you copy all threads or just the on that called \texttt{fork()}?
+    \i if signals are sent to processes, should the kernel assign it to a specific thread to handle
+    \el
+
+    \noindent In practice, user threads are mapped one-to-one with kernel threads: \textbf{hybrid implementation}. 
+
+    \subsubsection{Context Switching with Threads}
+
+    When context switching with threads...
+
+    \bl
+    \i thread is now the unit of a context switch
+    \i context switch causes CPU state to be copied to/from the TCB
+    \i when context switching two threads of the same process, no need to change address space
+    \i when context switching two threads in different processes, must change address space 
+    \el
+
+    \subsubsection{Thread Local Storage}
+
+    \textbf{Thread local storage (TLS)} works like a global variable but each thread has its own copy of it. Use this instead of global variables when making single-threaded code multi-threaded. Visible everywhere in the code, but each thread has its own copy. 
+
+\subsection{Threads in Linux}
+
+    Linux, implements threads in the kernel, not in user space. Linux uniformally handles processes and threads: processes and thread tables are unified into a single data structure. Processes and threads are considered \textbf{tasks} and are thus represented by a \texttt{task\_struct}: there is one \texttt{task\_struct} per thread. Linux assigns PID and TID for each thread; each thread has a unique TID. To check the TID use the \texttt{gettid()} syscall. 
+
+\section{Scheduling}
+
+\subsection{Introduction to Scheduling}
+
+    Multiple processes and threads are ready to run; the kernel's scheduler decides which runs next. Scheduling decisions may take place when a process/thread is created, terminates, blocks on an event. Scheduling decisions may also take place when an interrupt occurs; this includes clock interrupts ($running$ to $ready$) or I/O interrupts ($blocked$ to $ready$). 
+
+    \subsubsection{Clock Interrupts}
+
+    \textbf{Clock interrupts} are a way for a system to keep track of time. Interrupts occur at periodic intervals called a clock tick. Clock interrupts are implemented using a hardware clock interrupt and have high priority in the system. 
+
+    \subsubsection{Non-preemptive Scheduling}
+    
+    In \textbf{Non-preemptive Scheduling}, proceses execute until completion or until they make a \textbf{voluntary process swtich} or \textbf{process switch on blocking calls}. The scheduler gets involved only at exit or on request (i.e. for every clock interrupt, running processes keep going).
+
+    \subsubsection{Preemptive Scheduling}
+
+    In \textbf{preemtive scheduling} while a process executes, its execution may be paused and another process resumes its execution. This can take the form of an \textbf{involuntary process switch}. This scheduling is used in all OSes today. 
+
+    \subsubsection{Goals of All Scheduling Algorithms}
+
+    \bl
+    \i \textbf{fairness} - give each process a fair share of the CPU
+    \i \textbf{policy enforcement} - seeing that stated policy is carried out
+    \i \textbf{balance} - keeping all parts of the system busy
+    \el
+        
+\subsection{Scheduling in Batch Systems}
+
+    \subsubsection{Goals for Scheduling in Batch Systems}
+    \bl
+    \i \textbf{throughput} - maximize jobs per hour
+    \i \textbf{turnaround time} - maximize time between submission and termination
+    \i \textbf{CPU utilization} - keep the CPU busy all the time
+    \el
+
+    \subsubsection{First-come First-served (FCFS)}
+
+    Processes are assigned to the CPU in the order they request it (or they arrive). The non-preemptive version will let each job keep running until completion. \textbf{Convoy effect} is when a long process delays short processes. \textbf{Turnaround time} is the time taken by a job to complete after submission (including the wait time). 
+
+    $$\textrm{turnaround time} = \textrm{time}_{\textrm{end}} - \textrm{time}_{\textrm{submitted}}$$
+    
+    \subsubsection{Shortest Job First (SJF)}
+
+    Associate the length of its CPU time with each process. Use the CPU time length to schedule the process with the shortest CPU time first. In the \textbf{non-preemptive version}, once the CPU is given to the process, it cannot be taken away and then after completion of a process, will consider the next shortest job and begin executing that one until completion. In the \textbf{preemptive version}, if a new process arrives with less CPU time than the remaining time of the current ecxecuting process: then preempt. \\
+
+    \noindent The \textbf{preemptive version} is called \textbf{shortest remaining time next (SRTN)} and is optimal in terms of average turnaround time (i.e. always gives minimum average turnaround time). This method also prevents the convoy effect. However, there are more context switches and a process may be starved of the processeor if short processes keep arriving. 
+
+\subsection{Scheduling in Interactive Systems}
+    
+    \subsubsection{Goals for Scheduling in Interactive Systems}
+
+    \bl
+    \i \textbf{response time} - respond to requests quickly
+    \i \textbf{proportionality} - match duration expectation of users
+    \el
+
+    \subsubsection{Round-Robin (RR)}
+
+    Each process is allowed to run for a specified time interval called the \b{time quantum}; in practice, the time quantim is likely not fixed. After this time (the time quantum) has elapsed, the process is preempted and added to the end of the ready queue and the next process is scheduled. If the process terminates or blocks before the time quantum is entirely used up, then the process loses the rest of its time quantum and the next process is scheduled with a new time quantum. \\
+    
+    \noindent \b{Advantages of RR}
+
+    \bl
+    \i solution to fairness and starvation
+    \i fair allocation of CPU across jobs
+    \i low average waiting time when job lengths vary
+    \i good for responsiveness if small number of jobs
+    \el
+
+    \noindent \b{Disadvantages of RR}
+
+    \bl 
+    \i context-switching time may add up for long jobs
+    \el 
+
+    \noindent \b{Context switching} may impact the choice of the time quantum...
+
+    \bl 
+    \i when there are many processes, a long quantum causes a poor response time
+    \i a short time quantum makes things more responsive but gives a higher context switch overhead
+    \i time quantum might be variable depending on CPU load
+    \el
+
+    \noindent \b{Cache state} must be shared between all jobs which may slow down execution in RR scheduling. There is no cache sharing in FCFS. 
+
+    \subsubsection{Priority (PRIO) Scheduling}
+
+    \b{PRIO} has four priority classes and always executes the highest-priority runnable jobs to completion. Each queue is processed in a round-robin fashion with a time quantum. Note that lower numbers represent higher priority. There are, however, some \b{problems} with PRIO scheduling...
+
+    \bl 
+    \i \b{starvation} when lower priority jobs don't get run because higher priority tasks always running
+    \i \b{priority inversion} happpens when a low priority task has resource needed by high priority task, which then must wait
+    \el
+
+    \noindent Priorities can be \b{assigned} \b{statically} based on process type, user, how much the user paid (if a cloud server); or \b{dynamically} based on how much a process runs vs doing I/O. $\textrm{Priority} = \frac{1}{f}$ where $f$ is the size of the quantum last used. Thus, the longer a process ran, the lower its priority and the process that runs the shortest gets the highest priority to run next.
+
+    \subsubsection{Multiple Queues (MQ) Scheduling}
+
+    Same as priority scheduling, but each queue has a different time quantum (shortest quantum for high-priority and longer for low-priority). Processes start at the highest priority. When a process \b{exceeds} its time qunatum, it's moved to the next lowest priority queue. When a process \b{becomes interactive} it is moved to the higher priority. If the user discovers how to make their tasks more ineractive, they can get all of their processes to be very high priority, which is a problem. 
+
+    \subsubsection{Other Schedulers for Interactive Systems}
+
+    \bl 
+    \i \b{Shortest processes next}: SJF but educated guess for how much CPU a process will need next
+    \i \b{Guaranteed scheduling}
+    \i \b{Lottery scheduling} (probabilistic scheduling)
+    \i \b{Fair-share scheduling}: round robin scheduling between users. 
+    \el
+
+\subsection{Scheduling in Real-time Systems}
+    
+    \subsubsection{Goals for Scheduling in Real-Time Systems}
+
+    \bl
+    \i \textbf{meeting deadlines} - avoid losing data
+    \i \textbf{predictability} - avoid quality degradation in multimedia systems
+    \el
+
+    \noindent Time plays an essential role in real-time system scheduling. One or more physical devies external to the computer generate events and the computer must react appropriately to them within a fixed amount of time. If the computer reacts too late, it is \b{as bad as not reacting}. \\
+
+    \noindent Real-time scheduling can be split into two categories. \b{Hard real-time} is when there are absolute deadlines that must be met. \b{Soft real-time} is when missing an occassional deadline is undesirable but tolerable. \\ 
+
+    \noindent Let's assume that process behavior is predictable and known in advance (the software should be writtein in a way to make this true). Task timing is known and represented through the following values. 
+    
+    \begin{center}
+        \b{Release time} ($R_i$) is the earliest time when a task can start execution \\
+        \b{Execution time} ($C_i$) is the expected execution time for a task \\ 
+        \b{Deadline} ($D_i$) is the time by which the proecss must be completed. 
+    \end{center}
+
+    \noindent We can also assume that the \b{periodicity} is known. It can be one of the following options:
+
+    \bl 
+    \i periodic process
+    \i sporadic process (aperiodic, hard deadlines)
+    \i aperiodic proces (aperiodic, soft deadline)
+    \el
+
+    \subsubsection{Number of Schedulable Processes}
+
+    $$\sum_{i=1}^{m} \frac{C_i}{P_i} \leq 1$$
+
+    \noindent where ther are $m$ periodic events. Event $i$ occurs with period $P_i$, requires $C_i$ time on the CPU. The percentage of CPU usage for event $i$ is $\frac{C_i}{P_i}$. 
+
+    \subsubsection{Rate Monotonic Scheduling}
+
+    Preemptive algorithm, where the shorter the period, the higher the priority.
+
+    \subsubsection{Earliest Deadline First Scheduling}
+
+    Schedules processes according to the shortest remaining time until the next deadline. The shorter the remaining time, the higher the priority. 
+
+\section{Concurrency}
+
+\subsection{Inter-process Communication}
+
+    Processes need to share information or coordinate. Threads are nice for this but do not provide isolation from each other. Processes provide isolation but communication requires system calls. Some \b{problems with inter-process communication} include...
+
+    \bl 
+    \i how can one process pass information to another in such a way that porcesses do not get in each other's way?
+    \i how to maintain proper sequencing when dependencies are present between processes?
+    \el 
+
+    \noindent The same problems apply to inter-thread communication because by design, threads communicate via shared memory. For one process to \b{pass information} to another, it can...
+
+    \bl 
+    \i pass messages through the kernel
+    \i share memory (which can be setup with system calls)
+    \i share a file 
+    \i use asynchronous signals or alerts
+    \i use named pipes (which is just a message queue inside the kernel essentially)
+    \el 
+    
+\subsection{Race Conditions}
+
+    A \b{race condition} occurs when two or more processes/threads are reading or writing shared data and the final result depends on which runs precisely when. The \b{critical section} is the part of the program where the shared data is accessed. Uncoordinated read/write of the data in critical sections may lead to race conditions. Must find some way to prohibit more than one process to execute in its critical section at the same time. A solution is to have \b{mutual exclusive} access to critical sections: only one processor or thread in a critical section at any time. 
+
+    \subsubsection{Requirements to Avoid Race Conditions}
+
+    \begin{enumerate}
+    \i No two processes may be simultaneously inside their critical section: \b{mutual exclusion}
+    \i No processes running outside its critical section may block other processes from entering a critical section: \b{progress}
+    \i No process should have to wait forever to enter its critical section (be starved): \b{bounded waiting}
+    \end{enumerate}
+
+    \subsubsection{Disabling Interrupts to Avoid Race Conditions}
+    
+    Right before entering the critical section, the process disables all hardware interrupts and when leaving the critical section, the process reenables all interrupts. When interrupts are disabled, the CPU cannot be switched to another process, so the current process can keep the CPU just for itself while it is in the critical section (unless the process makes a system call). The \b{advantage} of disabling interrupts is that it is very easy to implement in softare. The \b{disadvantages} of disabling interrupts is that it is unwise to give user processes the ability to turn off interrupts and this is not suitable for multicore systems. In practice, disabling interrupts is only used on single core machines for mutual exclusion in kernel space. 
+    
+    \subsubsection{Using Lock Variables to Avoid Race Conditions}
+
+    Use a single shared variable (\b{lock}) between processes. A value of 0 means that no process is in its critical section. A vaue of 1 means that some process is in its critical section. This solution creates a critical section with the lock if the lock is read and written to in two separate lines of code (i.e. if the process context switches after reading the lock but before writing/updating the lock, then both processes may enter critica sectin simultaneously). Continuously testing a variable until some value appears (\b{busy waiting}) wastes a lot of CPU time. Note that a lock variable that uses busy waiting is called a \b{spinlock}. 
+
+    \subsubsection{Strict Alternation to Avoid Race Conditinos}
+
+    There is a single turn variable shared between processes. A value of 0 means that it is the turn of process 0. A value of 1 means it is the turn of process 1. the turn variable is initially set with 0 or 1 based on how should start first and the processes strictly alternate. This can easily be generalized to $n$ different processes. An \b{advantage} of this solution is that there are no race conditions. A \b{disadvantage} of this solution is that it does not achieve progres because a process can be blocked by a process not in its critical section.
+
+    \subsubsection{Peterson's Solution}
+
+    Use two shared variables \texttt{(turn, flags[])} between processes. \texttt{int turn} imposes an access order: which process can enter its critical section next. \texttt{bool flags[]} (array) specifies for each process whether it is currently interested in entering its critical section. This array is initialized to be false. Some \b{advantages} of this solution are that there are no race conditions and it satisfies all three conditions for critical regions. \b{Disadvantages} are that busy waiting uses a lot of CPU and generalization to more than two processes is complex. 
+
+    \subsubsection{Test-and-Set Lock (TSL) Instruction}
+
+    Reads and modifies the content of a memory word atomically. Takes arguments \texttt{TSL register, memory\_address}. Returns in a register the current value of the memory word at \texttt{memory\_address} and then sets the value of the memory word at \texttt{memory\_address} to true (usually abstracted as a non-zero value). Operations cannot be interrupted during execution because this locks the memory bus. Essentially, there can only be one read and one write in one atomic step. 
+
+    \subsubsection{TSL Solution}
+
+    There is a single lock variable in memory at \texttt{LOCK\_ADDR}, shared between processes. Uses TSL instead of while loops and assignment. \b{Advantages} of this solution are that there are no race conditions, mutual exclusion is achieved, and progress can be made. \b{Disadvantages} of this solution are that you must have a TSL instruction implemented in the CPU, there is no bounded waiting, and it has busy-waiting. 
+        
+    \subsubsection{Producer-Consumer Problem with \texttt{sleep()} and \texttt{wakeup()}}
+
+    Instead of busy-waiting, let the process sleep (requires kernel syscalls). The \texttt{sleep()} syscall causes the caller to give up the CPU for some duration of time or until some other process wakes it up. The \texttt{wakeup()} syscall causes the caller to wake up some sleeping process. Note that this solution doesn't sovle the priority inversion problem because process B might still end up having to wait a long time for process A to exit the critical section, even if process B is now sleeping
+
+    \begin{lstlisting}[language=C]
+    Producer
+    while(1){
+        produce an item A;
+        if (count == N) //full buffer
+            sleep();
+        insert item; 
+        count++;
+        if (count == 1) //was buffer empty
+            wakeup(consumer);
+    }
+
+    Consumer
+    while(1){
+        if (count == 0) //empty buffer
+            sleep();
+        remove item;
+        count--;
+        if (count == N-1) //was buffer full?
+            wakeup(producer);
+        consume an item;
+    }
+    \end{lstlisting}
+
+    \noindent In this soution both the producer and consumer may sleep forever. An \b{advantage} of this solution is that there is no busy-waiting. \b{Disadvantages} of this solution are that there is a race condition. A wakeup sent to a process that is not (yet) sleeping is lost. Decision to go to sleep and calling sleep() must be paired. So that the test of \texttt{count} must be done at the same time as the sleep/wakeup in some way. To achieve this we use \b{semaphores}...
+
+    \subsubsection{Sempahores}
+
+    The purpose of \b{sempahores} is to solve the lost wakeup problem (explained just above) and avoid race conditions. Semaphores will try to store the number of wakeups. To make a semaphore, define a count variable (the semaphore): \texttt{Down(<semaphore>)} is equivalent to consume (decrease) or sleep(), \texttt{Up(<semaphore>)} is equivalent to produce (increase) and (potentially) wakeup. \texttt{down()} and \texttt{up()} are \b{atomic} (i.e. once the operation has started, no other process can access the semaphore until completed or blocked). \\ 
+
+    \noindent The value of the semaphore... if \b{positive}, represents the number of resources available and that there are no pending wakeups. If \b{zero} represents that there are no resources available and no pending wakeups. If \b{negative} represents that there are no resources available and signifes the number of pending wakeups (number of processes waiting). 
+
+    \subsubsection{Types of Semaphores}
+
+    \b{Counting semaphore} is a sempahore based on the number of controlled resources. The value is an integer. \\ 
+
+    \noindent \b{Binary Semaphore} is a sempahore with a value of 0 or 1 which implementes mutual exclusion; this is called a \b{mutex}. The value is either a 0 or 1. A value of 0 represents \b{locked} and that the cirtical region is not available. A value of 1 represents \b{unlocked} and that the critical region is available.
+
+    \subsubsection{Producer-Consumer Problem using Semaphores}
+
+    \begin{lstlisting}[language=C]
+    Shared variables
+    const int N=100;
+    semaphore empty=N, full=0;
+
+    Producer
+    while(1) {
+        produce an item A; 
+        down(emtpy);
+        insert item;
+        up(full);
+    }
+
+    Consumer 
+    while(1) {
+        down(full);
+        remove item;
+        up(emtpy);
+        consume an item;
+    }
+    \end{lstlisting}
+
+    \noindent The sum of the semaphores must be equal to $N$. There could be a race condition with the insert and remove actions: if the buffer is not empty or full, then they may both try to insert/remove at the same time. \\
+    
+    \subsubsection{Producer-Consumer Problem using Semaphores and Mutexes}
+
+    \begin{lstlisting}[language=C]
+    Shared variables
+    const int N=100;
+    semaphore empty=N, full=0;
+    mutex mux=1;
+
+    Producer
+    while(1) {
+        produce an item A; 
+        down(emtpy);
+        lock(mux); // down(mux)
+        insert item;
+        unlock(mux); // up(mux)
+        up(full);
+    }
+
+    Consumer 
+    while(1) {
+        down(full);
+        lock(mux); // down(mux)
+        remove item;
+        unlock(mux); // up(mux)
+        up(emtpy);
+        consume an item;
+    }
+    \end{lstlisting}
+
+    The order of the \texttt{up()} and \texttt{down()} calls is important and can't be changed. 
+
+    \begin{center}
+        \b{Producer} = \texttt{down(empty), down(mux), up(mux), up(full)} \\ 
+        \b{Consumer} = \texttt{down(full), down(mux), up(mux), up(empty)}
+    \end{center}
+
+    \subsubsection{Monitors}
+
+    Monitors are a higher-level primitive. Monitors are a programming language construct: a package or module or class. Some \b{rules for monitors} include:
+
+    \bl 
+    \i only one process/thread can be active in a monitor at any time
+    \i processes cannot access internal data of monitor (fields are private)
+    \i put all critical sections inside monitor methods
+    \el
+
+    \noindent A \b{mutex} is used to achieve mutual exclusion: locked/unlocked automnatically at function/method invocation and return. They also have a \b{condition variable} which is used for processes to wait/block when attempting to enter a monitor which is already currently in use and to wake up the process. \\
+
+    \noindent \texttt{wait(condition)}
+
+    \bl 
+    \i adds process to wait queue for condition variable
+    \i causes the calling process to block
+    \i releases the mutex to allow other processes to enter monitor 
+    \i re-acquire mutex once blocked process is woken up
+    \el 
+
+    \noindent \texttt{signal(control)}
+    \bl 
+    \i wakes up one blocked process on the condition, if any
+    \i exits the monitor, leaving critical section
+    \el 
+
+\subsection{Readers-Writers Problem}
+
+    Problem is that multiple processes / threads need to acces a shared resources concurrently (but some only need to read it). Mutual exclusion allows one process to access the resource at a time, but can we allow more than one reader at a time? We want multiple readers to access the resource concurrently, but writers must access it with mutual exclusion. 
+
+    \begin{lstlisting}[language=C]
+    typedef int semaphore;
+    semaphore mutex = 1;
+    semaphore db = 1;
+    int rc = 0;
+
+    void reader(void) {
+        while(TRUE) {
+            down(&mutex);
+            rc = rc + 1;
+            if (rc == 1) down(&db)
+            up(&mutex)
+            read\_data\_base();
+            down(&mutex);
+            rc = rc - 1;
+            if (rc == 0) up(&db);
+            up(&mutex);
+            use\_data\_read();
+        }
+    }
+
+    void writer(void) {
+        while(TRUE) {
+            think\_up\_data();
+            down(&db);
+            write\_date\_base();
+            up(&db);
+        }
+    }
+    \end{lstlisting}
+
+\end{document}

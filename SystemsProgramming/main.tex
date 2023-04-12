@@ -1,0 +1,197 @@
+\documentclass{article}
+
+
+% Packages...
+\usepackage{listings} % to make nicely formatted code blocks
+\usepackage{hyperref} % to get hot links in the table of contents
+\usepackage{xcolor} % to define custom colors
+
+
+% Custom commands
+
+% \bold{} to bold the following text
+% usage: \bold ==> \bold{bolded text}
+\newcommand{\bold}[1]{\textbf{#1}}
+
+% \b to create a new list item
+% usage: \b this is a bullet in my list
+\renewcommand{\b}{\item[$\circ$]}
+
+% \newlist to start an itemized list
+% usage: \newlist \\ \b bullet 1 ...
+\newcommand{\newlist}{\begin{itemize}}
+
+% \listend to end an itemized list
+% usage: ... \b {last bullet} \\ \endlist
+\renewcommand{\endlist}{\end{itemize}}
+
+% \code to format inline strings of code
+% usage: \code{print("Hello world!")}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\definecolor{light-gray}{gray}{0.95}
+\lstset{
+    backgroundcolor = \color{light-gray},
+    frame=tb,
+    numbers = left,
+    numberstyle=\tiny\color{black},
+    numbersep=10pt,
+    stepnumber=1,
+    title=\lstname,
+    columns=fixed,
+}
+
+
+% Heading information
+\title{CS392: Systems Programming Notes}
+\author{Steven DeFalco}
+\date{Spring 2023}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+% Notes start here
+\section{Introduction to Linux}
+\section{Bash Scripts}
+\section{C Programming Language}
+
+\newpage
+\section{File Systems and File I/O}
+
+\subsection{File}
+\subsection{UNIX File System}
+\subsection{File Related Structures and Operations}
+\subsection{Directories Related Structures and Operations}
+
+\subsection{File Descriptors}
+
+File descriptors are non-negative intergers that are assigned to keep track of every file that is currently opened by a process. Each process maintains a table of file descriptors; think of this table as an array, where the indices are file descirptors and each element of the array is an object of the \code{fd} struct: \\ 
+
+\begin{lstlisting}[language=C]
+struct fd {
+    struct file* file;
+    unsigned int flags;
+};
+\end{lstlisting} 
+
+\noindent There are a lot of fields defined in \code{struct file}, but the most relevant ones are shown below: \\ 
+
+\begin{lstlisting}[language=C]
+struct file {
+    ...
+    struct inode* f_inode;
+    unsigned int f_flags;
+    loff_t f_pos;
+    ...
+}
+\end{lstlisting}
+
+\noindent The \code{f\_flags} are the file flags, such as \code{O\_RDONLY}, \code{O\_NONBLOCK}, \code{O\_SYNC}. The \code{f\_pos} indicates the current reading or writing position (offset). Its type, \code{loff\_t}, is a 64-bit value. You can list all the files in \code{/dev/} to see all the device files. 
+
+\subsection{I/O System Calls}
+
+All ways to open/write/read/close a file are just wrappers that eventually call the lowest level system functions. These functions deal with file descriptors directly. The following are some of these system functions:
+
+\newlist
+\b \code{open()} and \code{close()}: to open or close a file
+\b \code{creat()}: to create a file 
+\b \code{read()} and \code{write()}: to read or write a file
+\b \code{lseek()}: to seek a position in a file
+\endlist
+
+\subsubsection{Opening, Closing, and Creating Files}
+
+The prototype of \code{open()} is as follows:
+
+\begin{lstlisting}[language=C]
+#include <fcntl.h>
+int open(const char* pathname, int flags);
+int open(const char* pathname, int flags, mode_t mode);
+\end{lstlisting}
+
+\noindent which returns a file descriptor. This function is ued to open a file, regardless of its type: regular, directory, block, character, or socket. \\
+
+\noindent The \code{flags} specifies the mode of opening, and it has to have one of the following macros:
+
+\newlist
+\b \code{O\_RDONLY}: read only
+\b \code{O\_WRONLY}: write only
+\b \code{O\_RDWR}: read and write
+\endlist
+
+\noindent There are more macros as well. For example, if \code{O\_CREAT} is specified, the function will create a new file if the pathname doesn't exist. If \code{O\_APPEND} is used, the function will append content to the end of the file. To combine some of these macros, we can use the \emph{or} operator like this:
+
+\begin{lstlisting}[language=C]
+int fd = open("test", O_WRONLY | O_CREAT | O_APPEND);
+\end{lstlisting}
+
+\noindent Creating a file is also similar 
+
+\begin{lstlisting}[language=C]
+#include <fcntl.h>
+int creat(const char* pathname, mode_t mode);
+\end{lstlisting}
+
+\noindent where \code{mode} is the same as above. The following two statements are equivalent and represent how we can combine macros to customize the \code{open()} system call. 
+
+\begin{lstlisting}[language=C]
+int fd = open("test", O_WRONLY | O_CREAT | O_TRUNC |
+                      O_APPEND);
+int fd = creat("test", S_IRWXU);
+\end{lstlisting}
+
+\noindent because \code{O\_TRUNC} flag will remove everything in the file \code{test} if it exists already. \\ 
+
+\noindent In addition to those mentioned, we can also open a file using the following functions 
+
+\begin{lstlisting}[language=C]
+int openat(int dirfd, const char* pathname, int flags);
+int openat(int dirfd, const char* pathname, 
+           int flags, mode_t mode);
+\end{lstlisting}
+
+\noindent where \code{dirfd} is a file descriptor of a directory, and pathname is the \bold{relative path} under that directory. For example, to open a file at the absolute path of \code{\\usr\\sh\\myfile}, you can use \code{open()}:
+
+\begin{lstlisting}[language=C]
+int fd = open("/usr/sh/myfile", O_RDWR);
+\end{lstlisting}
+
+\noindent but you can also open a directory first, and use \code{openat()}:
+
+\begin{lstlisting}[language=C]
+int dirfd = open("/usr/sh/", O_RDWR);
+int fd = openat(dirfd, "myfile", O_RDWR);
+\end{lstlisting}
+
+\noindent To \bold{close} a file, you simply need the file descriptor:
+
+\begin{lstlisting}[language=C]
+int close(int fd);
+\end{lstlisting}
+
+\subsubsection{Reading and Writing a File}
+
+The functions to read and write files are as follows: 
+
+\begin{lstlisting}[language=C]
+#include<unistd.h>
+ssize_t read(int fd, void* buf, size_t count);
+ssize_t write(int fd, const void* buf, size_t count);
+\end{lstlisting}
+
+
+
+\newpage
+\section{Processes}
+\section{Inter-Process Communication (IPC)}
+\section{Threads}
+
+
+
+\end{document}
