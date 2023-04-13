@@ -538,12 +538,216 @@ When we are pressing \code{Ctrl+C}, it sends signal \code{SIGINT} to the process
 
 \paragraph{Altering Default Actions}
 
-Default actions of most of the signals can be altered by us, except \code{SIGKILL} and \code{SIGSTOP} which cannot be caught, blocked, or ignored. 
+Default actions of most of the signals can be altered by us, except \code{SIGKILL} and \code{SIGSTOP} which cannot be caught, blocked, or ignored. This is an example of changing the default handling of signals
+
+\begin{lstlisting}[language=c]
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
+void sig_handler(int sig) {
+    printf("Interrupt\n");
+}
+
+int main() {
+    /* installing the signal handler */
+    if (signal(SIGINT, sig_handler) == SIG_ERR)
+        printf("can't catch SIGINT\n");
+
+    /* main code...*/
+
+}
+\end{lstlisting}
+
+\noindent In this example, the \code{SIGINT} is the signal to be received, which will interupt the process. When we hit \code{Ctrl+C} to a running program, this signal will be send to the process from the kernel and, therefore, when our main program receives the signal, the newly defined actin will be executed. \\ 
+
+\noindent The function \code{signal()} is declared as follows:
+
+\begin{lstlisting}[language=C]
+#include <signal.h>
+typedef void (*sighandler_t)(int);
+sighandler_t signal(int signum, sighandler_t handler);
+\end{lstlisting}
+
+\noindent where \code{sighandler\_t} is typedef'd as a function pointer, pointing to a function with an integer parameter and a \code{void} type. Thus, we know that our self-defined signal handler has to be defined list this:
+
+\begin{lstlisting}[language=C]
+void our_signal_handler(int sig);
+\end{lstlisting}
+
+\noindent which returns \code{void} and receives exactly one integer. Argument \code{signum} is the signal macro to which you'd like to change action, wheree \code{handler} is the functin name of our self-defined signal handler. Now that we have a signal handler, when we press \code{Ctrl+C} the process will not be terminated; instead it will trigger \code{sig\_handler()}, and keep running. \\ 
+
+\noindent The calling of \code{signal()} in the code is called installing the signal handler. This means that the function that handles the signal (i.e. signal handler) will be registered in the kernel, so that later on when the corresponding signal was received, the kernel can call the signal handler. When the signal arrives, the execution of handler is called \bold{catching} or \bold{handling} the signal. 
+
+\subsubsection{Sending Signals}
+
+Just like other commands, there's a corresponding C function called \code{kill()} that we can use to send signals in our program 
+
+\begin{lstlisting}[language=C]
+#include <signal.h>
+int kill(pid_t pid, int sig);
+\end{lstlisting}
+
+\noindent On success (at least one signal was sent), 0 is returned. On error -1 is returned, and \code{errno} is set to indicate the error. There is another function called \code{raise()} that is defiend as follows:
+
+\begin{lstlisting}[language=C]
+#include <signal.h>
+int raise(int sig);
+\end{lstlisting}
+
+\noindent which sends a signal to the executing process (i.e. the current process). Therefore, use of \code{kill()} is equivalent to 
+
+\begin{lstlisting}[language=C]
+raise(SIGINT);
+\end{lstlisting}
 
 \newpage
 \section{Inter-Process Communication (IPC)}
+
+\subsection{Pipes}
+
+Pipes on the command level can be used like this
+
+\begin{lstlisting}[language=bash]
+last | grep 'reboot'
+\end{lstlisting}
+
+\noindent which connects the output of \code{last} command to the input of \code{grep}. The \code{'|'} is a bash operator; it causes bash to start the \code{last} command and the \code{grep} command \bold{simultaneously}, and to direct the standard output of \code{last} into the standard input of \code{grep}. Although \code{'|'} is a bash oerator, it uses the lower-level, underlying pipe facility of UNIX. You can visualize the pipe mechanism as a special file or buffer that acts quite literally like a physical pipe, connecting the output of \code{last} to the input of \code{grep}. 
+
+\subsubsection{Introduction}
+
+A pipe is not a file, and there is no file pointer associated with it. Conceptually, pipes are like a conveyor belt consisitng of a fixed number of logical blocks that can be filled and emptied. These types of pipes are called \bold{unnamed pipes} because they do not exist anywhere in the file system. They do not have names. In Linux, a pipe is created with the \code{pipe()} function: 
+
+\begin{lstlisting}[language=C]
+#include <unistd.h>
+int pipe(int pipefd[2]);
+\end{lstlisting}
+
+\noindent The function \code{pipe(fd)}, given an integer array \code{fd} of size 2, creates a pair of file descriptors, \code{fd[0]} and \code{fd[1]}, pointing to the "read-end" and "write-end" of a pipe inode respectively. If it is successful, it returns a 0, otherwise it returns -1. The process can then write to the write-end, \code{fd[1]}, using the \code{write()} funtion, and can read from the read-end, \code{fd[0]}, using \code{read()}. The read and write-ends are opened automatically as a result of the \code{pipe()} call. Written data is read in \bold{first-in-first-out (FIFO)} order. 
+
+\subsubsection{Full- \& Half-Duplex}
+
+Pipes exist in order to allow two different processes to communicate. Typically, a process creates a pipe, and then forks a child process. After the fork, the parent and child will each have copies of the read and write-ends of the pipe, so there will be two data channels and a total of four descriptors. This is called a \bold{full-duplex}. \\ 
+
+\noindent Full-duplex is only implemented on some UNIX systems. POSIX standards do not allow full-duplex; it only allows \bold{half-duplex}, meaning the message is unidirectional. In practice, we have to close a file descriptor in both parent and child processes. For examples, if we want the child to read from parent, we should close child's \code{fd[1]} and paren'ts \code{fd[0]}. For a half-duplex, the program strucutre usually is as follows:
+
+\begin{lstlisting}[language=C]
+#define WRITE_END 1
+#define  READ_END 0
+
+if ( pipe(fd) == -1) { exit(EXIT_FAILURE); }
+
+if (fork() == 0) {
+    /* child process */ 
+    close(fd[WRITE_END]); /* close write-end */
+    bytesread = read(fd[0], message, BUFSIZ);
+    /* check for errors afterward of course */ 
+} else {
+    /* parent process */
+    close(fd[READ_END]);
+    byteswritten = write(fd[1], buffer, strlen(buffer));
+}
+\end{lstlisting}
+
+\noindent There are two things to consider with the half-duplex:
+
+\begin{enumerate}
+    \item If we read from a pipe whose write end has been close, \code{read()} returns 0 to indicate an end of file after all the data has been read;
+    \item If we write to a pipe whose read end has been closed, the signal \code{SIGPIPE} (or broken pipe) is generated. If we either ignore the signal or catch it and return from the signal handler, \code{write()} returns \code{-1} with \code{errno} set to \code{EPIPE}. 
+\end{enumerate}
+
+\subsubsection{I/O Redirection}
+
+\paragraph{Redirecting Standard Output}
+
+The key to understanding I/O redirection in the shell is knowing that the \code{open()} function always chooses the lowest numbereed available file descriptor. Suppose you have entered the command: 
+
+\begin{lstlisting}[language=bash]
+ls > listing
+\end{lstlisting}
+
+\noindent The steps taken by the shell are:
+
+\begin{enumerate}
+    \item \code{fork()} a new process
+    \item In the new process, \code{close()} file descriptor 1 (standard output)
+    \item In the new process, \code{open()} (with the \code{O\_CREAT} flag) the file named \code{listing}
+    \item Let the new process \code{exec()} the \code{ls} program. 
+\end{enumerate}
+
+\paragraph{The Pipe Operator \code{|}}
+
+To write a program to simulate how the shell carries out a command such as 
+
+\begin{lstlisting}[language=bash]
+last | grep 'tty'
+\end{lstlisting}
+
+This cannot be accomplished only using \code{open()}, \code{close()}, and \code{pipe()}, because we need to connect one end of a pipe to a standard output for \code{last}, and the other end to the standard input for \code{grep}. Just cloning the file descriptors cannot do this. There are two functions that can be used for this purpose \code{dup()} and \code{dup2()}, and thfeir purpose is to duplicate a file descriptor. Their declaratinos are as follows: 
+
+\begin{lstlisting}[language=C]
+#include <unistd.h>
+int dup(int oldfd);
+int dup2(int oldfd, int newfd);
+\end{lstlisting}
+
+\noindent Given a file descriptor \code{oldfd}, \code{dup()} creates a new file descriptor that points to the same kernel file structure as the old one. The critical feature if \code{dup()} is that it returns the lowest numbered available file descriptor. To understand this better, let's assume we have two processes, \code{last} and \code{grep 'tty'}, where we want to feed the output of \code{last} to \code{grep}. See the following implementation in C code, where one of the processes is the parent and the other is the parent of the other (so that they can share a pipe). 
+
+\lstinputlisting[language=C]{src/dup1.c}
+
+\noindent An \bold{atomic operation} refers to an operation that executes as a single, inseparable, and uninterruptable unit. For example \code{open()} is atomic, because until the function has finished, no other operations can interrupt. Non-atomic operatins can lead to \bold{race conditions}. \\ 
+
+There are two major flaws with the code in \code{dup1.c} above...
+
+\newlist 
+\b When the parent process executes the \code{grep} command, its entire process image will be replaced by the program of \code{grep}. Thus, it cannot reap its child process and will risk making the child process a zombie
+\b There are two steps: close \code{stdout} and then \code{dup()} the write end of the pipe. There is small window of time between closing standard output and duplicating the write-end of the pipe. During this time, the child could be interruipted by a signal whose handler might make the descriptor closed unavailable. In this case, the descriptor returned by \code{dup()} will not be the one that was just closed. 
+\endlist 
+
+\noindent To resolve the first flaw, we can just create two child proceses, one for each program, so the parent process can wait for both of them. \\ 
+
+\noindent The second flaw is the reason that \code{dup2()} exists/is used. \code{dup2(fd1, fd2)} will duplicate \code{fd1} and \code{fd2}, closing \code{fd2} if necessary, as a \bold{single atomic operations}. In other words, if \code{fd2} is open, it will close it, and make \code{fd2} point to the same file structure to which \code{fd1} pointed. \\ 
+
+\noindent Making the change from \code{dup()} to \code{dup2()} will yield the improved code below:
+
+\lstinputlisting[language=C]{src/dup2.c}
+
+\subsubsection{The \code{popen()} Library Function}
+
+To create an IPC betwen the parent and child processes, there are several steps:
+
+\begin{enumerate}
+    \item generate a pipe
+    \item fork a child process
+    \item duplicate file descriptors
+    \item execute a new program in order to redirect the input or output of that program to the parent
+\end{enumerate}
+
+\noindent This sequence is so common that there is a pair of functions \code{popen()} and \code{pclose()} to streamline this procedure:
+
+\begin{lstlisting}[language=C]
+#include <stdio.h>
+FILE* popen(const char* command, const char* type);
+int   pclose(FILE* stream);
+\end{lstlisting}
+
+\noindent The \code{popen()} function creates a pipe, forks a new process to execute the shell \code{/bin/sh}, and passes the command to that shell to be executed by it. \code{popen()} expects the second argument to be either \code{"r"} or \code{"w"}:
+
+\newlist 
+\b \code{"r"}: the process invoking it will be returned a \code{FILE} pointer to the read-end of the pipe, and the write-end will be attached to the \code{stdout} of the command
+\b \code{"w"}: the process invoking it will be returned a \code{FILE} pointer to the write-end of the pipe, and the read-end will be attached to the \code{stdin} of the command. The output stream is fully buffered. 
+\endlist
+
+\noindent See the code below which works like the above examples, but uses \code{popen()} and \code{pclose()} this time.
+
+\lstinputlisting[language=C]{src/dup3.c}
+
+\subsubsection{Pipe Capacity}
+
+Like any other I/O operations, pipes also have a capacity, meaning you can only read/write a limited amount of data if you want to make sure the operation is atomic. In Linux, this is declared as a macro \code{PIPE\_BUF}, which has a value of 4,096 bytes. 
+
+\newpage
 \section{Threads}
-
-
 
 \end{document}
