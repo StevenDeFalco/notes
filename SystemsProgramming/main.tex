@@ -49,7 +49,6 @@
     tabsize=2,
     frame=tb,
     stepnumber=1,
-    title=\lstname
 }
 
 \setcounter{secnumdepth}{4}
@@ -88,7 +87,7 @@
 
 \subsection{File Descriptors}
 
-File descriptors are non-negative intergers that are assigned to keep track of every file that is currently opened by a process. Each process maintains a table of file descriptors; think of this table as an array, where the indices are file descirptors and each element of the array is an object of the \code{fd} struct: \\ 
+File descriptors are non-negative intergers that are assigned to keep track of every file that is currently opened by a process. Each process maintains a table of file descriptors; think of this table as an array, where the indices are file descirptors and each element of the array is an object of the \code{fd} struct: 
 
 \begin{lstlisting}[language=C]
 struct fd {
@@ -97,7 +96,7 @@ struct fd {
 };
 \end{lstlisting} 
 
-\noindent There are a lot of fields defined in \code{struct file}, but the most relevant ones are shown below: \\ 
+\noindent There are a lot of fields defined in \code{struct file}, but the most relevant ones are shown below: 
 
 \begin{lstlisting}[language=C]
 struct file {
@@ -694,7 +693,7 @@ int dup2(int oldfd, int newfd);
 
 \noindent Given a file descriptor \code{oldfd}, \code{dup()} creates a new file descriptor that points to the same kernel file structure as the old one. The critical feature if \code{dup()} is that it returns the lowest numbered available file descriptor. To understand this better, let's assume we have two processes, \code{last} and \code{grep 'tty'}, where we want to feed the output of \code{last} to \code{grep}. See the following implementation in C code, where one of the processes is the parent and the other is the parent of the other (so that they can share a pipe). 
 
-\lstinputlisting[language=C]{src/dup1.c}
+\lstinputlisting[language=C, title=\lstname]{src/dup1.c}
 
 \noindent An \bold{atomic operation} refers to an operation that executes as a single, inseparable, and uninterruptable unit. For example \code{open()} is atomic, because until the function has finished, no other operations can interrupt. Non-atomic operatins can lead to \bold{race conditions}. \\ 
 
@@ -711,7 +710,7 @@ There are two major flaws with the code in \code{dup1.c} above...
 
 \noindent Making the change from \code{dup()} to \code{dup2()} will yield the improved code below:
 
-\lstinputlisting[language=C]{src/dup2.c}
+\lstinputlisting[language=C, title=\lstname]{src/dup2.c}
 
 \subsubsection{The \code{popen()} Library Function}
 
@@ -741,7 +740,7 @@ int   pclose(FILE* stream);
 
 \noindent See the code below which works like the above examples, but uses \code{popen()} and \code{pclose()} this time.
 
-\lstinputlisting[language=C]{src/dup3.c}
+\lstinputlisting[language=C, title=\lstname]{src/dup3.c}
 
 \subsubsection{Pipe Capacity}
 
