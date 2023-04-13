@@ -430,7 +430,115 @@ pid_t waitpid(pid_t pid, int* status, int options);
 
 \subsection{Executing Programs}
 
+To create a process hierarchy, the first step is to \code{fork()} a child or miultiple child rpcoess from the very first proces \code{init}. The second step is to start executing different rpograms within those child processes. UNIX has a family of functions with \code{exec} as their prefix that can be used to invoke a binary within a program. There are many variations, but they are all just wrappers for one function: \code{execve()} system call. 
 
+\subsubsection{Using the \code{execve()} System Call}
+
+The declaration of \code{execve()} is as follows:
+
+\begin{lstlisting}[language=C]
+#include <unistd.h>
+int execve(const char* filename, char* const argv[],
+           char* const envp[]);
+\end{lstlisting}
+
+\noindent \code{filename} is the program we want to execute, \code{argv} is the argument list to that program, and \code{envp} is the environment variable list. The filename is the one that we want to execute by calling \code{execve()}, and it has to be a binary file. 
+
+\subsubsection{Wrapper Calls in \code{exec} Family}
+
+The following lists all the functions in \code{exec} family. 
+
+\begin{lstlisting}[language=C]
+#include <unistd.h>
+extern char** environ;
+
+/* Requires a pathname */
+int execl (const char* path, const char* arg, ...);
+int execv (const char* path, char* const argv[]);
+int execle(const char* path, const char* arg,...,
+           char* const envp[]);
+int execve(const char* path, char* const argv[],
+           char* const envp[]);
+
+/* Requires a filename */
+int execvp(const char* file, char* const argv[]);
+int execlp(const char* file, const char* arg, ...);
+\end{lstlisting}
+
+In summary, all the functions start with \code{exec}. The next suffix is:
+
+\newlist
+\b \code{l}: a list of arguments. That is, put your arguments as individual strings when calling these functions.
+\b \code{v}: vector/array of arguments. When you use these functions, put all arugment strings into a char*[], and only pass this array.
+\endlist
+
+\subsubsection{Environment Variables}
+
+In some POSIX standards, \code{main()} doesn't have \code{envp} in the argument list. In that case, we can declare an external variable like this:
+
+\begin{lstlisting}[language=C]
+extern char** environ;
+\end{lstlisting}
+
+\noindent Remember for both \code{argv} and \code{envp} we need \code{NULL} at the end of the array, so that we don't need to use another integer to record the length of the array. \\ 
+
+\noindent The \code{PATH} environment variable specifies the directories to be searched to find a commnad. The default systemwide \code{PATH} value is specified in \code{/etc/profile} file and each user normally has a \code{PATH} value in the user's \code{\$HOME/.profile} file. The \code{PATH} value in the \code{.profile} file either overrides the systemwide \code{PATH} value or adds extra directories to it. 
+
+\subsubsection{Using \code{system()}}
+
+An alternative to \code{exec} functions is \code{system()}.
+
+\begin{lstlisting}[language=C]
+#include <stdlib.h>
+int system(const char* command);
+\end{lstlisting}
+
+\noindent You can just write the command you'd put into the terminal as a string and pass it to \code{system()}. From the manpage, the \code{system()} library function uses \code{fork(2)} to create a child process that executes the shell command specified in \code{command} using \code{execl()}. 
+
+\subsection{Organization of Processes}
+
+\subsection{Signals}
+
+\subsubsection{General Concepts of Signal}
+
+\paragraph{Sending \& Receiving Signals}
+
+Kernel sends (delivers) a signal to a destinatin process by updating some state in the context of the destination process. It sends a signal for one of the following reasons:
+
+\newlist
+\b kernel has detected a system event such as a divide-by-zero (\code{SIGFPE}) or the termination of a child process (\code{SIGCHLD})
+\b another process has invoked the kill system call to explicitly request the kernel to send a signal to the destination process
+\endlist
+
+\noindent When a signal has been delivered to the destination process, the process has to handle it. There are three cases:
+
+\newlist 
+\b \bold{Ignore it.} Many signals can be and are ignored, but not all. Hardware exceptions such as divide-by-zero (\code{SIGFPE}) cannot be ignored successfully and some signals such as \code{SIGKILL} and \code{SIGSTOP} cannot be ignored at all
+\b \bold{Catch and handle the excpetion.} The process has a functin to be executed if and when the exception occurs. The function may terminate the program gracefully or it may handle it without terminating the program
+\b \bold{Let the default action apply.} Every signal has a default action. THe default may be ignore, terminate, terminate and dump core, stop and pause the program, resume a program paused earlier.
+\endlist
+
+\noindent Each signal has a current "disposition" which indicates what action will be the default.
+
+\paragraph{Pending \& Blocked Signals}
+
+A signal is \bold{pending} if sent but not yet received. There can be at most one pending signal of any partiular type, because signals are not queueed. What this means is, if a process has a pending signal of type \code{SIGINT}, then subsequent signals of type \code{SIGINT} that are sent to that process are discarded. A process can also \bold{block} to receipt of certain signals. Blocked signals can be delivered, but will not be received until the signal is unblocked. 
+
+\subsubsection{Reacting to Signals}
+
+\paragraph{Key-Binded Signals}
+
+When we are pressing \code{Ctrl+C}, it sends signal \code{SIGINT} to the process, and default action of \code{SIGINT} is to terminate the program. THat's why \code{Ctrl+C} terminates the program. There are three keybindings that can send signals to the process as shown below:
+
+\newlist 
+\b \code{Ctrl+C} is \code{SIGINT} whose default action is to terminate
+\b \code{Ctrl+Z} is \code{SIGTSTP} whose default action is to stop or pause the program
+\b \code{Ctrl+\textbackslash} is \code{SIGQUIT} whose default action is to terminate and dump core
+\endlist 
+
+\paragraph{Altering Default Actions}
+
+Default actions of most of the signals can be altered by us, except \code{SIGKILL} and \code{SIGSTOP} which cannot be caught, blocked, or ignored. 
 
 \newpage
 \section{Inter-Process Communication (IPC)}
