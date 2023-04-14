@@ -7,13 +7,15 @@
 % Packages...
 \usepackage{listings} % to make nicely formatted code blocks
 \usepackage{hyperref} % to get hot links in the table of contents
+\usepackage{xcolor}   % to define custom colors
+\usepackage{titlesec} % to make custom section formatting 
 
 
-% Custom commands
+% Custom Commands...
 
 % \bold{} to bold the following text
 % usage: \bold ==> \bold{bolded text}
-\newcommand{\bold}[1]{\textbf{#1}}  
+\newcommand{\bold}[1]{\textbf{#1}}
 
 % \b to create a new list item
 % usage: \b this is a bullet in my list
@@ -30,6 +32,42 @@
 % \code to format inline strings of code
 % usage: \code{print("Hello world!")}
 \newcommand{\code}[1]{\texttt{#1}}
+
+
+% formatting defaults...
+
+% removes paragraph indent by default
+\setlength{\parindent}{0pt}
+
+% custom colors for the code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% sets environment defaults for lstlistings (code blocks)
+\lstset{
+    backgroundcolor=\color{light-gray},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,       
+    numbersep=10pt,                  
+    tabsize=2,
+    frame=tb,
+    stepnumber=1,
+}
+
+% sets custom paragraph environment
+% layer of division that can be used with subsubsections
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
 
 % Heading information
