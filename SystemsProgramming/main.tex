@@ -204,7 +204,7 @@ ssize_t read(int fd, void* buf, size_t count);
 ssize_t write(int fd, const void* buf, size_t count);
 \end{lstlisting}
 
-The function \code{read()} attempts to read up to \code{count} bytes from file descriptor \code{fd} into the buffer starting at \code{buf}. THe other direction applies to \code{write()}. The functions return the number of bytes read or written if scucessful, 0 if it reaches the end of the file, and -1 if there is an error. It is good practice to always check the retrun value of \code{write()} to make sure it matches the expected number. See the following for an appropriate implementation.
+The function \code{read()} attempts to read up to \code{count} bytes from file descriptor \code{fd} into the buffer starting at \code{buf}. The other direction applies to \code{write()}. The functions return the number of bytes read or written if scucessful, 0 if it reaches the end of the file, and -1 if there is an error. It is good practice to always check the return value of \code{write()} to make sure it matches the expected number. See the following for an appropriate implementation.
 
 \begin{lstlisting}[language=C]
 char* tr = "Hello!";
@@ -215,7 +215,7 @@ if (write(fd, str, 6) != 6) {
 
 \subsubsection{File Reposition}
 
-For each file opened, the kernel keeps a record for current file offsets, i.e. which byte of the file we're currently at. THe \code{lseek()} function can b used to chnage the current location \bold{within} a file.
+For each file opened, the kernel keeps a record for current file offsets, i.e. which byte of the file we're currently at. The \code{lseek()} function can b used to chnage the current location \bold{within} a file.
 
 \begin{lstlisting}[language=C]
 off_t lssek(int fd, off_t offset, int whence);
@@ -233,7 +233,7 @@ where \code{off\_t} is offset in bytes and \code{whence} can be one of three pla
 
 \subsubsection{Buffering}
 
-Since everything including hardware in UNIX is considered a file, to utilize those hardwares, we have to connect them to the file systems. SOme devices need immediate access without delay, such as RAM, keyboard, monitor, etc. These devices are called \bold{character special devices}. Some other devices, however, woudl be better to "cache" some data first in order to avoid longer access time, and these are called \bold{block special devices} such as the hard drive. \\
+Since everything including hardware in UNIX is considered a file, to utilize those hardwares, we have to connect them to the file systems. Some devices need immediate access without delay, such as RAM, keyboard, monitor, etc. These devices are called \bold{character special devices}. Some other devices, however, would be better to "cache" some data first in order to avoid longer access time, and these are called \bold{block special devices} such as the hard drive. \\
 
 Recall that getting access to a file on a hard drive is very slow. Therefore, we use the idea of "cache" and create a "buffer cache" (aka "buffer") between the hard drive and the file system. Whenever we \code{open()} a file, the data contained in this file will be copied into the cache. This "buffer cache" is in the main memory and is a structure maintained by the kernel. During the booting of the system, the kernel will allocate a couple of buffers in a certain location of the memory. Each of the buffers includes a data area, and a buffer header to identify this buffer. 
 
@@ -261,7 +261,7 @@ This is typically used with files, such as reading from and writing to a file. T
 When the stream buffer is full, the content inside the buffer will be actually written to the disk or the hard drive. This process is called \bold{flushing}. Flushing can be automatic (such as when the buffer is full or we closed the file), but can also be manual by using \code{fflush()} function:
 
 \begin{lstlisting}[language=C]
-int fflush(FILE* stream;
+int fflush(FILE* stream);
 \end{lstlisting}
 
 \paragraph{Line Buffered}
@@ -302,11 +302,11 @@ When we invoke a program, the actual instance of that program becomes a \bold{pr
 
 \subsubsection{Process Image}
 
-The layout of a process is called a \bold{process image}.Each process image is split into two poriotns; the user-addressable and the kernel-addressable. The kernel-addressable portions are all maintained in the kernel space of the memory, while the user-addressable portions the user space. Additionally, each process also has a process structure (PCB) to store all its status information. 
+The layout of a process is called a \bold{process image}. Each process image is split into two poriotns; the user-addressable and the kernel-addressable. The kernel-addressable portions are all maintained in the kernel space of the memory, while the user-addressable portions the user space. Additionally, each process also has a process structure (PCB) to store all its status information. 
 
 \paragraph{Process structures}
 
-The kernel maintains a process structure for every running process called the \bold{process control block (PCB}, meaning whenever we start running a program, the kernel creates an object of the structure. This structure contains all the information that the kernel needs to manage the process. In Linux, this structure is called task structure. There are many fields of which the most important is Process ID or \bold{PID}. Each process has its own unique PID, and the kernel assigns PID to the process when it starts running. \\
+The kernel maintains a process structure for every running process called the \bold{process control block (PCB)}, meaning whenever we start running a program, the kernel creates an object of the structure. This structure contains all the information that the kernel needs to manage the process. In Linux, this structure is called task structure. There are many fields of which the most important is Process ID or \bold{PID}. Each process has its own unique PID, and the kernel assigns PID to the process when it starts running. \\
 
 In Linux, the PID's type is \code{pid\_t}. If your C program needs to know its PID when running, you can use the following function: 
 
@@ -348,7 +348,7 @@ Whenever we invoke a program from terminal, we have actually created a process. 
 pid_t fork();
 \end{lstlisting}
 
-the program that calls \code{fork()} is called the parent process, while the program invoked by \code{fork()} is called the child process. A \bold{child process} at the moment of successful call of \code{fork()} is just a copy of the parent - same code, same data, same everything. In the \code{fork()} function, the parent retruns its child's PID, while the child will return 0. Therefore, a successful \code{fork()} always returns twice: once in the parent and once in the child. You can use \code{getppid()} to get the parent process' PID: 
+The program that calls \code{fork()} is called the parent process, while the program invoked by \code{fork()} is called the child process. A \bold{child process} at the moment of successful call of \code{fork()} is just a copy of the parent - same code, same data, same everything. In the \code{fork()} function, the parent returns its child's PID, while the child will return 0. Therefore, a successful \code{fork()} always returns twice: once in the parent and once in the child. You can use \code{getppid()} to get the parent process' PID: 
 
 \begin{lstlisting}[language=c]
 #include <unistd.h>
@@ -401,7 +401,7 @@ To avoid zombies, the functions we want to use in the parent process are:
 pid_t wait(int* status);
 \end{lstlisting}
 
-When a process starts executing \code{wait()}, if it has no children, \code{wait()} returns immediatelyt witha  -1. If this process has a child or multiple child processes, it will halt at the line where \code{wait()} is called, until one of its child processes has finihsed. Once a child process has finished, the parent process will resume executing from \code{wait()}, and the return value of \code{wait()} is the PID of that terminated child process. The parameter of \code{wait()} is an integer pointer. 
+When a process starts executing \code{wait()}, if it has no children, \code{wait()} returns immediately with -1. If this process has a child or multiple child processes, it will halt at the line where \code{wait()} is called, until one of its child processes has finished. Once a child process has finished, the parent process will resume executing from \code{wait()}, and the return value of \code{wait()} is the PID of that terminated child process. The parameter of \code{wait()} is an integer pointer. 
 
 \paragraph{The \code{waitpid()} Function}
 
@@ -432,7 +432,7 @@ Argument \code{options} can be one or more (by using the OR operator) of the fol
 
 \subsection{Executing Programs}
 
-To create a process hierarchy, the first step is to \code{fork()} a child or miultiple child rpcoess from the very first proces \code{init}. The second step is to start executing different rpograms within those child processes. UNIX has a family of functions with \code{exec} as their prefix that can be used to invoke a binary within a program. There are many variations, but they are all just wrappers for one function: \code{execve()} system call. 
+To create a process hierarchy, the first step is to \code{fork()} a child or miultiple child prcoess from the very first proces \code{init}. The second step is to start executing different programs within those child processes. UNIX has a family of functions with \code{exec} as their prefix that can be used to invoke a binary within a program. There are many variations, but they are all just wrappers for one function: \code{execve()} system call. 
 
 \subsubsection{Using the \code{execve()} System Call}
 
@@ -505,7 +505,7 @@ You can just write the command you'd put into the terminal as a string and pass 
 
 \paragraph{Sending \& Receiving Signals}
 
-Kernel sends (delivers) a signal to a destinatin process by updating some state in the context of the destination process. It sends a signal for one of the following reasons:
+Kernel sends (delivers) a signal to a destination process by updating some state in the context of the destination process. It sends a signal for one of the following reasons:
 
 \newlist
 \b kernel has detected a system event such as a divide-by-zero (\code{SIGFPE}) or the termination of a child process (\code{SIGCHLD})
@@ -517,7 +517,7 @@ When a signal has been delivered to the destination process, the process has to 
 \newlist 
 \b \bold{Ignore it.} Many signals can be and are ignored, but not all. Hardware exceptions such as divide-by-zero (\code{SIGFPE}) cannot be ignored successfully and some signals such as \code{SIGKILL} and \code{SIGSTOP} cannot be ignored at all
 \b \bold{Catch and handle the excpetion.} The process has a functin to be executed if and when the exception occurs. The function may terminate the program gracefully or it may handle it without terminating the program
-\b \bold{Let the default action apply.} Every signal has a default action. THe default may be ignore, terminate, terminate and dump core, stop and pause the program, resume a program paused earlier.
+\b \bold{Let the default action apply.} Every signal has a default action. The default may be ignore, terminate, terminate and dump core, stop and pause the program, resume a program paused earlier.
 \endlist
 
 \ Each signal has a current "disposition" which indicates what action will be the default.
@@ -530,7 +530,7 @@ A signal is \bold{pending} if sent but not yet received. There can be at most on
 
 \paragraph{Key-Binded Signals}
 
-When we are pressing \code{Ctrl+C}, it sends signal \code{SIGINT} to the process, and default action of \code{SIGINT} is to terminate the program. THat's why \code{Ctrl+C} terminates the program. There are three keybindings that can send signals to the process as shown below:
+When we are pressing \code{Ctrl+C}, it sends signal \code{SIGINT} to the process, and default action of \code{SIGINT} is to terminate the program. That's why \code{Ctrl+C} terminates the program. There are three keybindings that can send signals to the process as shown below:
 
 \newlist 
 \b \code{Ctrl+C} is \code{SIGINT} whose default action is to terminate
@@ -562,7 +562,7 @@ int main() {
 }
 \end{lstlisting}
 
-In this example, the \code{SIGINT} is the signal to be received, which will interupt the process. When we hit \code{Ctrl+C} to a running program, this signal will be send to the process from the kernel and, therefore, when our main program receives the signal, the newly defined actin will be executed. \\ 
+In this example, the \code{SIGINT} is the signal to be received, which will interupt the process. When we hit \code{Ctrl+C} to a running program, this signal will be sent to the process from the kernel and, therefore, when our main program receives the signal, the newly defined actin will be executed. \\ 
 
 The function \code{signal()} is declared as follows:
 
@@ -619,7 +619,7 @@ which connects the output of \code{last} command to the input of \code{grep}. Th
 
 \subsubsection{Introduction}
 
-A pipe is not a file, and there is no file pointer associated with it. Conceptually, pipes are like a conveyor belt consisitng of a fixed number of logical blocks that can be filled and emptied. These types of pipes are called \bold{unnamed pipes} because they do not exist anywhere in the file system. They do not have names. In Linux, a pipe is created with the \code{pipe()} function: 
+A pipe is not a file, and there is no file pointer associated with it. Conceptually, pipes are like a conveyor belt consisting of a fixed number of logical blocks that can be filled and emptied. These types of pipes are called \bold{unnamed pipes} because they do not exist anywhere in the file system. They do not have names. In Linux, a pipe is created with the \code{pipe()} function: 
 
 \begin{lstlisting}[language=C]
 #include <unistd.h>
@@ -655,7 +655,7 @@ if (fork() == 0) {
 There are two things to consider with the half-duplex:
 
 \begin{enumerate}
-    \item If we read from a pipe whose write end has been close, \code{read()} returns 0 to indicate an end of file after all the data has been read;
+    \item If we read from a pipe whose write end has been closed, \code{read()} returns 0 to indicate an end of file after all the data has been read;
     \item If we write to a pipe whose read end has been closed, the signal \code{SIGPIPE} (or broken pipe) is generated. If we either ignore the signal or catch it and return from the signal handler, \code{write()} returns \code{-1} with \code{errno} set to \code{EPIPE}. 
 \end{enumerate}
 
@@ -686,7 +686,7 @@ To write a program to simulate how the shell carries out a command such as
 last | grep 'tty'
 \end{lstlisting}
 
-This cannot be accomplished only using \code{open()}, \code{close()}, and \code{pipe()}, because we need to connect one end of a pipe to a standard output for \code{last}, and the other end to the standard input for \code{grep}. Just cloning the file descriptors cannot do this. There are two functions that can be used for this purpose \code{dup()} and \code{dup2()}, and thfeir purpose is to duplicate a file descriptor. Their declaratinos are as follows: 
+This cannot be accomplished only using \code{open()}, \code{close()}, and \code{pipe()}, because we need to connect one end of a pipe to a standard output for \code{last}, and the other end to the standard input for \code{grep}. Just cloning the file descriptors cannot do this. There are two functions that can be used for this purpose \code{dup()} and \code{dup2()}, and their purpose is to duplicate a file descriptor. Their declarations are as follows: 
 
 \begin{lstlisting}[language=C]
 #include <unistd.h>
@@ -694,7 +694,7 @@ int dup(int oldfd);
 int dup2(int oldfd, int newfd);
 \end{lstlisting}
 
-Given a file descriptor \code{oldfd}, \code{dup()} creates a new file descriptor that points to the same kernel file structure as the old one. The critical feature if \code{dup()} is that it returns the lowest numbered available file descriptor. To understand this better, let's assume we have two processes, \code{last} and \code{grep 'tty'}, where we want to feed the output of \code{last} to \code{grep}. See the following implementation in C code, where one of the processes is the parent and the other is the parent of the other (so that they can share a pipe). 
+Given a file descriptor \code{oldfd}, \code{dup()} creates a new file descriptor that points to the same kernel file structure as the old one. The critical feature of \code{dup()} is that it returns the lowest numbered available file descriptor. To understand this better, let's assume we have two processes, \code{last} and \code{grep 'tty'}, where we want to feed the output of \code{last} to \code{grep}. See the following implementation in C code, where one of the processes is the parent and the other is the parent of the other (so that they can share a pipe). 
 
 \lstinputlisting[language=C, title=\lstname]{src/dup1.c}
 
