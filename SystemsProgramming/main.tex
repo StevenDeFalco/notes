@@ -30,6 +30,9 @@
 % usage: \code{print("Hello world!")}
 \newcommand{\code}[1]{\texttt{#1}}
 
+% removes paragraph indent by default
+\setlength{\parindent}{0pt}
+
 % custom colors for the code
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{light-gray}{gray}{0.95}
@@ -96,7 +99,7 @@ struct fd {
 };
 \end{lstlisting} 
 
-\noindent There are a lot of fields defined in \code{struct file}, but the most relevant ones are shown below: 
+There are a lot of fields defined in \code{struct file}, but the most relevant ones are shown below: 
 
 \begin{lstlisting}[language=C]
 struct file {
@@ -108,7 +111,7 @@ struct file {
 }
 \end{lstlisting}
 
-\noindent The \code{f\_flags} are the file flags, such as \code{O\_RDONLY}, \code{O\_NONBLOCK}, \code{O\_SYNC}. The \code{f\_pos} indicates the current reading or writing position (offset). Its type, \code{loff\_t}, is a 64-bit value. You can list all the files in \code{/dev/} to see all the device files. 
+The \code{f\_flags} are the file flags, such as \code{O\_RDONLY}, \code{O\_NONBLOCK}, \code{O\_SYNC}. The \code{f\_pos} indicates the current reading or writing position (offset). Its type, \code{loff\_t}, is a 64-bit value. You can list all the files in \code{/dev/} to see all the device files. 
 
 \subsection{I/O System Calls}
 
@@ -131,9 +134,9 @@ int open(const char* pathname, int flags);
 int open(const char* pathname, int flags, mode_t mode);
 \end{lstlisting}
 
-\noindent which returns a file descriptor. This function is ued to open a file, regardless of its type: regular, directory, block, character, or socket. \\
+which returns a file descriptor. This function is used to open a file, regardless of its type: regular, directory, block, character, or socket. \\
 
-\noindent The \code{flags} specifies the mode of opening, and it has to have one of the following macros:
+The \code{flags} specifies the mode of opening, and it has to have one of the following macros:
 
 \newlist
 \b \code{O\_RDONLY}: read only
@@ -141,20 +144,20 @@ int open(const char* pathname, int flags, mode_t mode);
 \b \code{O\_RDWR}: read and write
 \endlist
 
-\noindent There are more macros as well. For example, if \code{O\_CREAT} is specified, the function will create a new file if the pathname doesn't exist. If \code{O\_APPEND} is used, the function will append content to the end of the file. To combine some of these macros, we can use the \emph{or} operator like this:
+There are more macros as well. For example, if \code{O\_CREAT} is specified, the function will create a new file if the pathname doesn't exist. If \code{O\_APPEND} is used, the function will append content to the end of the file. To combine some of these macros, we can use the \emph{or} operator like this:
 
 \begin{lstlisting}[language=C]
 int fd = open("test", O_WRONLY | O_CREAT | O_APPEND);
 \end{lstlisting}
 
-\noindent Creating a file is also similar 
+Creating a file is also similar 
 
 \begin{lstlisting}[language=C]
 #include <fcntl.h>
 int creat(const char* pathname, mode_t mode);
 \end{lstlisting}
 
-\noindent where \code{mode} is the same as above. The following two statements are equivalent and represent how we can combine macros to customize the \code{open()} system call. 
+where \code{mode} is the same as above. The following two statements are equivalent and represent how we can combine macros to customize the \code{open()} system call. 
 
 \begin{lstlisting}[language=C]
 int fd = open("test", O_WRONLY | O_CREAT | O_TRUNC |
@@ -162,9 +165,9 @@ int fd = open("test", O_WRONLY | O_CREAT | O_TRUNC |
 int fd = creat("test", S_IRWXU);
 \end{lstlisting}
 
-\noindent because \code{O\_TRUNC} flag will remove everything in the file \code{test} if it exists already. \\ 
+because \code{O\_TRUNC} flag will remove everything in the file \code{test} if it exists already. \\ 
 
-\noindent In addition to those mentioned, we can also open a file using the following functions 
+In addition to those mentioned, we can also open a file using the following functions 
 
 \begin{lstlisting}[language=C]
 int openat(int dirfd, const char* pathname, int flags);
@@ -172,20 +175,20 @@ int openat(int dirfd, const char* pathname,
            int flags, mode_t mode);
 \end{lstlisting}
 
-\noindent where \code{dirfd} is a file descriptor of a directory, and pathname is the \bold{relative path} under that directory. For example, to open a file at the absolute path of \code{/usr/sh/myfile}, you can use \code{open()}:
+where \code{dirfd} is a file descriptor of a directory, and pathname is the \bold{relative path} under that directory. For example, to open a file at the absolute path of \code{/usr/sh/myfile}, you can use \code{open()}:
 
 \begin{lstlisting}[language=C]
 int fd = open("/usr/sh/myfile", O_RDWR);
 \end{lstlisting}
 
-\noindent but you can also open a directory first, and use \code{openat()}:
+but you can also open a directory first, and use \code{openat()}:
 
 \begin{lstlisting}[language=C]
 int dirfd = open("/usr/sh/", O_RDWR);
 int fd = openat(dirfd, "myfile", O_RDWR);
 \end{lstlisting}
 
-\noindent To \bold{close} a file, you simply need the file descriptor:
+To \bold{close} a file, you simply need the file descriptor:
 
 \begin{lstlisting}[language=C]
 int close(int fd);
@@ -201,7 +204,7 @@ ssize_t read(int fd, void* buf, size_t count);
 ssize_t write(int fd, const void* buf, size_t count);
 \end{lstlisting}
 
-\noindent The function \code{read()} attempts to read up to \code{count} bytes from file descriptor \code{fd} into the buffer starting at \code{buf}. THe other direction applies to \code{write()}. The functions return the number of bytes read or written if scucessful, 0 if it reaches the end of the file, and -1 if there is an error. It is good practice to always check the retrun value of \code{write()} to make sure it matches the expected number. See the following for an appropriate implementation.
+The function \code{read()} attempts to read up to \code{count} bytes from file descriptor \code{fd} into the buffer starting at \code{buf}. THe other direction applies to \code{write()}. The functions return the number of bytes read or written if scucessful, 0 if it reaches the end of the file, and -1 if there is an error. It is good practice to always check the retrun value of \code{write()} to make sure it matches the expected number. See the following for an appropriate implementation.
 
 \begin{lstlisting}[language=C]
 char* tr = "Hello!";
@@ -218,7 +221,7 @@ For each file opened, the kernel keeps a record for current file offsets, i.e. w
 off_t lssek(int fd, off_t offset, int whence);
 \end{lstlisting}
 
-\noindent where \code{off\_t} is offset in bytes and \code{whence} can be one of three places (declared as macros):
+where \code{off\_t} is offset in bytes and \code{whence} can be one of three places (declared as macros):
 
 \newlist
 \b \code{SEEK\_SET}: relocate to the beginning of the file (offset of zero) + \code{offset}. Essentially just \code{offset}'
@@ -226,25 +229,25 @@ off_t lssek(int fd, off_t offset, int whence);
 \b \code{SEEK\_CUR}: relocate to its current location within the file + \code{offset}
 \endlist
 
-\noindent \bold{File holes} can be created when the content of the file is no longer contiguous due to changing the file pointer with an \code{lseek()} command. 
+\bold{File holes} can be created when the content of the file is no longer contiguous due to changing the file pointer with an \code{lseek()} command. 
 
 \subsubsection{Buffering}
 
 Since everything including hardware in UNIX is considered a file, to utilize those hardwares, we have to connect them to the file systems. SOme devices need immediate access without delay, such as RAM, keyboard, monitor, etc. These devices are called \bold{character special devices}. Some other devices, however, woudl be better to "cache" some data first in order to avoid longer access time, and these are called \bold{block special devices} such as the hard drive. \\
 
-\noindent Recall that getting access to a file on a hard drive is very slow. Therefore, we use the idea of "cache" and create a "buffer cache" (aka "buffer") between the hard drive and the file system. Whenever we \code{open()} a file, the data contained in this file will be copied into the cache. This "buffer cache" is in the main memory and is a structure maintained by the kernel. During the booting of the system, the kernel will allocate a couple of buffers in a certain location of the memory. Each of the buffers includes a data area, and a buffer header to identify this buffer. 
+Recall that getting access to a file on a hard drive is very slow. Therefore, we use the idea of "cache" and create a "buffer cache" (aka "buffer") between the hard drive and the file system. Whenever we \code{open()} a file, the data contained in this file will be copied into the cache. This "buffer cache" is in the main memory and is a structure maintained by the kernel. During the booting of the system, the kernel will allocate a couple of buffers in a certain location of the memory. Each of the buffers includes a data area, and a buffer header to identify this buffer. 
 
 \subsubsection{Streams}
 
 Whenever we want to operate on a file, we create a channel to connect our program and the file. On the low level, we know that the channel is a file descriptor created by calling \code{open()}. On a higher (user) level, the channel we use is an object of \code{FILE*}, declared in the standard C library \code{<stdio.h>}. This connection is called a \bold{stream}. \\ 
 
-\noindent Recall that to open a file using \code{<stdio.h>} we use \code{fopen()} with \code{FILE*}. This function does the system call \code{open()} for us, and associates this stream with the file descriptor. You can get the file descriptor number of a stream using the \code{fileno()} function. If we want to open a file using an existing file descriptor, we can use the \code{fdopen()} function, which will create a \code{FILE} struct and associate it with the file descriptor. 
+Recall that to open a file using \code{<stdio.h>} we use \code{fopen()} with \code{FILE*}. This function does the system call \code{open()} for us, and associates this stream with the file descriptor. You can get the file descriptor number of a stream using the \code{fileno()} function. If we want to open a file using an existing file descriptor, we can use the \code{fdopen()} function, which will create a \code{FILE} struct and associate it with the file descriptor. 
 
 \subsubsection{Stream Buffering}
 
 In user space, we also need buffered stream between our program and system call. This is because we want to avoid using system calls too often, so we buffer some data from our program, and only when the buffer is full do we use system call. For example: Say we want to use \code{fprintf()} to write a string to a file. When our program reaches the \code{fprintf()} line, from our perspective the operation of writing to the file is done, i.e., the string is already written to the file. This is not necessarily true, however, because this only means it's written to the \bold{stdio buffer}, not the actual file. \\
 
-\noindent C standard I/O library \code{stdio} provides three buffering modes, fully buffered, line buffered, and unbuffered. \\
+C standard I/O library \code{stdio} provides three buffering modes, fully buffered, line buffered, and unbuffered. \\
 
 \paragraph{Fully Buffered}
 
@@ -255,7 +258,7 @@ This is typically used with files, such as reading from and writing to a file. T
 \b Writing: buffer is full and needs to be emptied;
 \endlist
 
-\noindent When the stream buffer is full, the content inside the buffer will be actually written to the disk or the hard drive. This process is called \bold{flushing}. Flushing can be automatic (such as when the buffer is full or we closed the file), but can also be manual by using \code{fflush()} function:
+When the stream buffer is full, the content inside the buffer will be actually written to the disk or the hard drive. This process is called \bold{flushing}. Flushing can be automatic (such as when the buffer is full or we closed the file), but can also be manual by using \code{fflush()} function:
 
 \begin{lstlisting}[language=C]
 int fflush(FILE* stream;
@@ -280,7 +283,7 @@ void setbuffer(FILE* stream, char* buf, size_t size);
 void setlinebuf(FILE* stream);
 \end{lstlisting}
 
-\noindent The \code{mode} argument \code{setvbuf()} can be one of the following macros:
+The \code{mode} argument \code{setvbuf()} can be one of the following macros:
 
 \newlist
 \b \code{\_IONBF}: unbuffered;
@@ -288,7 +291,7 @@ void setlinebuf(FILE* stream);
 \b \code{\_IOFBF}: fully buffered;
 \endlist
 
-\noindent If you want to use \code{stdio} stream buffer, pass \code{NULL} to \code{buf}; otherwise you can use your own buffer by declaring a \code{char} array with length of \code{size}.
+If you want to use \code{stdio} stream buffer, pass \code{NULL} to \code{buf}; otherwise you can use your own buffer by declaring a \code{char} array with length of \code{size}.
 
 \newpage
 \section{Processes}
@@ -305,7 +308,7 @@ The layout of a process is called a \bold{process image}.Each process image is s
 
 The kernel maintains a process structure for every running process called the \bold{process control block (PCB}, meaning whenever we start running a program, the kernel creates an object of the structure. This structure contains all the information that the kernel needs to manage the process. In Linux, this structure is called task structure. There are many fields of which the most important is Process ID or \bold{PID}. Each process has its own unique PID, and the kernel assigns PID to the process when it starts running. \\
 
-\noindent In Linux, the PID's type is \code{pid\_t}. If your C program needs to know its PID when running, you can use the following function: 
+In Linux, the PID's type is \code{pid\_t}. If your C program needs to know its PID when running, you can use the following function: 
 
 \begin{lstlisting}[language=C]
 pid_t getpid();
@@ -345,7 +348,7 @@ Whenever we invoke a program from terminal, we have actually created a process. 
 pid_t fork();
 \end{lstlisting}
 
-\noindent the program that calls \code{fork()} is called the parent process, while the program invoked by \code{fork()} is called the child process. A \bold{child process} at the moment of successful call of \code{fork()} is just a copy of the parent - same code, same data, same everything. In the \code{fork()} function, the parent retruns its child's PID, while the child will return 0. Therefore, a successful \code{fork()} always returns twice: once in the parent and once in the child. You can use \code{getppid()} to get the parent process' PID: 
+the program that calls \code{fork()} is called the parent process, while the program invoked by \code{fork()} is called the child process. A \bold{child process} at the moment of successful call of \code{fork()} is just a copy of the parent - same code, same data, same everything. In the \code{fork()} function, the parent retruns its child's PID, while the child will return 0. Therefore, a successful \code{fork()} always returns twice: once in the parent and once in the child. You can use \code{getppid()} to get the parent process' PID: 
 
 \begin{lstlisting}[language=c]
 #include <unistd.h>
@@ -398,7 +401,7 @@ To avoid zombies, the functions we want to use in the parent process are:
 pid_t wait(int* status);
 \end{lstlisting}
 
-\noindent When a process starts executing \code{wait()}, if it has no children, \code{wait()} returns immediatelyt witha  -1. If this process has a child or multiple child processes, it will halt at the line where \code{wait()} is called, until one of its child processes has finihsed. Once a child process has finished, the parent process will resume executing from \code{wait()}, and the return value of \code{wait()} is the PID of that terminated child process. The parameter of \code{wait()} is an integer pointer. 
+When a process starts executing \code{wait()}, if it has no children, \code{wait()} returns immediatelyt witha  -1. If this process has a child or multiple child processes, it will halt at the line where \code{wait()} is called, until one of its child processes has finihsed. Once a child process has finished, the parent process will resume executing from \code{wait()}, and the return value of \code{wait()} is the PID of that terminated child process. The parameter of \code{wait()} is an integer pointer. 
 
 \paragraph{The \code{waitpid()} Function}
 
@@ -410,7 +413,7 @@ Another function we could use is \code{waitpid()}:
 pid_t waitpid(pid_t pid, int* status, int options);
 \end{lstlisting}
 
-\noindent It is very similary to \code{wait()}, but it's more flexible. The first argument, \code{pid}, can be one of the following:
+It is very similary to \code{wait()}, but it's more flexible. The first argument, \code{pid}, can be one of the following:
 
 \newlist
 \b \code{< -1}: Wait for any child process whose process ID is equal to the absolute value of PID
@@ -419,7 +422,7 @@ pid_t waitpid(pid_t pid, int* status, int options);
 \b \code{> 0}: Wait for the child whose process ID is equal to the value of \code{pid}
 \endlist
 
-\noindent Argument \code{options} can be one or more (by using the OR operator) of the following macros:
+Argument \code{options} can be one or more (by using the OR operator) of the following macros:
 
 \newlist
 \b \code{WCONTINUED}: returns if a stopped child has been resumed by delivery of \code{SIGCONT}
@@ -441,7 +444,7 @@ int execve(const char* filename, char* const argv[],
            char* const envp[]);
 \end{lstlisting}
 
-\noindent \code{filename} is the program we want to execute, \code{argv} is the argument list to that program, and \code{envp} is the environment variable list. The filename is the one that we want to execute by calling \code{execve()}, and it has to be a binary file. 
+\code{filename} is the program we want to execute, \code{argv} is the argument list to that program, and \code{envp} is the environment variable list. The filename is the one that we want to execute by calling \code{execve()}, and it has to be a binary file. 
 
 \subsubsection{Wrapper Calls in \code{exec} Family}
 
@@ -479,9 +482,9 @@ In some POSIX standards, \code{main()} doesn't have \code{envp} in the argument 
 extern char** environ;
 \end{lstlisting}
 
-\noindent Remember for both \code{argv} and \code{envp} we need \code{NULL} at the end of the array, so that we don't need to use another integer to record the length of the array. \\ 
+Remember for both \code{argv} and \code{envp} we need \code{NULL} at the end of the array, so that we don't need to use another integer to record the length of the array. \\ 
 
-\noindent The \code{PATH} environment variable specifies the directories to be searched to find a commnad. The default systemwide \code{PATH} value is specified in \code{/etc/profile} file and each user normally has a \code{PATH} value in the user's \code{\$HOME/.profile} file. The \code{PATH} value in the \code{.profile} file either overrides the systemwide \code{PATH} value or adds extra directories to it. 
+The \code{PATH} environment variable specifies the directories to be searched to find a commnad. The default systemwide \code{PATH} value is specified in \code{/etc/profile} file and each user normally has a \code{PATH} value in the user's \code{\$HOME/.profile} file. The \code{PATH} value in the \code{.profile} file either overrides the systemwide \code{PATH} value or adds extra directories to it. 
 
 \subsubsection{Using \code{system()}}
 
@@ -492,7 +495,7 @@ An alternative to \code{exec} functions is \code{system()}.
 int system(const char* command);
 \end{lstlisting}
 
-\noindent You can just write the command you'd put into the terminal as a string and pass it to \code{system()}. From the manpage, the \code{system()} library function uses \code{fork(2)} to create a child process that executes the shell command specified in \code{command} using \code{execl()}. 
+You can just write the command you'd put into the terminal as a string and pass it to \code{system()}. From the manpage, the \code{system()} library function uses \code{fork(2)} to create a child process that executes the shell command specified in \code{command} using \code{execl()}. 
 
 \subsection{Organization of Processes}
 
@@ -509,7 +512,7 @@ Kernel sends (delivers) a signal to a destinatin process by updating some state 
 \b another process has invoked the kill system call to explicitly request the kernel to send a signal to the destination process
 \endlist
 
-\noindent When a signal has been delivered to the destination process, the process has to handle it. There are three cases:
+When a signal has been delivered to the destination process, the process has to handle it. There are three cases:
 
 \newlist 
 \b \bold{Ignore it.} Many signals can be and are ignored, but not all. Hardware exceptions such as divide-by-zero (\code{SIGFPE}) cannot be ignored successfully and some signals such as \code{SIGKILL} and \code{SIGSTOP} cannot be ignored at all
@@ -517,7 +520,7 @@ Kernel sends (delivers) a signal to a destinatin process by updating some state 
 \b \bold{Let the default action apply.} Every signal has a default action. THe default may be ignore, terminate, terminate and dump core, stop and pause the program, resume a program paused earlier.
 \endlist
 
-\noindent Each signal has a current "disposition" which indicates what action will be the default.
+\ Each signal has a current "disposition" which indicates what action will be the default.
 
 \paragraph{Pending \& Blocked Signals}
 
@@ -559,9 +562,9 @@ int main() {
 }
 \end{lstlisting}
 
-\noindent In this example, the \code{SIGINT} is the signal to be received, which will interupt the process. When we hit \code{Ctrl+C} to a running program, this signal will be send to the process from the kernel and, therefore, when our main program receives the signal, the newly defined actin will be executed. \\ 
+In this example, the \code{SIGINT} is the signal to be received, which will interupt the process. When we hit \code{Ctrl+C} to a running program, this signal will be send to the process from the kernel and, therefore, when our main program receives the signal, the newly defined actin will be executed. \\ 
 
-\noindent The function \code{signal()} is declared as follows:
+The function \code{signal()} is declared as follows:
 
 \begin{lstlisting}[language=C]
 #include <signal.h>
@@ -569,15 +572,15 @@ typedef void (*sighandler_t)(int);
 sighandler_t signal(int signum, sighandler_t handler);
 \end{lstlisting}
 
-\noindent where \code{sighandler\_t} is typedef'd as a function pointer, pointing to a function with an integer parameter and a \code{void} type. Thus, we know that our self-defined signal handler has to be defined list this:
+where \code{sighandler\_t} is typedef'd as a function pointer, pointing to a function with an integer parameter and a \code{void} type. Thus, we know that our self-defined signal handler has to be defined list this:
 
 \begin{lstlisting}[language=C]
 void our_signal_handler(int sig);
 \end{lstlisting}
 
-\noindent which returns \code{void} and receives exactly one integer. Argument \code{signum} is the signal macro to which you'd like to change action, wheree \code{handler} is the functin name of our self-defined signal handler. Now that we have a signal handler, when we press \code{Ctrl+C} the process will not be terminated; instead it will trigger \code{sig\_handler()}, and keep running. \\ 
+which returns \code{void} and receives exactly one integer. Argument \code{signum} is the signal macro to which you'd like to change action, wheree \code{handler} is the functin name of our self-defined signal handler. Now that we have a signal handler, when we press \code{Ctrl+C} the process will not be terminated; instead it will trigger \code{sig\_handler()}, and keep running. \\ 
 
-\noindent The calling of \code{signal()} in the code is called installing the signal handler. This means that the function that handles the signal (i.e. signal handler) will be registered in the kernel, so that later on when the corresponding signal was received, the kernel can call the signal handler. When the signal arrives, the execution of handler is called \bold{catching} or \bold{handling} the signal. 
+The calling of \code{signal()} in the code is called installing the signal handler. This means that the function that handles the signal (i.e. signal handler) will be registered in the kernel, so that later on when the corresponding signal was received, the kernel can call the signal handler. When the signal arrives, the execution of handler is called \bold{catching} or \bold{handling} the signal. 
 
 \subsubsection{Sending Signals}
 
@@ -588,14 +591,14 @@ Just like other commands, there's a corresponding C function called \code{kill()
 int kill(pid_t pid, int sig);
 \end{lstlisting}
 
-\noindent On success (at least one signal was sent), 0 is returned. On error -1 is returned, and \code{errno} is set to indicate the error. There is another function called \code{raise()} that is defiend as follows:
+On success (at least one signal was sent), 0 is returned. On error -1 is returned, and \code{errno} is set to indicate the error. There is another function called \code{raise()} that is defiend as follows:
 
 \begin{lstlisting}[language=C]
 #include <signal.h>
 int raise(int sig);
 \end{lstlisting}
 
-\noindent which sends a signal to the executing process (i.e. the current process). Therefore, use of \code{kill()} is equivalent to 
+which sends a signal to the executing process (i.e. the current process). Therefore, use of \code{kill()} is equivalent to 
 
 \begin{lstlisting}[language=C]
 raise(SIGINT);
@@ -612,7 +615,7 @@ Pipes on the command level can be used like this
 last | grep 'reboot'
 \end{lstlisting}
 
-\noindent which connects the output of \code{last} command to the input of \code{grep}. The \code{'|'} is a bash operator; it causes bash to start the \code{last} command and the \code{grep} command \bold{simultaneously}, and to direct the standard output of \code{last} into the standard input of \code{grep}. Although \code{'|'} is a bash oerator, it uses the lower-level, underlying pipe facility of UNIX. You can visualize the pipe mechanism as a special file or buffer that acts quite literally like a physical pipe, connecting the output of \code{last} to the input of \code{grep}. 
+which connects the output of \code{last} command to the input of \code{grep}. The \code{'|'} is a bash operator; it causes bash to start the \code{last} command and the \code{grep} command \bold{simultaneously}, and to direct the standard output of \code{last} into the standard input of \code{grep}. Although \code{'|'} is a bash oerator, it uses the lower-level, underlying pipe facility of UNIX. You can visualize the pipe mechanism as a special file or buffer that acts quite literally like a physical pipe, connecting the output of \code{last} to the input of \code{grep}. 
 
 \subsubsection{Introduction}
 
@@ -623,13 +626,13 @@ A pipe is not a file, and there is no file pointer associated with it. Conceptua
 int pipe(int pipefd[2]);
 \end{lstlisting}
 
-\noindent The function \code{pipe(fd)}, given an integer array \code{fd} of size 2, creates a pair of file descriptors, \code{fd[0]} and \code{fd[1]}, pointing to the "read-end" and "write-end" of a pipe inode respectively. If it is successful, it returns a 0, otherwise it returns -1. The process can then write to the write-end, \code{fd[1]}, using the \code{write()} funtion, and can read from the read-end, \code{fd[0]}, using \code{read()}. The read and write-ends are opened automatically as a result of the \code{pipe()} call. Written data is read in \bold{first-in-first-out (FIFO)} order. 
+The function \code{pipe(fd)}, given an integer array \code{fd} of size 2, creates a pair of file descriptors, \code{fd[0]} and \code{fd[1]}, pointing to the "read-end" and "write-end" of a pipe inode respectively. If it is successful, it returns a 0, otherwise it returns -1. The process can then write to the write-end, \code{fd[1]}, using the \code{write()} funtion, and can read from the read-end, \code{fd[0]}, using \code{read()}. The read and write-ends are opened automatically as a result of the \code{pipe()} call. Written data is read in \bold{first-in-first-out (FIFO)} order. 
 
 \subsubsection{Full- \& Half-Duplex}
 
 Pipes exist in order to allow two different processes to communicate. Typically, a process creates a pipe, and then forks a child process. After the fork, the parent and child will each have copies of the read and write-ends of the pipe, so there will be two data channels and a total of four descriptors. This is called a \bold{full-duplex}. \\ 
 
-\noindent Full-duplex is only implemented on some UNIX systems. POSIX standards do not allow full-duplex; it only allows \bold{half-duplex}, meaning the message is unidirectional. In practice, we have to close a file descriptor in both parent and child processes. For examples, if we want the child to read from parent, we should close child's \code{fd[1]} and paren'ts \code{fd[0]}. For a half-duplex, the program strucutre usually is as follows:
+Full-duplex is only implemented on some UNIX systems. POSIX standards do not allow full-duplex; it only allows \bold{half-duplex}, meaning the message is unidirectional. In practice, we have to close a file descriptor in both parent and child processes. For examples, if we want the child to read from parent, we should close child's \code{fd[1]} and paren'ts \code{fd[0]}. For a half-duplex, the program strucutre usually is as follows:
 
 \begin{lstlisting}[language=C]
 #define WRITE_END 1
@@ -649,7 +652,7 @@ if (fork() == 0) {
 }
 \end{lstlisting}
 
-\noindent There are two things to consider with the half-duplex:
+There are two things to consider with the half-duplex:
 
 \begin{enumerate}
     \item If we read from a pipe whose write end has been close, \code{read()} returns 0 to indicate an end of file after all the data has been read;
@@ -666,7 +669,7 @@ The key to understanding I/O redirection in the shell is knowing that the \code{
 ls > listing
 \end{lstlisting}
 
-\noindent The steps taken by the shell are:
+The steps taken by the shell are:
 
 \begin{enumerate}
     \item \code{fork()} a new process
@@ -691,11 +694,11 @@ int dup(int oldfd);
 int dup2(int oldfd, int newfd);
 \end{lstlisting}
 
-\noindent Given a file descriptor \code{oldfd}, \code{dup()} creates a new file descriptor that points to the same kernel file structure as the old one. The critical feature if \code{dup()} is that it returns the lowest numbered available file descriptor. To understand this better, let's assume we have two processes, \code{last} and \code{grep 'tty'}, where we want to feed the output of \code{last} to \code{grep}. See the following implementation in C code, where one of the processes is the parent and the other is the parent of the other (so that they can share a pipe). 
+Given a file descriptor \code{oldfd}, \code{dup()} creates a new file descriptor that points to the same kernel file structure as the old one. The critical feature if \code{dup()} is that it returns the lowest numbered available file descriptor. To understand this better, let's assume we have two processes, \code{last} and \code{grep 'tty'}, where we want to feed the output of \code{last} to \code{grep}. See the following implementation in C code, where one of the processes is the parent and the other is the parent of the other (so that they can share a pipe). 
 
 \lstinputlisting[language=C, title=\lstname]{src/dup1.c}
 
-\noindent An \bold{atomic operation} refers to an operation that executes as a single, inseparable, and uninterruptable unit. For example \code{open()} is atomic, because until the function has finished, no other operations can interrupt. Non-atomic operatins can lead to \bold{race conditions}. \\ 
+An \bold{atomic operation} refers to an operation that executes as a single, inseparable, and uninterruptable unit. For example \code{open()} is atomic, because until the function has finished, no other operations can interrupt. Non-atomic operatins can lead to \bold{race conditions}. \\ 
 
 There are two major flaws with the code in \code{dup1.c} above...
 
@@ -704,11 +707,11 @@ There are two major flaws with the code in \code{dup1.c} above...
 \b There are two steps: close \code{stdout} and then \code{dup()} the write end of the pipe. There is small window of time between closing standard output and duplicating the write-end of the pipe. During this time, the child could be interruipted by a signal whose handler might make the descriptor closed unavailable. In this case, the descriptor returned by \code{dup()} will not be the one that was just closed. 
 \endlist 
 
-\noindent To resolve the first flaw, we can just create two child proceses, one for each program, so the parent process can wait for both of them. \\ 
+To resolve the first flaw, we can just create two child proceses, one for each program, so the parent process can wait for both of them. \\ 
 
-\noindent The second flaw is the reason that \code{dup2()} exists/is used. \code{dup2(fd1, fd2)} will duplicate \code{fd1} and \code{fd2}, closing \code{fd2} if necessary, as a \bold{single atomic operations}. In other words, if \code{fd2} is open, it will close it, and make \code{fd2} point to the same file structure to which \code{fd1} pointed. \\ 
+The second flaw is the reason that \code{dup2()} exists/is used. \code{dup2(fd1, fd2)} will duplicate \code{fd1} and \code{fd2}, closing \code{fd2} if necessary, as a \bold{single atomic operations}. In other words, if \code{fd2} is open, it will close it, and make \code{fd2} point to the same file structure to which \code{fd1} pointed. \\ 
 
-\noindent Making the change from \code{dup()} to \code{dup2()} will yield the improved code below:
+Making the change from \code{dup()} to \code{dup2()} will yield the improved code below:
 
 \lstinputlisting[language=C, title=\lstname]{src/dup2.c}
 
@@ -723,7 +726,7 @@ To create an IPC betwen the parent and child processes, there are several steps:
     \item execute a new program in order to redirect the input or output of that program to the parent
 \end{enumerate}
 
-\noindent This sequence is so common that there is a pair of functions \code{popen()} and \code{pclose()} to streamline this procedure:
+This sequence is so common that there is a pair of functions \code{popen()} and \code{pclose()} to streamline this procedure:
 
 \begin{lstlisting}[language=C]
 #include <stdio.h>
@@ -731,14 +734,14 @@ FILE* popen(const char* command, const char* type);
 int   pclose(FILE* stream);
 \end{lstlisting}
 
-\noindent The \code{popen()} function creates a pipe, forks a new process to execute the shell \code{/bin/sh}, and passes the command to that shell to be executed by it. \code{popen()} expects the second argument to be either \code{"r"} or \code{"w"}:
+The \code{popen()} function creates a pipe, forks a new process to execute the shell \code{/bin/sh}, and passes the command to that shell to be executed by it. \code{popen()} expects the second argument to be either \code{"r"} or \code{"w"}:
 
 \newlist 
 \b \code{"r"}: the process invoking it will be returned a \code{FILE} pointer to the read-end of the pipe, and the write-end will be attached to the \code{stdout} of the command
 \b \code{"w"}: the process invoking it will be returned a \code{FILE} pointer to the write-end of the pipe, and the read-end will be attached to the \code{stdin} of the command. The output stream is fully buffered. 
 \endlist
 
-\noindent See the code below which works like the above examples, but uses \code{popen()} and \code{pclose()} this time.
+See the code below which works like the above examples, but uses \code{popen()} and \code{pclose()} this time.
 
 \lstinputlisting[language=C, title=\lstname]{src/dup3.c}
 
