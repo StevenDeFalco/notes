@@ -1,18 +1,76 @@
 \documentclass{article}
-\usepackage{listings}
-\usepackage{hyperref}
+
+
+% Packages...
+\usepackage{listings} % to make nicely formatted code blocks
+\usepackage{hyperref} % to get hot links in the table of contents
+\usepackage{xcolor}   % to define custom colors
+\usepackage{titlesec} % to make custom section formatting 
+
+
+% Custom Commands...
+
+% \bold{} to bold the following text
+% usage: \bold ==> \bold{bolded text}
+\newcommand{\bold}[1]{\textbf{#1}}
+
+% \b to create a new list item
+% usage: \b this is a bullet in my list
+\renewcommand{\b}{\item[$\circ$]}
+
+% \newlist to start an itemized list
+% usage: \newlist \\ \b bullet 1 ...
+\newcommand{\newlist}{\begin{itemize}}
+
+% \listend to end an itemized list
+% usage: ... \b {last bullet} \\ \endlist
+\renewcommand{\endlist}{\end{itemize}}
+
+% \code to format inline strings of code
+% usage: \code{print("Hello world!")}
+\newcommand{\code}[1]{\texttt{#1}}
+
+
+% formatting defaults...
+
+% removes paragraph indent by default
+\setlength{\parindent}{0pt}
+
+% custom colors for the code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% sets environment defaults for lstlistings (code blocks)
+\lstset{
+    backgroundcolor=\color{light-gray},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,       
+    numbersep=10pt,                  
+    tabsize=2,
+    frame=tb,
+    stepnumber=1,
+}
+
+% sets custom paragraph environment
+% layer of division that can be used with subsubsections
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
 \title{CS492: Operating Systems \\ Notes}
 \author{Steven DeFalco}
 \date{Spring 2023}
 
 \begin{document}
-
-%simple functions to speed up note-taking
-\renewcommand{\i}{\item}
-\newcommand{\bl}{\begin{itemize}}
-\newcommand{\el}{\end{itemize}}
-\renewcommand{\b}[1]{\textbf{#1}}
 
 \maketitle
 
@@ -37,26 +95,26 @@
     \noindent \textbf{Address space} is the range of valid memory address for a given process. Address space can be read and/or written and/or executed. Each process has its own separate address space which consists of...
     
     \begin{center}
-        \b{Text} - binary program code \\
+        \bold{Text} - binary program code \\
 
-        \b{Stack} - function calls data \\
+        \bold{Stack} - function calls data \\
 
-        \b{Heap} - dunamically allocated data \\
+        \bold{Heap} - dunamically allocated data \\
     \end{center}
 
     \subsubsection{Files}
 
     \noindent A \textbf{file} is an abstraction of a (possible) real storage device such as a hard disk. You can read/write data from/to a file by providing postion and an amount of data to transfer. In UNIX, everything is considered a file. Files are maintained in \textbf{directories} which keep a name for each file they contain. Directories and files form a hierarchy. 
 
-    \begin{quote}
-    
-    \textbf{Block Special Files} can be written and read from block by block. (e.g. disk)
+    \newlist
 
-    \textbf{Character Special Files} can be written and read from byte by byte. (e.g. serial port)
+\item \textbf{Block Special Files} can be written and read from block by block. (e.g. disk)
 
-    \textbf{Pipes} are pseudo files allowing for multiple process to communicate over a FIFO channel. 
+\item \textbf{Character Special Files} can be written and read from byte by byte. (e.g. serial port)
 
-    \end{quote}
+\item \textbf{Pipes} are pseudo files allowing for multiple process to communicate over a FIFO channel. 
+
+    \endlist
 
     \noindent \textbf{Device drivers} are software inside the kernel that knows how to initialize and communicate with specific hardware devices. 
 
@@ -95,10 +153,10 @@
     \item each CPU has a specific set of instructions and thus different instruction sets on different CPUs will not be interchangeable
     \item has different \textbf{registers}
     \begin{itemize}
-        \item \b{General} register for genera data
-        \item \b{Program} counter to store the memory address of the next CPU instruction to execute
-        \item \b{Stack pointer} to store the address of the top of the stack
-        \item \b{Program status word}: readable/writable bits that store the state of the CPU and different conditions that resulted from the previous instruction
+        \item \bold{General} register for genera data
+        \item \bold{Program} counter to store the memory address of the next CPU instruction to execute
+        \item \bold{Stack pointer} to store the address of the top of the stack
+        \item \bold{Program status word}: readable/writable bits that store the state of the CPU and different conditions that resulted from the previous instruction
     \end{itemize}
     \end{itemize}
 
@@ -224,16 +282,16 @@
 
     \noindent When a \textbf{context switch} occurs
     
-    \bl
-    \i hardware stacks program counter
-    \i hardware loads new program counter from interrupt vector
-    \i assembly language procedure saves registers 
-    \i assembly language procedure sets up new stack
-    \i C interrupt service runs
-    \i scheduler decides which process is to run next
-    \i C procdure returns to the assembly code
-    \i assembly language procedure starts up new current process
-    \el
+    \newlist
+    \b hardware stacks program counter
+    \b hardware loads new program counter from interrupt vector
+    \b assembly language procedure saves registers 
+    \b assembly language procedure sets up new stack
+    \b C interrupt service runs
+    \b scheduler decides which process is to run next
+    \b C procdure returns to the assembly code
+    \b assembly language procedure starts up new current process
+    \endlist
 
 \subsection{Processes in Linux}
 
@@ -241,29 +299,29 @@
 
     \noindent In Linux, a process is a \textbf{task} represented by a \texttt{task\_struct} inside the kernel's memory. This is the \textbf{proces control block} for a linux task. A task struct includes:
 
-    \bl
-    \i scheduling parameters
-    \i memory image
-    \i signals
-    \i CPU registers
-    \i system call state
-    \i file descriptor table
-    \i accounting
-    \i kernel stack
-    \el
+    \newlist
+    \b scheduling parameters
+    \b memory image
+    \b signals
+    \b CPU registers
+    \b system call state
+    \b file descriptor table
+    \b accounting
+    \b kernel stack
+    \endlist
 
     \noindent \texttt{fork()} is limited to creating processes only. On Linux, task creation in general can be done by the \texttt{clone()} syscall. When \texttt{clone()} is called... 
 
-    \bl
-    \i new child starts executing function
-    \i may use a new stack
-    \i has \texttt{sharing\_flags} to describe the amount of sharing between the caller and the callee
-    \i blurs the disctinction between process and thread creation 
-    \bl
-    \i if you share nothing then it's the same as \texttt{fork()}
-    \i if you share everything then it's the same as thread creation
-    \el
-    \el
+    \newlist
+    \b new child starts executing function
+    \b may use a new stack
+    \b has \texttt{sharing\_flags} to describe the amount of sharing between the caller and the callee
+    \b blurs the disctinction between process and thread creation 
+    \newlist
+    \b if you share nothing then it's the same as \texttt{fork()}
+    \b if you share everything then it's the same as thread creation
+    \endlist
+    \endlist
 
     \noindent Internally, both \texttt{fork()} and \texttt{clone()} call the kernel function \texttt{kernel\_clone()}.
 
@@ -271,24 +329,24 @@
 
     A \textbf{thread} cannot exist without a process. A process is a "container" for threads. A process may contain one (the default) or more threads. Thread tells you what part of the program is currently being executed. \textbf{Thread} is an independent sequential execution stream within a process; programs use one or more threads per process. Items that are \textbf{shared per process} include the following:
 
-    \bl
-    \i address space
-    \i global variables
-    \i open files
-    \i child processes
-    \i pending alarms
-    \i signals and signal handlers
-    \i acccounting information
-    \el
+    \newlist
+    \b address space
+    \b global variables
+    \b open files
+    \b child processes
+    \b pending alarms
+    \b signals and signal handlers
+    \b acccounting information
+    \endlist
 
     \noindent Items that are \textbf{shared per thread} (private to each thread) include the following:
 
-    \bl
-    \i program counter
-    \i registers 
-    \i stack
-    \i state
-    \el
+    \newlist
+    \b program counter
+    \b registers 
+    \b stack
+    \b state
+    \endlist
     
     \noindent Some of the advantages of threads:  \\
     \textbf{Performance} - shared address space and therefore no communication overhead between threads. Thread creation can be 10-100 times faster than process creation. \\
@@ -305,44 +363,44 @@
     When making threads, the kernel will break the PCB into two pieces.
 
     \begin{enumerate}
-    \i Information about program execution is stored in \textbf{Thread Control Block (TCB)}. This includes the program counter, CPU registers, scheduling information, and pending I/O information. 
-    \i Other information is stored in the \textbf{Process Control Block (PCB)}. This includes memory management information and accounting information. 
+    \b Information about program execution is stored in \textbf{Thread Control Block (TCB)}. This includes the program counter, CPU registers, scheduling information, and pending I/O information. 
+    \b Other information is stored in the \textbf{Process Control Block (PCB)}. This includes memory management information and accounting information. 
     \end{enumerate}
 
     \subsubsection{Threads Implemented in User Space}
 
     \textbf{Pros}:
-    \bl
-    \i \textbf{Portable}: can be used on any OS
-    \i a user-level threads library can be implemented on an OS that does not support threads
-    \i thread switching is at least an order of magnitude faster than trapping to the kernel
-    \i thread scheduling is very fast: no process context switching, no kernel trap, no flushing of memory cache
-    \i each process can have its own thread scheduling algorithm
-    \el
+    \newlist
+    \b \textbf{Portable}: can be used on any OS
+    \b a user-level threads library can be implemented on an OS that does not support threads
+    \b thread switching is at least an order of magnitude faster than trapping to the kernel
+    \b thread scheduling is very fast: no process context switching, no kernel trap, no flushing of memory cache
+    \b each process can have its own thread scheduling algorithm
+    \endlist
 
     \noindent \textbf{Cons}:
-    \bl
-    \i \textbf{Doesn't support real parallelism}: kernel will schedule process on single core regardless of number of threads and therefore cannot take advantage of multicore/multiprocessor systems
-    \i if one thread makes a blocking system call then the kernel suspends the whole process
-    \i threads need to voluntarily give up the CPU to each other for multiprogramming so user code is more complex
-    \el
+    \newlist
+    \b \textbf{Doesn't support real parallelism}: kernel will schedule process on single core regardless of number of threads and therefore cannot take advantage of multicore/multiprocessor systems
+    \b if one thread makes a blocking system call then the kernel suspends the whole process
+    \b threads need to voluntarily give up the CPU to each other for multiprogramming so user code is more complex
+    \endlist
 
     \subsubsection{Threads Implemented in Kernel Space}
 
     \textbf{Pros}:
-    \bl
-    \i \textbf{supports real parallelism} (multicore/multiprocessor systems)
-    \i no run-time thread system needed in each process
-    \i no thread table in each process
-    \i block system calls are not a problem (the kernel can schedule another thread)
-    \el
+    \newlist
+    \b \textbf{supports real parallelism} (multicore/multiprocessor systems)
+    \b no run-time thread system needed in each process
+    \b no thread table in each process
+    \b block system calls are not a problem (the kernel can schedule another thread)
+    \endlist
 
     \noindent \textbf{Cons}:
-    \bl
-    \i \textbf{slower than user-space threads}: if thread operations are common, much more kernel overhead will be incurred because of the many system calls required
-    \i if you fork a multithreaded process, do you copy all threads or just the on that called \texttt{fork()}?
-    \i if signals are sent to processes, should the kernel assign it to a specific thread to handle
-    \el
+    \newlist
+    \b \textbf{slower than user-space threads}: if thread operations are common, much more kernel overhead will be incurred because of the many system calls required
+    \b if you fork a multithreaded process, do you copy all threads or just the on that called \texttt{fork()}?
+    \b if signals are sent to processes, should the kernel assign it to a specific thread to handle
+    \endlist
 
     \noindent In practice, user threads are mapped one-to-one with kernel threads: \textbf{hybrid implementation}. 
 
@@ -350,12 +408,12 @@
 
     When context switching with threads...
 
-    \bl
-    \i thread is now the unit of a context switch
-    \i context switch causes CPU state to be copied to/from the TCB
-    \i when context switching two threads of the same process, no need to change address space
-    \i when context switching two threads in different processes, must change address space 
-    \el
+    \newlist
+    \b thread is now the unit of a context switch
+    \b context switch causes CPU state to be copied to/from the TCB
+    \b when context switching two threads of the same process, no need to change address space
+    \b when context switching two threads in different processes, must change address space 
+    \endlist
 
     \subsubsection{Thread Local Storage}
 
@@ -385,20 +443,20 @@
 
     \subsubsection{Goals of All Scheduling Algorithms}
 
-    \bl
-    \i \textbf{fairness} - give each process a fair share of the CPU
-    \i \textbf{policy enforcement} - seeing that stated policy is carried out
-    \i \textbf{balance} - keeping all parts of the system busy
-    \el
+    \newlist
+    \b \textbf{fairness} - give each process a fair share of the CPU
+    \b \textbf{policy enforcement} - seeing that stated policy is carried out
+    \b \textbf{balance} - keeping all parts of the system busy
+    \endlist
         
 \subsection{Scheduling in Batch Systems}
 
     \subsubsection{Goals for Scheduling in Batch Systems}
-    \bl
-    \i \textbf{throughput} - maximize jobs per hour
-    \i \textbf{turnaround time} - maximize time between submission and termination
-    \i \textbf{CPU utilization} - keep the CPU busy all the time
-    \el
+    \newlist
+    \b \textbf{throughput} - maximize jobs per hour
+    \b \textbf{turnaround time} - maximize time between submission and termination
+    \b \textbf{CPU utilization} - keep the CPU busy all the time
+    \endlist
 
     \subsubsection{First-come First-served (FCFS)}
 
@@ -416,92 +474,92 @@
     
     \subsubsection{Goals for Scheduling in Interactive Systems}
 
-    \bl
-    \i \textbf{response time} - respond to requests quickly
-    \i \textbf{proportionality} - match duration expectation of users
-    \el
+    \newlist
+    \b \textbf{response time} - respond to requests quickly
+    \b \textbf{proportionality} - match duration expectation of users
+    \endlist
 
     \subsubsection{Round-Robin (RR)}
 
-    Each process is allowed to run for a specified time interval called the \b{time quantum}; in practice, the time quantim is likely not fixed. After this time (the time quantum) has elapsed, the process is preempted and added to the end of the ready queue and the next process is scheduled. If the process terminates or blocks before the time quantum is entirely used up, then the process loses the rest of its time quantum and the next process is scheduled with a new time quantum. \\
+    Each process is allowed to run for a specified time interval called the \bold{time quantum}; in practice, the time quantim is likely not fixed. After this time (the time quantum) has elapsed, the process is preempted and added to the end of the ready queue and the next process is scheduled. If the process terminates or blocks before the time quantum is entirely used up, then the process loses the rest of its time quantum and the next process is scheduled with a new time quantum. \\
     
-    \noindent \b{Advantages of RR}
+    \noindent \bold{Advantages of RR}
 
-    \bl
-    \i solution to fairness and starvation
-    \i fair allocation of CPU across jobs
-    \i low average waiting time when job lengths vary
-    \i good for responsiveness if small number of jobs
-    \el
+    \newlist
+    \b solution to fairness and starvation
+    \b fair allocation of CPU across jobs
+    \b low average waiting time when job lengths vary
+    \b good for responsiveness if small number of jobs
+    \endlist
 
-    \noindent \b{Disadvantages of RR}
+    \noindent \bold{Disadvantages of RR}
 
-    \bl 
-    \i context-switching time may add up for long jobs
-    \el 
+    \newlist
+    \b context-switching time may add up for long jobs
+    \endlist 
 
-    \noindent \b{Context switching} may impact the choice of the time quantum...
+    \noindent \bold{Context switching} may impact the choice of the time quantum...
 
-    \bl 
-    \i when there are many processes, a long quantum causes a poor response time
-    \i a short time quantum makes things more responsive but gives a higher context switch overhead
-    \i time quantum might be variable depending on CPU load
-    \el
+    \newlist
+    \b when there are many processes, a long quantum causes a poor response time
+    \b a short time quantum makes things more responsive but gives a higher context switch overhead
+    \b time quantum might be variable depending on CPU load
+    \endlist
 
-    \noindent \b{Cache state} must be shared between all jobs which may slow down execution in RR scheduling. There is no cache sharing in FCFS. 
+    \noindent \bold{Cache state} must be shared between all jobs which may slow down execution in RR scheduling. There is no cache sharing in FCFS. 
 
     \subsubsection{Priority (PRIO) Scheduling}
 
-    \b{PRIO} has four priority classes and always executes the highest-priority runnable jobs to completion. Each queue is processed in a round-robin fashion with a time quantum. Note that lower numbers represent higher priority. There are, however, some \b{problems} with PRIO scheduling...
+    \bold{PRIO} has four priority classes and always executes the highest-priority runnable jobs to completion. Each queue is processed in a round-robin fashion with a time quantum. Note that lower numbers represent higher priority. There are, however, some \bold{problems} with PRIO scheduling...
 
-    \bl 
-    \i \b{starvation} when lower priority jobs don't get run because higher priority tasks always running
-    \i \b{priority inversion} happpens when a low priority task has resource needed by high priority task, which then must wait
-    \el
+    \newlist
+    \b \bold{starvation} when lower priority jobs don't get run because higher priority tasks always running
+    \b \bold{priority inversion} happpens when a low priority task has resource needed by high priority task, which then must wait
+    \endlist
 
-    \noindent Priorities can be \b{assigned} \b{statically} based on process type, user, how much the user paid (if a cloud server); or \b{dynamically} based on how much a process runs vs doing I/O. $\textrm{Priority} = \frac{1}{f}$ where $f$ is the size of the quantum last used. Thus, the longer a process ran, the lower its priority and the process that runs the shortest gets the highest priority to run next.
+    \noindent Priorities can be \bold{assigned} \bold{statically} based on process type, user, how much the user paid (if a cloud server); or \bold{dynamically} based on how much a process runs vs doing I/O. $\textrm{Priority} = \frac{1}{f}$ where $f$ is the size of the quantum last used. Thus, the longer a process ran, the lower its priority and the process that runs the shortest gets the highest priority to run next.
 
     \subsubsection{Multiple Queues (MQ) Scheduling}
 
-    Same as priority scheduling, but each queue has a different time quantum (shortest quantum for high-priority and longer for low-priority). Processes start at the highest priority. When a process \b{exceeds} its time qunatum, it's moved to the next lowest priority queue. When a process \b{becomes interactive} it is moved to the higher priority. If the user discovers how to make their tasks more ineractive, they can get all of their processes to be very high priority, which is a problem. 
+    Same as priority scheduling, but each queue has a different time quantum (shortest quantum for high-priority and longer for low-priority). Processes start at the highest priority. When a process \bold{exceeds} its time qunatum, it's moved to the next lowest priority queue. When a process \bold{becomes interactive} it is moved to the higher priority. If the user discovers how to make their tasks more ineractive, they can get all of their processes to be very high priority, which is a problem. 
 
     \subsubsection{Other Schedulers for Interactive Systems}
 
-    \bl 
-    \i \b{Shortest processes next}: SJF but educated guess for how much CPU a process will need next
-    \i \b{Guaranteed scheduling}
-    \i \b{Lottery scheduling} (probabilistic scheduling)
-    \i \b{Fair-share scheduling}: round robin scheduling between users. 
-    \el
+    \newlist
+    \b \bold{Shortest processes next}: SJF but educated guess for how much CPU a process will need next
+    \b \bold{Guaranteed scheduling}
+    \b \bold{Lottery scheduling} (probabilistic scheduling)
+    \b \bold{Fair-share scheduling}: round robin scheduling between users. 
+    \endlist
 
 \subsection{Scheduling in Real-time Systems}
     
     \subsubsection{Goals for Scheduling in Real-Time Systems}
 
-    \bl
-    \i \textbf{meeting deadlines} - avoid losing data
-    \i \textbf{predictability} - avoid quality degradation in multimedia systems
-    \el
+    \newlist
+    \b \textbf{meeting deadlines} - avoid losing data
+    \b \textbf{predictability} - avoid quality degradation in multimedia systems
+    \endlist
 
-    \noindent Time plays an essential role in real-time system scheduling. One or more physical devies external to the computer generate events and the computer must react appropriately to them within a fixed amount of time. If the computer reacts too late, it is \b{as bad as not reacting}. \\
+    \noindent Time plays an essential role in real-time system scheduling. One or more physical devies external to the computer generate events and the computer must react appropriately to them within a fixed amount of time. If the computer reacts too late, it is \bold{as bad as not reacting}. \\
 
-    \noindent Real-time scheduling can be split into two categories. \b{Hard real-time} is when there are absolute deadlines that must be met. \b{Soft real-time} is when missing an occassional deadline is undesirable but tolerable. \\ 
+    \noindent Real-time scheduling can be split into two categories. \bold{Hard real-time} is when there are absolute deadlines that must be met. \bold{Soft real-time} is when missing an occassional deadline is undesirable but tolerable. \\ 
 
     \noindent Let's assume that process behavior is predictable and known in advance (the software should be writtein in a way to make this true). Task timing is known and represented through the following values. 
     
     \begin{center}
-        \b{Release time} ($R_i$) is the earliest time when a task can start execution \\
-        \b{Execution time} ($C_i$) is the expected execution time for a task \\ 
-        \b{Deadline} ($D_i$) is the time by which the proecss must be completed. 
+        \bold{Release time} ($R_i$) is the earliest time when a task can start execution \\
+        \bold{Execution time} ($C_i$) is the expected execution time for a task \\ 
+        \bold{Deadline} ($D_i$) is the time by which the proecss must be completed. 
     \end{center}
 
-    \noindent We can also assume that the \b{periodicity} is known. It can be one of the following options:
+    \noindent We can also assume that the \bold{periodicity} is known. It can be one of the following options:
 
-    \bl 
-    \i periodic process
-    \i sporadic process (aperiodic, hard deadlines)
-    \i aperiodic proces (aperiodic, soft deadline)
-    \el
+    \newlist
+    \b periodic process
+    \b sporadic process (aperiodic, hard deadlines)
+    \b aperiodic proces (aperiodic, soft deadline)
+    \endlist
 
     \subsubsection{Number of Schedulable Processes}
 
@@ -521,50 +579,50 @@
 
 \subsection{Inter-process Communication}
 
-    Processes need to share information or coordinate. Threads are nice for this but do not provide isolation from each other. Processes provide isolation but communication requires system calls. Some \b{problems with inter-process communication} include...
+    Processes need to share information or coordinate. Threads are nice for this but do not provide isolation from each other. Processes provide isolation but communication requires system calls. Some \bold{problems with inter-process communication} include...
 
-    \bl 
-    \i how can one process pass information to another in such a way that porcesses do not get in each other's way?
-    \i how to maintain proper sequencing when dependencies are present between processes?
-    \el 
+    \newlist
+    \b how can one process pass information to another in such a way that porcesses do not get in each other's way?
+    \b how to maintain proper sequencing when dependencies are present between processes?
+    \endlist 
 
-    \noindent The same problems apply to inter-thread communication because by design, threads communicate via shared memory. For one process to \b{pass information} to another, it can...
+    \noindent The same problems apply to inter-thread communication because by design, threads communicate via shared memory. For one process to \bold{pass information} to another, it can...
 
-    \bl 
-    \i pass messages through the kernel
-    \i share memory (which can be setup with system calls)
-    \i share a file 
-    \i use asynchronous signals or alerts
-    \i use named pipes (which is just a message queue inside the kernel essentially)
-    \el 
+    \newlist
+    \b pass messages through the kernel
+    \b share memory (which can be setup with system calls)
+    \b share a file 
+    \b use asynchronous signals or alerts
+    \b use named pipes (which is just a message queue inside the kernel essentially)
+    \endlist 
     
 \subsection{Race Conditions}
 
-    A \b{race condition} occurs when two or more processes/threads are reading or writing shared data and the final result depends on which runs precisely when. The \b{critical section} is the part of the program where the shared data is accessed. Uncoordinated read/write of the data in critical sections may lead to race conditions. Must find some way to prohibit more than one process to execute in its critical section at the same time. A solution is to have \b{mutual exclusive} access to critical sections: only one processor or thread in a critical section at any time. 
+    A \bold{race condition} occurs when two or more processes/threads are reading or writing shared data and the final result depends on which runs precisely when. The \bold{critical section} is the part of the program where the shared data is accessed. Uncoordinated read/write of the data in critical sections may lead to race conditions. Must find some way to prohibit more than one process to execute in its critical section at the same time. A solution is to have \bold{mutual exclusive} access to critical sections: only one processor or thread in a critical section at any time. 
 
     \subsubsection{Requirements to Avoid Race Conditions}
 
     \begin{enumerate}
-    \i No two processes may be simultaneously inside their critical section: \b{mutual exclusion}
-    \i No processes running outside its critical section may block other processes from entering a critical section: \b{progress}
-    \i No process should have to wait forever to enter its critical section (be starved): \b{bounded waiting}
+    \b No two processes may be simultaneously inside their critical section: \bold{mutual exclusion}
+    \b No processes running outside its critical section may block other processes from entering a critical section: \bold{progress}
+    \b No process should have to wait forever to enter its critical section (be starved): \bold{bounded waiting}
     \end{enumerate}
 
     \subsubsection{Disabling Interrupts to Avoid Race Conditions}
     
-    Right before entering the critical section, the process disables all hardware interrupts and when leaving the critical section, the process reenables all interrupts. When interrupts are disabled, the CPU cannot be switched to another process, so the current process can keep the CPU just for itself while it is in the critical section (unless the process makes a system call). The \b{advantage} of disabling interrupts is that it is very easy to implement in softare. The \b{disadvantages} of disabling interrupts is that it is unwise to give user processes the ability to turn off interrupts and this is not suitable for multicore systems. In practice, disabling interrupts is only used on single core machines for mutual exclusion in kernel space. 
+    Right before entering the critical section, the process disables all hardware interrupts and when leaving the critical section, the process reenables all interrupts. When interrupts are disabled, the CPU cannot be switched to another process, so the current process can keep the CPU just for itself while it is in the critical section (unless the process makes a system call). The \bold{advantage} of disabling interrupts is that it is very easy to implement in softare. The \bold{disadvantages} of disabling interrupts is that it is unwise to give user processes the ability to turn off interrupts and this is not suitable for multicore systems. In practice, disabling interrupts is only used on single core machines for mutual exclusion in kernel space. 
     
     \subsubsection{Using Lock Variables to Avoid Race Conditions}
 
-    Use a single shared variable (\b{lock}) between processes. A value of 0 means that no process is in its critical section. A vaue of 1 means that some process is in its critical section. This solution creates a critical section with the lock if the lock is read and written to in two separate lines of code (i.e. if the process context switches after reading the lock but before writing/updating the lock, then both processes may enter critica sectin simultaneously). Continuously testing a variable until some value appears (\b{busy waiting}) wastes a lot of CPU time. Note that a lock variable that uses busy waiting is called a \b{spinlock}. 
+    Use a single shared variable (\bold{lock}) between processes. A value of 0 means that no process is in its critical section. A vaue of 1 means that some process is in its critical section. This solution creates a critical section with the lock if the lock is read and written to in two separate lines of code (i.e. if the process context switches after reading the lock but before writing/updating the lock, then both processes may enter critica sectin simultaneously). Continuously testing a variable until some value appears (\bold{busy waiting}) wastes a lot of CPU time. Note that a lock variable that uses busy waiting is called a \bold{spinlock}. 
 
     \subsubsection{Strict Alternation to Avoid Race Conditinos}
 
-    There is a single turn variable shared between processes. A value of 0 means that it is the turn of process 0. A value of 1 means it is the turn of process 1. the turn variable is initially set with 0 or 1 based on how should start first and the processes strictly alternate. This can easily be generalized to $n$ different processes. An \b{advantage} of this solution is that there are no race conditions. A \b{disadvantage} of this solution is that it does not achieve progres because a process can be blocked by a process not in its critical section.
+    There is a single turn variable shared between processes. A value of 0 means that it is the turn of process 0. A value of 1 means it is the turn of process 1. the turn variable is initially set with 0 or 1 based on how should start first and the processes strictly alternate. This can easily be generalized to $n$ different processes. An \bold{advantage} of this solution is that there are no race conditions. A \bold{disadvantage} of this solution is that it does not achieve progres because a process can be blocked by a process not in its critical section.
 
     \subsubsection{Peterson's Solution}
 
-    Use two shared variables \texttt{(turn, flags[])} between processes. \texttt{int turn} imposes an access order: which process can enter its critical section next. \texttt{bool flags[]} (array) specifies for each process whether it is currently interested in entering its critical section. This array is initialized to be false. Some \b{advantages} of this solution are that there are no race conditions and it satisfies all three conditions for critical regions. \b{Disadvantages} are that busy waiting uses a lot of CPU and generalization to more than two processes is complex. 
+    Use two shared variables \texttt{(turn, flags[])} between processes. \texttt{int turn} imposes an access order: which process can enter its critical section next. \texttt{bool flags[]} (array) specifies for each process whether it is currently interested in entering its critical section. This array is initialized to be false. Some \bold{advantages} of this solution are that there are no race conditions and it satisfies all three conditions for critical regions. \bold{Disadvantages} are that busy waiting uses a lot of CPU and generalization to more than two processes is complex. 
 
     \subsubsection{Test-and-Set Lock (TSL) Instruction}
 
@@ -572,7 +630,7 @@
 
     \subsubsection{TSL Solution}
 
-    There is a single lock variable in memory at \texttt{LOCK\_ADDR}, shared between processes. Uses TSL instead of while loops and assignment. \b{Advantages} of this solution are that there are no race conditions, mutual exclusion is achieved, and progress can be made. \b{Disadvantages} of this solution are that you must have a TSL instruction implemented in the CPU, there is no bounded waiting, and it has busy-waiting. 
+    There is a single lock variable in memory at \texttt{LOCK\_ADDR}, shared between processes. Uses TSL instead of while loops and assignment. \bold{Advantages} of this solution are that there are no race conditions, mutual exclusion is achieved, and progress can be made. \bold{Disadvantages} of this solution are that you must have a TSL instruction implemented in the CPU, there is no bounded waiting, and it has busy-waiting. 
         
     \subsubsection{Producer-Consumer Problem with \texttt{sleep()} and \texttt{wakeup()}}
 
@@ -602,19 +660,19 @@
     }
     \end{lstlisting}
 
-    \noindent In this soution both the producer and consumer may sleep forever. An \b{advantage} of this solution is that there is no busy-waiting. \b{Disadvantages} of this solution are that there is a race condition. A wakeup sent to a process that is not (yet) sleeping is lost. Decision to go to sleep and calling sleep() must be paired. So that the test of \texttt{count} must be done at the same time as the sleep/wakeup in some way. To achieve this we use \b{semaphores}...
+    \noindent In this soution both the producer and consumer may sleep forever. An \bold{advantage} of this solution is that there is no busy-waiting. \bold{Disadvantages} of this solution are that there is a race condition. A wakeup sent to a process that is not (yet) sleeping is lost. Decision to go to sleep and calling sleep() must be paired. So that the test of \texttt{count} must be done at the same time as the sleep/wakeup in some way. To achieve this we use \bold{semaphores}...
 
     \subsubsection{Sempahores}
 
-    The purpose of \b{sempahores} is to solve the lost wakeup problem (explained just above) and avoid race conditions. Semaphores will try to store the number of wakeups. To make a semaphore, define a count variable (the semaphore): \texttt{Down(<semaphore>)} is equivalent to consume (decrease) or sleep(), \texttt{Up(<semaphore>)} is equivalent to produce (increase) and (potentially) wakeup. \texttt{down()} and \texttt{up()} are \b{atomic} (i.e. once the operation has started, no other process can access the semaphore until completed or blocked). \\ 
+    The purpose of \bold{sempahores} is to solve the lost wakeup problem (explained just above) and avoid race conditions. Semaphores will try to store the number of wakeups. To make a semaphore, define a count variable (the semaphore): \texttt{Down(<semaphore>)} is equivalent to consume (decrease) or sleep(), \texttt{Up(<semaphore>)} is equivalent to produce (increase) and (potentially) wakeup. \texttt{down()} and \texttt{up()} are \bold{atomic} (i.e. once the operation has started, no other process can access the semaphore until completed or blocked). \\ 
 
-    \noindent The value of the semaphore... if \b{positive}, represents the number of resources available and that there are no pending wakeups. If \b{zero} represents that there are no resources available and no pending wakeups. If \b{negative} represents that there are no resources available and signifes the number of pending wakeups (number of processes waiting). 
+    \noindent The value of the semaphore... if \bold{positive}, represents the number of resources available and that there are no pending wakeups. If \bold{zero} represents that there are no resources available and no pending wakeups. If \bold{negative} represents that there are no resources available and signifes the number of pending wakeups (number of processes waiting). 
 
     \subsubsection{Types of Semaphores}
 
-    \b{Counting semaphore} is a sempahore based on the number of controlled resources. The value is an integer. \\ 
+    \bold{Counting semaphore} is a sempahore based on the number of controlled resources. The value is an integer. \\ 
 
-    \noindent \b{Binary Semaphore} is a sempahore with a value of 0 or 1 which implementes mutual exclusion; this is called a \b{mutex}. The value is either a 0 or 1. A value of 0 represents \b{locked} and that the cirtical region is not available. A value of 1 represents \b{unlocked} and that the critical region is available.
+    \noindent \bold{Binary Semaphore} is a sempahore with a value of 0 or 1 which implementes mutual exclusion; this is called a \bold{mutex}. The value is either a 0 or 1. A value of 0 represents \bold{locked} and that the cirtical region is not available. A value of 1 represents \bold{unlocked} and that the critical region is available.
 
     \subsubsection{Producer-Consumer Problem using Semaphores}
 
@@ -674,36 +732,36 @@
     The order of the \texttt{up()} and \texttt{down()} calls is important and can't be changed. 
 
     \begin{center}
-        \b{Producer} = \texttt{down(empty), down(mux), up(mux), up(full)} \\ 
-        \b{Consumer} = \texttt{down(full), down(mux), up(mux), up(empty)}
+        \bold{Producer} = \texttt{down(empty), down(mux), up(mux), up(full)} \\ 
+        \bold{Consumer} = \texttt{down(full), down(mux), up(mux), up(empty)}
     \end{center}
 
     \subsubsection{Monitors}
 
-    Monitors are a higher-level primitive. Monitors are a programming language construct: a package or module or class. Some \b{rules for monitors} include:
+    Monitors are a higher-level primitive. Monitors are a programming language construct: a package or module or class. Some \bold{rules for monitors} include:
 
-    \bl 
-    \i only one process/thread can be active in a monitor at any time
-    \i processes cannot access internal data of monitor (fields are private)
-    \i put all critical sections inside monitor methods
-    \el
+    \newlist
+    \b only one process/thread can be active in a monitor at any time
+    \b processes cannot access internal data of monitor (fields are private)
+    \b put all critical sections inside monitor methods
+    \endlist
 
-    \noindent A \b{mutex} is used to achieve mutual exclusion: locked/unlocked automnatically at function/method invocation and return. They also have a \b{condition variable} which is used for processes to wait/block when attempting to enter a monitor which is already currently in use and to wake up the process. \\
+    \noindent A \bold{mutex} is used to achieve mutual exclusion: locked/unlocked automnatically at function/method invocation and return. They also have a \bold{condition variable} which is used for processes to wait/block when attempting to enter a monitor which is already currently in use and to wake up the process. \\
 
     \noindent \texttt{wait(condition)}
 
-    \bl 
-    \i adds process to wait queue for condition variable
-    \i causes the calling process to block
-    \i releases the mutex to allow other processes to enter monitor 
-    \i re-acquire mutex once blocked process is woken up
-    \el 
+    \newlist
+    \b adds process to wait queue for condition variable
+    \b causes the calling process to block
+    \b releases the mutex to allow other processes to enter monitor 
+    \b re-acquire mutex once blocked process is woken up
+    \endlist 
 
     \noindent \texttt{signal(control)}
-    \bl 
-    \i wakes up one blocked process on the condition, if any
-    \i exits the monitor, leaving critical section
-    \el 
+    \newlist
+    \b wakes up one blocked process on the condition, if any
+    \b exits the monitor, leaving critical section
+    \endlist 
 
 \subsection{Readers-Writers Problem}
 
@@ -739,5 +797,75 @@
         }
     }
     \end{lstlisting}
+
+\newpage
+\section{Memory Management}
+
+Physical memory (RAM) is a hardware arary consisting of words. \bold{words} are a fixed-size unit of data (64 bits). When there is \bold{one program} with \bold{no memory abstraction}, the program lives in and directly works with physical memory; the program can even share physical memory with the OS. When there are \bold{multiple programs} with \bold{no memory abstraction} every program operates in physical memory, there is no isolatin and thus programs can access each other's memory and OS memory. \\ 
+
+Problems with having multple prgorams and no memory abstraction include:
+
+\newlist 
+\b No protection
+\b expensive relocation process
+\b security
+\b \bold{stability}: user program could write over something in OS
+\endlist
+
+Additionally, note that programs must be \bold{relocatable}: written to be plcaed to run at any physical memory address. The \bold{loader} is the part of the OS that loads the program from disk to RAM and is reponsible for deciding where to place programs based on the availabel physical memory.  \\ 
+
+\subsection{Memory Management}
+
+The \bold{virtual address space} abstracts physical memory space so that each process has its own memory address space. \\ 
+
+\subsubsection{Base and Limit Registers}
+
+One such tool for implementing virtual memory is the use of \bold{base and limit registers}. These are hardware support to ease relocation (store the base register and limit register). Thus, the program does not need to be relocatable, so there is a faster load time. Each process also gets its own private address space. In this implementation, the memory management unit will convert virtual address in program (offset) to the physical memory address, then retrieve the data from the memory and return it to the user program. 
+
+\subsubsection{Swapping}
+
+\begin{enumerate}
+    \item Save address space of idle processes to disk and reclaim memory
+    \item When a swapped process needs to run, bring its address space from disk back to memory
+    \item Go back to step 1
+\end{enumerate}
+
+Know that idel processes are mostly stored on the disk, so they do not take up any memory when they are not running. Swapped processes are kicked out of memory and brought back into memory in full when it is needed again. 
+
+\subsubsection{Memory Fragmentation}
+
+\bold{Memory fragmentation} happens during process creation, exit, and swapping when memory holes are created. This brings about he problem that new processes may not fit in any available memory hole, even if all the holes together are big enough for the new process. A solution to this is \bold{compaction}. In \bold{compaction} all the processes are moved tightly together, which results in one single hole which is big enough for the new process. Compaction has to freeze all the programs to perform the operatino, so it is not good to use on interactive systems where the freeze will be noticeable. \\ 
+
+\subsubsection{Determine which Memory is Allocated}
+
+With all implementations for memory managment, recall that we need to allow extra room for process growth. To figure out which part of memory is allocated, divide the memory into \bold{blocks}. $$\textrm{1 block} = 4 \textrm{KB}$$
+
+\paragraph{Bitmaps}
+
+Allocation units (blocks) are as small as a few words and as large as many KB. Each allocation unit has a bit in the bitmap which is 1 if that block is occupied and 0 if that block is free. An issue with this implementation is the long search time. 
+
+\paragraph{Linked Lists}
+
+Each node in the list contains a process or a hole. Each node has a start address and length. Since the list is sorted by increasing addresses, it's easy to merge adjacent nodes when a process exits. 
+
+\subsubsection{Picking Location of New Process's Memory}
+
+When picking where to allocate the memory of a new process, there are many options. The following are some of the common options:
+
+\newlist
+\b \bold{First fit}: take the first fitting hole. This is the simplest option. Tends to allocate at the beginning of memory
+\b \bold{Next fit}: take the next fitting hold. Faster than first fit in practice (allocates from all over the memrory) but is not as memory efficient.
+\b \bold{Best fit}: take the best fitting hole. This is slower as it must search the whole list. Prone to creating lots of small holes. 
+\b \bold{Worst fit}: take the worst fitting hole. Poor performance in practice
+\b \bold{Quick fit}: keep hole lists for holes of different sizes. Poor coalescing performance.
+\endlist
+
+\subsubsection{Overlays}
+
+Overlays are a strategy where you only load part of the program. The programmer breaks the address space into pieces so that each piece can fit into physical memory. The pieces are called \bold{overlays} and are loaded and overwritten by the program when necesssary. This requires an overlay manager which likely takes the form of some software library. In this library, programmers call functions of the overlay manager to load an overlay segment into memory when it is not in RAM. This overwrites a segment previously in RAM. The \bold{issues} of this impelmentation is that it is implemented in the program itself and therefore there is a high complexity for the developer. However, this is still used in some embedded systems where the hardware does not support paging. 
+
+\section{Virtual Management}
+
+
 
 \end{document}
