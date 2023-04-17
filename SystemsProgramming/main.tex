@@ -215,7 +215,7 @@ if (write(fd, str, 6) != 6) {
 
 \subsubsection{File Reposition}
 
-For each file opened, the kernel keeps a record for current file offsets, i.e. which byte of the file we're currently at. The \code{lseek()} function can b used to chnage the current location \bold{within} a file.
+For each file opened, the kernel keeps a record for current file offsets, i.e. which byte of the file we're currently at. The \code{lseek()} function can be used to change the current location \bold{within} a file.
 
 \begin{lstlisting}[language=C]
 off_t lssek(int fd, off_t offset, int whence);
@@ -224,8 +224,8 @@ off_t lssek(int fd, off_t offset, int whence);
 where \code{off\_t} is offset in bytes and \code{whence} can be one of three places (declared as macros):
 
 \newlist
-\b \code{SEEK\_SET}: relocate to the beginning of the file (offset of zero) + \code{offset}. Essentially just \code{offset}'
-\b \code{SEEK\_END}: relocate to the end of the file (or, the size of the file) + \code{offset};
+\b \code{SEEK\_SET}: relocate to the beginning of the file (offset of zero) + \code{offset}. Essentially just \code{offset}
+\b \code{SEEK\_END}: relocate to the end of the file (or, the size of the file) + \code{offset}
 \b \code{SEEK\_CUR}: relocate to its current location within the file + \code{offset}
 \endlist
 
@@ -302,7 +302,7 @@ When we invoke a program, the actual instance of that program becomes a \bold{pr
 
 \subsubsection{Process Image}
 
-The layout of a process is called a \bold{process image}. Each process image is split into two poriotns; the user-addressable and the kernel-addressable. The kernel-addressable portions are all maintained in the kernel space of the memory, while the user-addressable portions the user space. Additionally, each process also has a process structure (PCB) to store all its status information. 
+The layout of a process is called a \bold{process image}. Each process image is split into two portions; the user-addressable and the kernel-addressable. The kernel-addressable portions are all maintained in the kernel space of the memory, while the user-addressable portions the user space. Additionally, each process also has a process structure (PCB) to store all its status information. 
 
 \paragraph{Process structures}
 
