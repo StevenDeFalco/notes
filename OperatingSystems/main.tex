@@ -864,8 +864,114 @@ When picking where to allocate the memory of a new process, there are many optio
 
 Overlays are a strategy where you only load part of the program. The programmer breaks the address space into pieces so that each piece can fit into physical memory. The pieces are called \bold{overlays} and are loaded and overwritten by the program when necesssary. This requires an overlay manager which likely takes the form of some software library. In this library, programmers call functions of the overlay manager to load an overlay segment into memory when it is not in RAM. This overwrites a segment previously in RAM. The \bold{issues} of this impelmentation is that it is implemented in the program itself and therefore there is a high complexity for the developer. However, this is still used in some embedded systems where the hardware does not support paging. 
 
-\section{Virtual Management}
+\section{Virtual Memory}
 
+\bold{Virtual memory} is a powerful concept for the address-space abstraction that decouples process address space from physical memory. It gives the illusion of large and private addresss spaceses. It also allows for programs to execute even if only partially loaded in memory. It enables different memory protection policies as well. In this, each process has its own virtual address space from 0x00 to some maximum. The program and CPU operate on virtual addresses which are translated to the physical addresses: a process which is transparent to the program. \\ 
 
+The virtual address space is broken into \bold{chunks}. Each chunk is a contiguous range of addresses mapped onto a contiguous range of physical memory. The process always sees the entire virtual address space. NOt all chunks need be in physical mmeory to run the program. Chunk switching is hidden from the process. When a program references a chunk loaded in pyysical memory, hardware peforms necessary virtual-to-physical address translation on the fly. When a program references a chunk not in physical memory, the kernel gets it from the disk and re-executes the memory instruction a second time. A chunk is either a \bold{segment} or a \bold{page}. \\ 
+
+\subsection{Paging}
+
+A \bold{virtual address space} consists of fixed-size chunks called \bold{pages} which each correspond to chunks in the \bold{physical memory} called \bold{frames}. Pages and frames are \emph{always} the same size (which is usually 4KB). The hardware \bold{memory management unit (MMU)} translates pages to frames; this translation is invisible to the process and the programmer does not have to worry about it. \\ 
+
+The \bold{application} sees a single, private, contiguous addresss space while in reality application code and data are scattered across physical memory. Note that not all pages neeed to be loaded into physical memory. 
+
+\subsubsection{Translating Addresses when Paging}
+
+To translate the address when paging, the virtual address is broken into \bold{page number} and \bold{page offset}. \bold{Page number} is used to get the \bold{frame number}. This uses a mapping function and is implemented with a page table. The page number is used as the index into the page table. Each page table entry stores a frame number plus some additional information. The numner of entries in the page table is equal tot he size of the virtual address spcae divided by the page size. 
+
+\subsubsection{Page Table Entry}
+
+The \emph{exact} content of a \bold{page table entry} is highly OS and MMU depenedent; however, all must contain at least the frame number. The entry will also have a \bold{modified/dirty} bit (referenced bit) which is set by the MMY when the page is used to allow the kernel to keep track of page usage. The entry also has \bold{protection bits} (i.e. what kind of access is permitted: read, write, execute). The entry also has a \bold{present/absent bit}: 1 if the entry is valid and page can be used, 0 if the page is not currently in memory. Accessing a page with absent/invalid entry causes a \bold{page fault}. 
+
+\subsubsection{Page Faults}
+
+If a process makes a reference to a page which is not currently in RAM, the reference to that page will result in the MMU detecting that the page is marked as invalid in the process' page table, and the MMU will trap to the kernel: \bold{page fault}. 
+
+\begin{enumerate}
+    \item Kernel looks at another table in the process' PCB to decide
+        \newlist 
+        \b If invalid reference, then abort
+        \b If just not in memory, but exists somewhere else
+        \endlist
+    \item Kernel finds a free frame in RAM
+    \item Page-in the needed page into the free frame in RAM using a disk operation
+    \item Kernel changes the page table to indicate that the page is now in memory: set the valid bit to true
+    \item Kernel restarts the process at the same CPU instruction that caused the page fault
+    \item The second time the instruction will succeed without a page fualt. 
+\end{enumerate}
+
+During a process context switch, the kernel tells the MMU where in RAM to find the page table for the process executing next on the CPU. Everytime the process reads/writes a virtual addresss...
+
+\newlist 
+\b MMU uses the page number bits of the virtual address to lookip in the page table the corresponding frame number
+\b If a page table entry is found, the MMU uses that frame number and the offset bits to generate the physical memory request 
+\b If a page table entry isnot found then a page fault is generated. 
+\newlist 
+\b Either the kernel kills the process if it was trying to access nonexistant memory
+\b Or the kernel loads the requested page from disk and updates the page table before resuming the prtocess's execution
+\endlist
+\endlist
+
+\subsubsection{Addresses}
+
+In an \emph{n-bit} virtual addresss space, a virtual address consists of \emph{n} bits and there are $2^n$ virtual addresses. \\ 
+
+In an \emph{n-bit} virtual address space with \emph{k bits} for the page offset. Each page consists of $2^k$ virtual addresses. The virtual page number takes $(n-k)$ bits. There are $2^{(n-k)}$ virtual pages and $2^{(n-k)}$ entries in the table. \\ 
+
+In an \emph{m-bit} physical address space, a physical address consists of \emph{m bits}. There are $2^m$ physical addresses. \\ 
+
+In an \emph{m-bit} physical address space with \emph{k bits} for the frame offset. Each page consists of $2^k$ physical addresses. The frame number takes $(m-k)$ bits. There are at most $2^{(m-k)}$ physical frames. \\ 
+
+\subsubsection{Translation Lookaside Buffer}
+
+The use of a \bold{translation lookaside buffer} helps reudce accesses to the page table by caching recently used page table entries. TLB is a hardware cache for page table entries inside the MMU, used to speed up address translation. This works because most programs often make a large number of references to a small number of pages: locality of memory references. \\ 
+
+The \bold{translation lookaside buffer} translates virtual addresses into physical addresses without going through the page table. It is usually implemented as an \bold{associative memory} that caches most recent virtual to physical address translatins. All TLB entries are searched in parallel. 
+
+\newlist 
+\b If the page number if found in the TLB: \bold{hit}. The matching TLB entry contains the right frame number and thus the virtual address can easily be translated to the physical memory. 
+\b If the page number is not found in the TLB: \bold{miss}. The MMU access the page table in the main memory to get the right frame number. MMU translates the virtual address into a physical address. The MMU updates the TLB so accessing the same page later will then result in a hit. 
+\endlist
+
+\paragraph{Metrics}
+
+\bold{Hit ratio} (\emph{h}) is the percentage of time tha ta page number is found in the TLB. \\ 
+
+\bold{Effective access time} (EAT) = $a + (2-h)m$. Where $a$ is TLB lookup time, $m$ is memory access time. $a$ is negligible; if $h$ is close to 1 (100\%) then EAT is close to $m$. 
+
+\subsubsection{Multilevel Page Tables}
+
+There is a high memory overhead with a \bold{flat page table}. If the virtual address space is large then the page table will be large as well. Even if the program uses a small fraction of its virtual address space, the entire page table is still needed. \\
+
+In \bold{multilevel page tables}, the virtual address bits are split into three parts: hight page bits, low page bits, and offset bits. The basic idea is to \emph{page} the page table. This allows for only portions of a page table to be kept in memory at one time (the rest can be on the disk); portions of a page tbale can simply not be present at all. When there is a TLB miss, a process might now require three memory accesses: 
+
+\newlist
+\b primary page table needed by the MMU
+\b Secondary page table needed by the MMU
+\b Data requested by the process
+\endlist
+
+In practice, the TLB hit ratio ($h$) is very close to 100\% so requiring 3 memory accesses only happens very rarely. 
+\paragraph{Example}
+
+Assume the 32-bit address is allocated as following: 10 bits to the primary page, 10 bits to the secondary page, 12bits to the page offfset. \\ 
+
+1st-level page size = $1024 \times 4 \textrm{ bytes} = 4\textrm{KB}$ \\ 
+
+2nd-level page size = $2^{10} = 1024 \times 4 \textrm{ bytes} = 4\textrm{KB}$. The secondary page gets 10 bits, so 1024 unique addresses and each one is 4 bytes.
+
+Total size of the page table = $4\textrm{KB} \times 1024 + 4\textrm{KB}$. All 1024 entries in the pruimary table point to one secondary page. 
+
+Thus, 8KB of memory is needed for one virtual address translation. 
+
+\subsubsection{Inverted Page Tables}
+
+Another approach, instead of paging, is using \bold{inverted paged tables}. To do this, you must have a frame table where the frame number is the index and the page number is the context. The table size is proportional to RAM size, which is much smaller than the size of the virtual address space of a process. Only a single frame is required for all processes. The problem with this implementation is tha t a TLB miss requires searching the frame table entry by entry, so is very slow on a miss. This takes \bold{less space} than paging but \bold{more time}. \\ 
+
+To implement an inverted page table using hashaed maps, hash the page number to a bucket. The table size only depends on the has function used. Hashing is slow but only needs to be done on a TLB miss. Multiple page numbers might hash to the same bucket, so then need to search a (short) list to find the right frame number. 
+
+\newpage
+\section{Page Replacement Algorithm}
 
 \end{document}
