@@ -974,4 +974,183 @@ To implement an inverted page table using hashaed maps, hash the page number to 
 \newpage
 \section{Page Replacement Algorithm}
 
+If there is no free frame in physical memory, then must identify some \emph{victim} pages in memory and move them to disk to free the corresponding frames. \\
+
+\bold{Question}: Which page to evict when physical memory is full and a free frame is required? \\
+\bold{Goal}: Achieve the lowest number of (future) page faults \\ 
+\bold{Input of Algorithm}: A particular string of memory references \\ 
+\bold{Output of Algorithm}: The number of page faults on that string \\ 
+
+\subsection{Optimal Algorithm}
+
+The \bold{optimal algorithm} will replcae the page in memory that will be used the furthest in the future. This is the page that will create a page fault the furthest in the future, thereby minimizing the number of page faults. This is not achievable in real systems because this only works if we know the whole sequence of page references in advance. \\ 
+
+In the following algorithms, we will use the following notation. In \bold{page table entries}, \bold{R} is set whenever the page is referenced, \bold{M} is set when the page is written to. 
+
+\subsection{Not Recently Used Algorithm}
+
+The general idea of this algorithm is to use virtual memory hardware tracking bits to determine what page was not recently accessed. 
+
+\begin{enumerate}
+    \item When a process starts, the R and M bits for all its pages are set to 0 by the kernel
+    \item Periodically (on the clock interrupt), the R bit is cleared (the M bit remains the same). 
+        \newlist 
+        \b To distinguish pages that have not been referenced recently from those that have been 
+        \endlist
+    \item When a page fault occurs, the kernel inspects all the pages and divides them into four categories
+        \newlist 
+        \b \bold{Class 0}: not referenced but not modified
+        \b \bold{Class 1}: not referenced but modified
+        \b \bold{Class 2}: referenced but not modified
+        \b \bold{Class 3}: referenced and modified
+        \endlist
+    \item The algorithm removes a page at \bold{random} from the lowest-numbered non-empty class
+\end{enumerate}
+
+\bold{Disadvantages} of NRU algorithm: \\ 
+\newlist 
+\b only looks at referenced/modified bits chagned since the last clock tick
+\b pages split among only four categories
+\b performance is, at best, adequate
+\endlist
+
+Note that the page removed is from the same process that triggered the page fault in the first place. 
+
+\subsection{First in First Out (FIFO) Algorithm}
+
+In FIFO, the kernel maintains a linked list of all pages in the order that they came into physical memory. THe page at the beginning of th elist is removed from the list and from physical memroy when a free frame is needed; this is also the page that has been in physical memory for the longest time, so may very well be a frequently used page. \\
+
+An \bold{advantage} of FIFO algorithm is that it is easy to implement. \\ 
+
+\bold{Disadvantages} of FIFO algorithm: \\ 
+\newlist
+\b The page which is memory the longest is replaced. This does not consider page usage and thus may throw out pages that are in use right now. 
+\b Suffers from "\bold{Belady's Anomaly}": the page fault rate might increase when there are more frames
+\endlist
+
+The linked list can contain pages from many different processes, so the page removed might not belong to the process that triggered the page fault. 
+
+\subsection{Second Chance Algorithm}
+
+Second chance is a FIFO variant that adds the concept of page usage (check reference bit). This examines pages in FIFO order starting from the beginning of the linked list but considers the reference bit, R< of the page at the front of the list:
+
+\newlist 
+\b If \bold{R=0}, the oldest page has not been used since it was added at the end of the list, so remove page (go to third bullet)
+\b If \bold{R=1}, set R=0 and place the oldest page back at the end of FIFO list (second chance) because it was used recently (go to first bullet)
+\b Add new page at the end of FIFO
+\endlist
+
+If no victim page is found on the first pass, the algorithm automatically reverts to pure FIFO on the second pass. The problem with the second chance algorithm is that moving pages around the list is not efficient. The \bold{clock algorithm} is a more performant implementation that uses a circular list and simply moves a pointer around the list. 
+
+\subsection{Least Recently Used (LRU) Algorithm}
+
+LRU is a good approximation of the optimal algorithm that is based on the obsevations that pages that have been heavily used int he last few instructions will probably be heavily used again soon. Additionally, we can infer that pages that have not been used for a long time will probably remain unused for a long time. When a page fault occurs, remove the page that has been unused for the longest time in the past. 
+
+\subsubsection{Priority List Implementation of LRU}
+
+Keep a doubly linked list of page numbers with the most recently used at the front and the least recently at the rear. A page that gets referenced is moved to the front, and on a page fault, you always remove from memory the page at the rear of the linked list. In this implementation, it is easy to find the least recently used page, but a list update is required on every memory reference; this is time consuming and not practical. 
+
+\subsubsection{Counter Implementation of LRU}
+
+Equip the hardware with an N-bit counter and on every instruction that references memory, increment the counter. Every page table entry must have a field to save the counter. When a page is referenced, copy the counter to that field. The more recently that the page is used, the larger the counter value is in its table entry. For replacement during a page fault: evict the page with the lowest counter value (i.e. the oldest page). This operation requires searching the page table for the entry with the lowest counter, so it is linear time in the size of the page table. This also means that the evicted page always belongs to the process that triggered the page fault.
+
+\subsection{Not Frequently Used (NFU) Algorithm}
+
+\begin{enumerate}
+    \item At each clock interrupt, for each page, the R bit is added to a software counter for each page which keeps track (roughly) of how often each page has been referenced in the past 
+    \item The page with the lowest counter is evicted during page fault
+\end{enumerate}
+
+This algorithm never forgets: looks at overall usage of each page rather than recently used usage. 
+
+\subsection{Aging Algorithm}
+
+This algorithm is a variant of NFU that forgets the past after a while. Uses an N-bit counter per page and periodically...
+
+\newlist 
+\b Shift couter to the right to forget the oldest bit: reduces counter values over time by dividing it by two
+\b Add R as the new leftmost bit to represent recent usage. This recent R bit is added as the most significant bit and, therefore, more weight is given to recent references
+\endlist 
+
+When a page fault occurs, we replcae the page with the lowest counter. Because this algorithm uses 8 bit integers, it only remembers what has happened within the last 8 clock ticks (anything older than that would be shifted to zero). If two pages have a value of 0 then we know they have not been used for $n$ clock ticks, but we do not know which of the two was used more recently. 
+
+\subsection{When to Move Pages into Memory}
+
+There are many options of how to decide when to move pages into memory. Here are some of the options. \\ 
+
+\bold{Demand} paging is when pages are loaded on demand, not in advance \\ 
+
+\bold{Prepaging} loads a group of pages at once in the hope of minimizing the numbner of page faults later. The group of pages to get is a guess but could include all of a given program's pages, the first/last $N$ pages: the \bold{working set pages} \\ 
+
+\subsubsection{Working Set Pages}
+
+The \bold{working set} is the set of pages that a process is currrently using. This sat may change over time in the regard that there will be different pages and that there will be a different total size due to the pages themselves changing. The working set of pages are those used by the $k$ most recent memory references. $w(k,t)$ is the size of the working set at time $t$. \\ 
+
+If the entire working set is in physical memory, there are no page faults. If there is insufficient physical memory for the working set, \bold{thrashing} where a process busies itself copying pages in and out of memory. The goal is to keep the working set in physical memory to minimize the number of page faults. 
+
+\subsection{Working Set Based Algorithm}
+
+This page replacement algorithm has a threshold T (working set window size), and for every page table entry keeps track of the time of last use, reference bit R and modified bit M. During a page fault, the algorithm will scan the page table, and for each entry: 
+
+\newlist 
+\b If \bold{R=1}, set time of last use to current time, set R to 0. Page has been referenced since last clock tick, so in working set, so remember when it was last used. 
+\b If \bold{R=0}, the page is a candidate for removal. First calculate the age: $\textrm{age} = (\textrm{current time} - \textrm{time of last use})$. If the age is greater than threshold T, then the page is replaced. If the age is less than threshold T, the page is still in the working set, but may be removed if it is the oldest page in the working set. 
+\b If not page has R=0, choose the oldest and when they are all the same age, pick randomly
+\endlist
+
+This algorithm works fine in terms of page faults, but requires scanning the whole page table which is expensive. 
+
+\subsection{Working Set Clock (WSClock) Algorithm}
+
+This algorithm uses a circular list of \bold{frames} (including R and M bits and time of last use). When there is a page fault: 
+
+\newlist
+\b If \bold{R=1}, set R=0 and advance the clock hand around the list. This page was used recetnly and is part of the working set. 
+\b If \bold{R=0} and \bold{age is greater than threshold T}:
+\newlist 
+\b Page is clean (M=0), replace this page
+\b Page is dirty (M=1), schedule write but advance hand to check other pages
+\endlist
+\b At the end of the first pass, if no page has been replaced...
+\newlist
+\b If the write has been scheduled, keep moving the hand until the write is done and the page is clean. Evict the first clean page. 
+\b If no write scheduled, claim any clean page even though it is in the working set. 
+\endlist
+\endlist
+
+This algorithm is simple and has good performance so is used a lot in practice. 
+
+\subsection{Frame Allocation to Processes}
+
+Each process requires a minimum numnber of frames. The following are some of the options for choosing how many frames to allocate.
+
+\subsubsection{Fixed Frame Allocation}
+
+In this implementation there could be \bold{equal allocation}; so, if-for example-there are 100 frames and 5 processes, then you give each process 20 frames. There could also be \bold{proportional allocation} which means that we allocate frames according to the size of the process. 
+
+$$S \sum_{}^{} s_i$$
+$$S_i = \textrm{ virtual size used by process } p_i$$
+$$M = \textrm{ total number of frames}$$ 
+$$a_i = \textrm{ allocation for } p_i = \frac{s_i}{S \times m}$$
+
+\subsubsection{Priority Allocation}
+
+This implementatnion uses a proportional allocation scheme that uses priorities rather than size. 
+
+\subsubsection{Local Replacement}
+
+In this implementation, for each process, the kernel only selects from the process's own set of allocated frames; therefore a process has a fixed number of frames. The good thing about this is that when a process thrashes, it does not cause other processes to thrash. The bad thing about this is that it can lead to wasted memory if a process's working set decreases in size. 
+
+\subsubsection{Global Replacement}
+
+For each process, the kernel selects a replacement frame from the set of all frames. This is better for dynamic working set which may grow or shrink. However, there can be domino-style thrashing. Most modern operating systems use global replacement to avoid wasting memory. 
+
+\paragraph{Avoiding Thrashing}
+
+To prevent thashing, adopt a local allocation policy (wastes memroy), do not schedule a process unless its working set of pages is in memory (implies prepaging), and use a page fault frequency approach. 
+
+\paragraph{Page Fault Frequency Scheme}
+
+Measure the page fault rate of process and if its too low then take pages from that proces and if too high, then allocate additional frames to the process. If many processes have high page fault frequency, swap out one or more of these processes (the process to swap out is determined by the scheduling algorithm). This may use process priority to affect the range of acceptable page fault frequencies. 
+
 \end{document}
