@@ -801,9 +801,9 @@
 \newpage
 \section{Memory Management}
 
-Physical memory (RAM) is a hardware arary consisting of words. \bold{words} are a fixed-size unit of data (64 bits). When there is \bold{one program} with \bold{no memory abstraction}, the program lives in and directly works with physical memory; the program can even share physical memory with the OS. When there are \bold{multiple programs} with \bold{no memory abstraction} every program operates in physical memory, there is no isolatin and thus programs can access each other's memory and OS memory. \\ 
+Physical memory (RAM) is a hardware arary consisting of words. \bold{words} are a fixed-size unit of data (64 bits). When there is \bold{one program} with \bold{no memory abstraction}, the program lives in and directly works with physical memory; the program can even share physical memory with the OS. When there are \bold{multiple programs} with \bold{no memory abstraction} every program operates in physical memory, there is no isolation and thus programs can access each other's memory and OS memory. \\ 
 
-Problems with having multple prgorams and no memory abstraction include:
+Problems with having multple programs and no memory abstraction include:
 
 \newlist 
 \b No protection
@@ -812,7 +812,7 @@ Problems with having multple prgorams and no memory abstraction include:
 \b \bold{stability}: user program could write over something in OS
 \endlist
 
-Additionally, note that programs must be \bold{relocatable}: written to be plcaed to run at any physical memory address. The \bold{loader} is the part of the OS that loads the program from disk to RAM and is reponsible for deciding where to place programs based on the availabel physical memory.  \\ 
+Additionally, note that programs must be \bold{relocatable}: written to be placed and run at any physical memory address. The \bold{loader} is the part of the OS that loads the program from disk to RAM and is reponsible for deciding where to place programs based on the available physical memory.  \\ 
 
 \subsection{Memory Management}
 
@@ -830,11 +830,11 @@ One such tool for implementing virtual memory is the use of \bold{base and limit
     \item Go back to step 1
 \end{enumerate}
 
-Know that idel processes are mostly stored on the disk, so they do not take up any memory when they are not running. Swapped processes are kicked out of memory and brought back into memory in full when it is needed again. 
+Know that idle processes are mostly stored on the disk, so they do not take up any memory when they are not running. Swapped processes are kicked out of memory and brought back into memory in full when it is needed again. 
 
 \subsubsection{Memory Fragmentation}
 
-\bold{Memory fragmentation} happens during process creation, exit, and swapping when memory holes are created. This brings about he problem that new processes may not fit in any available memory hole, even if all the holes together are big enough for the new process. A solution to this is \bold{compaction}. In \bold{compaction} all the processes are moved tightly together, which results in one single hole which is big enough for the new process. Compaction has to freeze all the programs to perform the operatino, so it is not good to use on interactive systems where the freeze will be noticeable. \\ 
+\bold{Memory fragmentation} happens during process creation, exit, and swapping when memory holes are created. This brings about the problem that new processes may not fit in any available memory hole, even if all the holes together are big enough for the new process. A solution to this is \bold{compaction}. In \bold{compaction} all the processes are moved tightly together, which results in one single hole which is big enough for the new process. Compaction has to freeze all the programs to perform the operatino, so it is not good to use on interactive systems where the freeze will be noticeable. \\ 
 
 \subsubsection{Determine which Memory is Allocated}
 
@@ -862,13 +862,13 @@ When picking where to allocate the memory of a new process, there are many optio
 
 \subsubsection{Overlays}
 
-Overlays are a strategy where you only load part of the program. The programmer breaks the address space into pieces so that each piece can fit into physical memory. The pieces are called \bold{overlays} and are loaded and overwritten by the program when necesssary. This requires an overlay manager which likely takes the form of some software library. In this library, programmers call functions of the overlay manager to load an overlay segment into memory when it is not in RAM. This overwrites a segment previously in RAM. The \bold{issues} of this impelmentation is that it is implemented in the program itself and therefore there is a high complexity for the developer. However, this is still used in some embedded systems where the hardware does not support paging. 
+Overlays are a strategy where you only load part of the program. The programmer breaks the address space into pieces so that each piece can fit into physical memory. The pieces are called \bold{overlays} and are loaded and overwritten by the program when necesssary. This requires an overlay manager which likely takes the form of some software library. In this library, programmers call functions of the overlay manager to load an overlay segment into memory when it is not in RAM. This overwrites a segment previously in RAM. The \bold{issues} of this impelmentation are that it is implemented in the program itself and therefore there is a high complexity for the developer. However, this is still used in some embedded systems where the hardware does not support paging. 
 
 \section{Virtual Memory}
 
 \bold{Virtual memory} is a powerful concept for the address-space abstraction that decouples process address space from physical memory. It gives the illusion of large and private addresss spaceses. It also allows for programs to execute even if only partially loaded in memory. It enables different memory protection policies as well. In this, each process has its own virtual address space from 0x00 to some maximum. The program and CPU operate on virtual addresses which are translated to the physical addresses: a process which is transparent to the program. \\ 
 
-The virtual address space is broken into \bold{chunks}. Each chunk is a contiguous range of addresses mapped onto a contiguous range of physical memory. The process always sees the entire virtual address space. NOt all chunks need be in physical mmeory to run the program. Chunk switching is hidden from the process. When a program references a chunk loaded in pyysical memory, hardware peforms necessary virtual-to-physical address translation on the fly. When a program references a chunk not in physical memory, the kernel gets it from the disk and re-executes the memory instruction a second time. A chunk is either a \bold{segment} or a \bold{page}. \\ 
+The virtual address space is broken into \bold{chunks}. Each chunk is a contiguous range of addresses mapped onto a contiguous range of physical memory. The process always sees the entire virtual address space. Not all chunks need be in physical memory to run the program. Chunk switching is hidden from the process. When a program references a chunk loaded in physical memory, hardware peforms necessary virtual-to-physical address translation on the fly. When a program references a chunk not in physical memory, the kernel gets it from the disk and re-executes the memory instruction a second time. A chunk is either a \bold{segment} or a \bold{page}. \\ 
 
 \subsection{Paging}
 
@@ -878,11 +878,11 @@ The \bold{application} sees a single, private, contiguous addresss space while i
 
 \subsubsection{Translating Addresses when Paging}
 
-To translate the address when paging, the virtual address is broken into \bold{page number} and \bold{page offset}. \bold{Page number} is used to get the \bold{frame number}. This uses a mapping function and is implemented with a page table. The page number is used as the index into the page table. Each page table entry stores a frame number plus some additional information. The numner of entries in the page table is equal tot he size of the virtual address spcae divided by the page size. 
+To translate the address when paging, the virtual address is broken into \bold{page number} and \bold{page offset}. \bold{Page number} is used to get the \bold{frame number}. This uses a mapping function and is implemented with a page table. The page number is used as the index into the page table. Each page table entry stores a frame number plus some additional information. The numner of entries in the page table is equal to the size of the virtual address space divided by the page size. 
 
 \subsubsection{Page Table Entry}
 
-The \emph{exact} content of a \bold{page table entry} is highly OS and MMU depenedent; however, all must contain at least the frame number. The entry will also have a \bold{modified/dirty} bit (referenced bit) which is set by the MMY when the page is used to allow the kernel to keep track of page usage. The entry also has \bold{protection bits} (i.e. what kind of access is permitted: read, write, execute). The entry also has a \bold{present/absent bit}: 1 if the entry is valid and page can be used, 0 if the page is not currently in memory. Accessing a page with absent/invalid entry causes a \bold{page fault}. 
+The \emph{exact} content of a \bold{page table entry} is highly OS and MMU depenedent; however, all must contain at least the frame number. The entry will also have a \bold{modified/dirty} bit (referenced bit) which is set by the MMU when the page is used to allow the kernel to keep track of page usage. The entry also has \bold{protection bits} (i.e. what kind of access is permitted: read, write, execute). The entry also has a \bold{present/absent bit}: 1 if the entry is valid and page can be used, 0 if the page is not currently in memory. Accessing a page with absent/invalid entry causes a \bold{page fault}. 
 
 \subsubsection{Page Faults}
 
@@ -904,9 +904,9 @@ If a process makes a reference to a page which is not currently in RAM, the refe
 During a process context switch, the kernel tells the MMU where in RAM to find the page table for the process executing next on the CPU. Everytime the process reads/writes a virtual addresss...
 
 \newlist 
-\b MMU uses the page number bits of the virtual address to lookip in the page table the corresponding frame number
+\b MMU uses the page number bits of the virtual address to lookup in the page table the corresponding frame number
 \b If a page table entry is found, the MMU uses that frame number and the offset bits to generate the physical memory request 
-\b If a page table entry isnot found then a page fault is generated. 
+\b If a page table entry is not found then a page fault is generated. 
 \newlist 
 \b Either the kernel kills the process if it was trying to access nonexistant memory
 \b Or the kernel loads the requested page from disk and updates the page table before resuming the prtocess's execution
@@ -927,7 +927,7 @@ In an \emph{m-bit} physical address space with \emph{k bits} for the frame offse
 
 The use of a \bold{translation lookaside buffer} helps reudce accesses to the page table by caching recently used page table entries. TLB is a hardware cache for page table entries inside the MMU, used to speed up address translation. This works because most programs often make a large number of references to a small number of pages: locality of memory references. \\ 
 
-The \bold{translation lookaside buffer} translates virtual addresses into physical addresses without going through the page table. It is usually implemented as an \bold{associative memory} that caches most recent virtual to physical address translatins. All TLB entries are searched in parallel. 
+The \bold{translation lookaside buffer} translates virtual addresses into physical addresses without going through the page table. It is usually implemented as an \bold{associative memory} that caches most recent virtual to physical address translations. All TLB entries are searched in parallel. 
 
 \newlist 
 \b If the page number if found in the TLB: \bold{hit}. The matching TLB entry contains the right frame number and thus the virtual address can easily be translated to the physical memory. 
@@ -936,7 +936,7 @@ The \bold{translation lookaside buffer} translates virtual addresses into physic
 
 \paragraph{Metrics}
 
-\bold{Hit ratio} (\emph{h}) is the percentage of time tha ta page number is found in the TLB. \\ 
+\bold{Hit ratio} (\emph{h}) is the percentage of time that a page number is found in the TLB. \\ 
 
 \bold{Effective access time} (EAT) = $a + (2-h)m$. Where $a$ is TLB lookup time, $m$ is memory access time. $a$ is negligible; if $h$ is close to 1 (100\%) then EAT is close to $m$. 
 
@@ -944,7 +944,7 @@ The \bold{translation lookaside buffer} translates virtual addresses into physic
 
 There is a high memory overhead with a \bold{flat page table}. If the virtual address space is large then the page table will be large as well. Even if the program uses a small fraction of its virtual address space, the entire page table is still needed. \\
 
-In \bold{multilevel page tables}, the virtual address bits are split into three parts: hight page bits, low page bits, and offset bits. The basic idea is to \emph{page} the page table. This allows for only portions of a page table to be kept in memory at one time (the rest can be on the disk); portions of a page tbale can simply not be present at all. When there is a TLB miss, a process might now require three memory accesses: 
+In \bold{multilevel page tables}, the virtual address bits are split into three parts: high page bits, low page bits, and offset bits. The basic idea is to \emph{page} the page table. This allows for only portions of a page table to be kept in memory at one time (the rest can be on the disk); portions of a page table can simply not be present at all. When there is a TLB miss, a process might now require three memory accesses: 
 
 \newlist
 \b primary page table needed by the MMU
@@ -983,7 +983,7 @@ If there is no free frame in physical memory, then must identify some \emph{vict
 
 \subsection{Optimal Algorithm}
 
-The \bold{optimal algorithm} will replcae the page in memory that will be used the furthest in the future. This is the page that will create a page fault the furthest in the future, thereby minimizing the number of page faults. This is not achievable in real systems because this only works if we know the whole sequence of page references in advance. \\ 
+The \bold{optimal algorithm} will replace the page in memory that will be used the furthest in the future. This is the page that will create a page fault the furthest in the future, thereby minimizing the number of page faults. This is not achievable in real systems because this only works if we know the whole sequence of page references in advance. \\ 
 
 In the following algorithms, we will use the following notation. In \bold{page table entries}, \bold{R} is set whenever the page is referenced, \bold{M} is set when the page is written to. 
 
@@ -1007,7 +1007,7 @@ The general idea of this algorithm is to use virtual memory hardware tracking bi
     \item The algorithm removes a page at \bold{random} from the lowest-numbered non-empty class
 \end{enumerate}
 
-\bold{Disadvantages} of NRU algorithm: \\ 
+\bold{Disadvantages} of NRU algorithm:
 \newlist 
 \b only looks at referenced/modified bits chagned since the last clock tick
 \b pages split among only four categories
@@ -1018,11 +1018,11 @@ Note that the page removed is from the same process that triggered the page faul
 
 \subsection{First in First Out (FIFO) Algorithm}
 
-In FIFO, the kernel maintains a linked list of all pages in the order that they came into physical memory. THe page at the beginning of th elist is removed from the list and from physical memroy when a free frame is needed; this is also the page that has been in physical memory for the longest time, so may very well be a frequently used page. \\
+In FIFO, the kernel maintains a linked list of all pages in the order that they came into physical memory. The page at the beginning of th elist is removed from the list and from physical memroy when a free frame is needed; this is also the page that has been in physical memory for the longest time, so may very well be a frequently used page. \\
 
 An \bold{advantage} of FIFO algorithm is that it is easy to implement. \\ 
 
-\bold{Disadvantages} of FIFO algorithm: \\ 
+\bold{Disadvantages} of FIFO algorithm:
 \newlist
 \b The page which is memory the longest is replaced. This does not consider page usage and thus may throw out pages that are in use right now. 
 \b Suffers from "\bold{Belady's Anomaly}": the page fault rate might increase when there are more frames
@@ -1032,7 +1032,7 @@ The linked list can contain pages from many different processes, so the page rem
 
 \subsection{Second Chance Algorithm}
 
-Second chance is a FIFO variant that adds the concept of page usage (check reference bit). This examines pages in FIFO order starting from the beginning of the linked list but considers the reference bit, R< of the page at the front of the list:
+Second chance is a FIFO variant that adds the concept of page usage (check reference bit). This examines pages in FIFO order starting from the beginning of the linked list but considers the reference bit, R of the page at the front of the list:
 
 \newlist 
 \b If \bold{R=0}, the oldest page has not been used since it was added at the end of the list, so remove page (go to third bullet)
@@ -1044,7 +1044,7 @@ If no victim page is found on the first pass, the algorithm automatically revert
 
 \subsection{Least Recently Used (LRU) Algorithm}
 
-LRU is a good approximation of the optimal algorithm that is based on the obsevations that pages that have been heavily used int he last few instructions will probably be heavily used again soon. Additionally, we can infer that pages that have not been used for a long time will probably remain unused for a long time. When a page fault occurs, remove the page that has been unused for the longest time in the past. 
+LRU is a good approximation of the optimal algorithm that is based on the obsevations that pages that have been heavily used in the last few instructions will probably be heavily used again soon. Additionally, we can infer that pages that have not been used for a long time will probably remain unused for a long time. When a page fault occurs, remove the page that has been unused for the longest time in the past. 
 
 \subsubsection{Priority List Implementation of LRU}
 
@@ -1072,7 +1072,7 @@ This algorithm is a variant of NFU that forgets the past after a while. Uses an 
 \b Add R as the new leftmost bit to represent recent usage. This recent R bit is added as the most significant bit and, therefore, more weight is given to recent references
 \endlist 
 
-When a page fault occurs, we replcae the page with the lowest counter. Because this algorithm uses 8 bit integers, it only remembers what has happened within the last 8 clock ticks (anything older than that would be shifted to zero). If two pages have a value of 0 then we know they have not been used for $n$ clock ticks, but we do not know which of the two was used more recently. 
+When a page fault occurs, we replace the page with the lowest counter. Because this algorithm uses 8 bit integers, it only remembers what has happened within the last 8 clock ticks (anything older than that would be shifted to zero). If two pages have a value of 0 then we know they have not been used for $n$ clock ticks, but we do not know which of the two was used more recently. 
 
 \subsection{When to Move Pages into Memory}
 
@@ -1084,7 +1084,7 @@ There are many options of how to decide when to move pages into memory. Here are
 
 \subsubsection{Working Set Pages}
 
-The \bold{working set} is the set of pages that a process is currrently using. This sat may change over time in the regard that there will be different pages and that there will be a different total size due to the pages themselves changing. The working set of pages are those used by the $k$ most recent memory references. $w(k,t)$ is the size of the working set at time $t$. \\ 
+The \bold{working set} is the set of pages that a process is currrently using. This set may change over time in the regard that there will be different pages and that there will be a different total size due to the pages themselves changing. The working set of pages are those used by the $k$ most recent memory references. $w(k,t)$ is the size of the working set at time $t$. \\ 
 
 If the entire working set is in physical memory, there are no page faults. If there is insufficient physical memory for the working set, \bold{thrashing} where a process busies itself copying pages in and out of memory. The goal is to keep the working set in physical memory to minimize the number of page faults. 
 
