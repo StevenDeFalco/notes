@@ -1153,4 +1153,94 @@ To prevent thashing, adopt a local allocation policy (wastes memroy), do not sch
 
 Measure the page fault rate of process and if its too low then take pages from that proces and if too high, then allocate additional frames to the process. If many processes have high page fault frequency, swap out one or more of these processes (the process to swap out is determined by the scheduling algorithm). This may use process priority to affect the range of acceptable page fault frequencies. 
 
+\newpage 
+\section{File Systems}
+
+File systems are used for long term information storage, i.e.
+
+\newlist 
+\b It must be possible to store a very large amount of information
+\b Information must survive termination of a process using it
+\b Multiple processes must be able to access information concurrently
+\endlist 
+
+A \bold{file} is ab abstraction that is a logical unit of information created by processes managed by the operating system. The \bold{file system} is the subssytem that deals with files (part of the kernel). In UNIX, extensions are just conventions that sometimes determine how a file should be opened, but are mostly information for the user: the kernl does not care. \\ 
+
+To read a byte using \bold{sequential access}, all previous bytes must be read first. To read a byte using \bold{random access}, you can read any byte at any time. \\ 
+
+\bold{Directories} are persistent data structures for organizing and maintaining information about files (they are also files themselves). The \bold{file system} consists of the kernel's file system subsystem organized into layers and teh file system data is stored in storage. 
+
+\subsection{Disks}
+
+A \bold{disk} can be divided up into one or more partitions each with an independent file system. The \bold{master boot record (MBR)} is a 0.5 KB partition that looks at the partition table and decides which to use. The \bold{partition boot record} finds the boot loader for the kernel: there is a PBR in each partition. To boot...
+
+\newlist 
+\b The computer's BIOS runs first, finds boot storage device, and loads the MBR
+\b MBR contains partition table and boot code that finds and loads PBR
+\b Boot block = PBR = boot code to find kernel loader inside the file system of the partition (which itself then finds the kernel) 
+\b Superblock stores key parameters about the file system
+\endlist 
+
+\subsection{Allocation Methods}
+
+A \bold{disk block} is the minimal unit of allocation. Physical addresses are some kind of tuple that identifies a single block on a disk. The kernel drive translates physical addresses to block addresses. The logical file address is relative to the beginning of the file and is measured in bytes. 
+
+\subsubsection{Contiguous Allocation}
+
+In contiguous allocation, each file occupies a set of contiguous disk blocks. Entire blocks are used independent from the file size (i.e. file size is not a consideration). \\ 
+
+\bold{Pros} of contiguous allocation:
+
+\newlist 
+\b \bold{Simple}: only need to maintain starting location and length
+\b \bold{Performance excellent}: the entire file system can be read in a single operation
+\endlist 
+
+\bold{Pros} of contiguous allocation:
+
+\newlist 
+\b \bold{Wasteful of space}: external fragmentation, may require compaction
+\b \bold{Files cannot grow}: need to know the final size upfront
+\endlist 
+
+\subsubsection{Linked List Allocation}
+
+In linked list allocation, each file is a linked list of disk blocks. THe first bytes of the block contain a pointer to the next block. Blocks may be scattered anywhere on the disk. \\
+
+\bold{Pros} of linked list allocation:
+
+\newlist 
+\b \bold{Simple}: only need starting address
+\b \bold{Free-space management system}: No waste of space
+\endlist
+
+\bold{Cons} of linked list allocation: \bold{No efficient random access}: must go from block to block to find the data
+
+\subsubsection{Linked List Allocation with Table}
+
+This implementation is a variant of linked list allocation that uses a \bold{file-allocation table (FAT)}. We keep the pointer in a separate table rather than as part of data blocks. In the table, each entry corresponds to the disk block number and contains a pointer to the next block. The table is on disk but copied into the memory for speed. \\ 
+
+\bold{Pros}: Faster raandom access
+
+\bold{Cons}: Entire table must be in memory (huge problem for very large disks)
+
+\subsubsection{Indexed Allocation}
+
+In indexed allocation, we associate a block-sized data structure called index-node (i-node) to each file which lists the attributes and lists the disk addresses of the file's blocks. The last address(es) is for another blcok of addresses. \\
+
+\bold{Pros} of indexed allocation:
+
+\newlist 
+\b efficient random access
+\b dynamic access withotu external fragmentation
+\b lower overhead than FAT
+\endlist
+
+\bold{Con} of indexed allocation is that it can be hard to support large files (that do not fit the i-node) \\ 
+
+An i-node can contain a pointer to direct block (data blocks), single indirect, double indirect, triple indirect block, etc... \\ 
+
+\bold{Indirection} allows files to grow and be incredibly large. Indirection refers to when i-node points to indirection blocks which can point to other indirection blocks or data blocks. 
+
+
 \end{document}
