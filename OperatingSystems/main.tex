@@ -1242,5 +1242,221 @@ An i-node can contain a pointer to direct block (data blocks), single indirect, 
 
 \bold{Indirection} allows files to grow and be incredibly large. Indirection refers to when i-node points to indirection blocks which can point to other indirection blocks or data blocks. 
 
+\subsection{Implementation of Directories}
+
+To implement directories we first start by mapping the file name to some attributes and data. Directories are stored as special files: the file contents are the directory entries. \bold{Directory blocks} include on entry for ecah file within that directory; directories with many files may span multiple blocks. Every file and directory is represented by an \bold{i-node} (index node). This index node contains two kinds of information:
+
+\newlist 
+\b Metadata describing the file or directory's owner, access rights, etc...
+\b Location of the file or directory's data blocks on disk
+\endlist 
+
+For a directory, the data blocks simply store the directory's file entries: file name + corresponding i-node number. The beginning part of the file system contains all the inodes. \\ 
+
+Because it can be convenient for a shared file to appear in different directories, the directory system is implemented as a \bold{directed acyclic graph}. We can thus create multiple names for the same inode in the same directory or even in different directories. All the names must be on the file system since each file system has its own inode. In UNIX and Windows NTFS this is called a \bold{"hard link"}, which refers to the specific location of physical data. Use the Linux commnad \code{ln <source> <destination>} to create a link. \\ 
+
+\subsubsection{Symbolic Link}
+
+A \bold{symbolic link} is a special kind of file, the contents of which indicate the location of another file. These files have a special status that is indicated by the file attribute "sym link" bit being set. During name interpretation, symbolic link is read nd used to find the read file. You can use the Linux commmand \code{ln -s <source> <destination>} to create a symbolic link. To read the contents of a symbolic link file itself, you can use the \code{readlink} command. Only the original file actually links to the i-node; symbolic links only link to path names, not i-nodes. When the owner removes the real file, the link now points to a non-existent path name. \\ 
+
+\bold{Disadvantage}: extra overhead to parse symbolic links
+
+\bold{Advantage}: can link across file systems. 
+
+\subsection{Virtual File System}
+
+Many different file systems are in use even onthe same computer and under the same operating system. From the user's point of view, there is a single file-system hierarchy which encompasses multiple (incompatible) file systems. The UNIX kernel uses a \bold{virtual system layer} (VFS) which integrates multiple file systems into a single structure and abstracts over the details of each file system. All system calls related to file are directed to the VFS layer using standard POSIX calls. The lower VFS interface calls into the file system code. Internally, the VFS is object oriented and contains a superblock, v-node, and directory. 
+
+\newpage
+\section{Input/Output}
+
+The operating system...
+
+\newlist 
+\b \bold{Controls} all the computer's I/O devices
+\newlist 
+\b Issues commands to the devices
+\b Catches and manages interrupts
+\b Handles errors
+\endlist 
+\b \bold{Provides an interface} between the devices and the user-space software that is simple, easy to use, and potentiall the same for all devices
+\endlist 
+
+One type of device that may perform I/O with the system are \bold{block devices} which store informatin in fixed-size blocks. In block devics, each block has its won address and transfers are in terms of entire blocks. 
+
+Another type is a \bold{character device} which delivers or accepts a stream of characters without any block structure. These are not strictly addressable and do not have any \emph{seek} operations. 
+
+\subsection{I/O Hardware}
+
+A \bold{port} is a connection point for a device. There a \bold{buses} such as {peripheral buses} such as PCI and PCIe and \bold{expansion buses} which connect relatively slow devices. There will be a \bold{controller (host adapter)} which operates the port, bus and devices. Sometimes this controller will be integrated on the motherboard while others times it may be on a separate circuit board. The controller contains the processor, microcode, private memory, bus controller, etc... \bold{Buses} are used to handle traffic between I/O devices and the processor. \bold{PCI/PCIe} connects with speed graphics, networking, etc and connects to low speed buses. \\ 
+
+Each device has both a mechanical and electronic component. The \bold{mechanical component} (the device itself) will have its own electronic controller too, but this is invisible to the kernel. The \bold{electronic component} (chip on the motherboard) consists of the controller (host adapter) which may be able to handle multiple or only a single device at once. The controller's tasks are to convert bit streams to bytes, perform error correction when necessary, and move data to/from host memory. 
+
+\subsection{Communication Mechanisms Between CPU and I/O Devices}
+
+Communication between the CPU and I/O devices can happen through registers or a buffer. The kernel device driver reads/writes to \bold{registers} for configuration/initialization, reading/writing data, and to check the status of a device. The kernel device drive reads/writes to \bold{buffers} to move data. 
+
+\subsubsection{Register Based I/O}
+
+Each controller register has an I/O port number. There are special instruction to access the I/O port space: CPU reads in from device I/O port to CPU registers (\code{IN REG, PORT}) and the CPU writes to device I/O port from CPU register (\code{OUT PORT, REG}). These instructions are priveleged (kernel-use only) and must be written in assembly. There are separate I/O port space and memory space. 
+
+\subsubsection{Memory Mapped I/O}
+
+All controller registers and buffers are mapped into the normal RAM address space. Each controller register is assigned a unique memory address: there is not actual RAM memory for that address. Such addresses may be at the top of the physical address space. \\ 
+
+\bold{Advantages} of memory mapped I/O:
+
+\newlist 
+\b Software can read/write to I/O deivces as to any other memory location. All normal load/store memory instructions apply to I/O devices as well. Read/write easy to program in C using a normal pointer. 
+\b Protection of I/O device registers and buffers is the same as memory protection. Can be accessed from kernel mode and user mode (if you have the right permissions). 
+\endlist 
+
+\bold{Advantages} of memory mapped I/O:
+
+\newlist
+\b Need to disable cachine to memory-mapped I/O
+\b For one address, RAM controller and I/O devices will examine the memory reference. 
+\endlist
+
+\subsubsection{Hybrid I/O Implementation}
+
+A \bold{hybrid I/O implementation} uses both I/O ports and memory-mapped I/O. To \bold{send data to I/O device}, the CPU wants to read a word either from memory or I/O port:
+
+\begin{enumerate}
+    \item Puts the address it needs on the bus address line
+    \item Asserts a read signla on a bus control line
+    \item A second signal line to tell I/O space or memory space
+\end{enumerate}
+
+\newlist 
+\b If it is memory space, memory responds to request
+\b If it is I/O space, I/O device repsonds to the request
+\b If there is only memory space (no I/O ports)
+\newlist 
+\b RAM controller and every I/O device compares the address lines to the range of addresses that it services
+\b If the addresss falls in its range, it responds to the request
+\b Since no address is ever assigned to both memory and I/O device, there is no ambiguity and no conflict
+\endlist 
+\endlist 
+
+The CPU can request data from an I/O controller on byte/word at a time; this wastes the CPU's time for big transfers. In \bold{offloaded communication}, the CPU can offload data transfers and do something else in the meantime. 
+
+\subsubsection{Direct Memory Access (DMA)}
+
+The \bold{direct memory access} (DMA) controller transfers data for the CPU from/to the I/O devices and between I/O devices. This implementation requires a DMA controller on the device host controller or on the motherboard. A \bold{DMA controller} contains registers to be read/written by the kernel include the memory address register, bute counter register, and control registers to indicate the direction of the transfer and the transfer unit. The CPU commands the DMA controller by writing to control registers of DMA device. DMA is no faster than CPU but frees the CPU from having to wait for everything to finish and thus is used to take care of all big memory transfers. To do \bold{multiple data transfers} at once (multiple channels), we need multiple sets of registers (one for each transfer channel). 
+
+\paragraph{Data Transfer Bus Mode}
+
+In \bold{word-at-a-time} mode, the DMA controller requests for tansfer of one word. If the CPU wants the bus, it has to wait: this is called \bold{cycle stealing}. \\ 
+
+In \bold{block} mode, the DMA controller acquires the bus, issues a series of transfers, and releases the bus: this is also called \bold{burst} mode. An advantage to block mode is that it takes less time for acquiring the bus. A disadvantage of block mode is that it can block the CPU and other devices for a long time if there is a long burst. \\ 
+
+In \bold{fly-by} mode, the DMA controller demands the device controller to transfer data directly to the destination. \\
+
+In \bold{flow-through} mode, data transferred passes through the DMA controller. The DMA controller first reads data into an ainternal buffer and then writes it to the destination. This scheme requires an extra bus cycle per word transferred, but is more flexible because it can perform both device-to-device and memory-to-memory copies. \\
+
+
+\paragraph{Interrupts}
+
+DMA controllers are able to read and write \bold{directly from/to memory} and/or I/O devices with not kernel intervention in the meantime. DMA hardware enables data transfer to be accomplished without using the CPU except for configuration. Interrupts are sent to the interrupt controller from the device; the controller issues the interrupt to the CPU and the CPU acknowledges the interruipt. \\ 
+
+There are type types of interrupts: external interrupt and internal interrupts (referring to whether the interrupt comes from within our outside of the CPU). \bold{Processing} any type of \bold{interrupt} is almost identical: 
+
+\begin{enumerate}
+    \item Kernel (with help from CPU) is responsible to save the state of the interrupted process
+    \item Kernel processes the interrupt
+    \item The interrupted process is resumed after the interrupt is handled by the kernel. 
+\end{enumerate}
+
+\bold{External interrupts} deal with interactions with the I/O devices. \\
+
+\bold{Internal interrupts} (traps, exceptions) occur entirely within the CPU. They are used to handle exceptional conditions that occur during the execution of programs such as divide by zero. \\ 
+
+\paragraph{Processing Interrupts}
+
+The CPU checks for interrupts after executing every instruction. In the case that there is an interrupt, the hardware looks up the \bold{interrupt vectory} (configured by the kernel at boot time) to fetch a new program counter. The new program counters points at the code of the right kernel \bold{interrupt handler} which is then executed. 
+
+\subsection{Goals of I/O software}
+
+Some of the goals of I/O software include the following:
+
+\newlist 
+\b \bold{device independence}: programs can easily access any I/O device without having to specify the device in advance.
+\b \bold{Uniform naming}: name of a file or device should be a string independently of device
+\b \bold{Error handling}: errors should be handled as close to the hardware as possible
+\b \bold{Synchronous} (blocking) vs. \bold{asynchronous} (interrupt-driven)
+\b \bold{Buffering} involves considerable copying which may negatively impact I/O performance
+\b \bold{Shareable} vs. \bold{Dedicated devies}: Some I/O devices, like disks, can be used by many users at the same time while other devices, such as printers, have to be dedicated to a single user.
+\endlist 
+
+\subsubsection{Programmed I/O}
+
+In programmed I/O, the CPU does all the work. The CPU writes/reads a byte/word at a time from/to main memory to/from the device. The CPU makes a request, then waits for the device to become read. Buses are only byte/word wide, so the last few steps are repeated for large transfers. \\ 
+
+CPU time is wasted; if the device is slow, the CPU may wait a long time. The CPU continuously polls the device to see if it is ready to accept another byte/word: \bold{polling} or \bold{busy waiting}. 
+
+\begin{lstlisting}[language=C, caption=Writing a string to the printer using programmed I/O]
+copy_from_user(buffer,p,count);             /* p is the kernel buffer */
+for (i=0;i>count;i++) {                     /* loop on every character */
+    while(*printer_status_reg != READY);    /* loop until ready */
+    *print_data_register = p[i];            /* output one character */
+}
+return_to_user();
+\end{lstlisting}
+
+\bold{Pros}: simple to implement/understand
+
+\bold{Cons}: CPU cannot be used for anything else until I/O ends, polling is inefficient
+
+\subsubsection{Interrupt-driven I/O}
+
+In interrupt-driven I/O, the CPU does the work but interrupts tell when to do that work. We use interrupts because I/O devices are slower than memory or CPU and there is uncertaintly of when the device will be ready. The OS needs to know when the I/O device has completed an operation and when the I/O operation has encountered an error. \bold{Instead of waiting}, the CPU continues with other computations. The device, then, interrupts the processor when operatin completes or there is an error. 
+
+\begin{lstlisting}[language=C, caption=Writing a string to the printer using interrupt driven I/O]
+/* Executes at the time the print system call is made */
+copy_from_user(buffer,p,count);
+enable_interrupts();
+while(*printer_status_reg != READY);
+*printer_data_register = p[0];
+scheduler();
+
+/* Interrupt service procedure for the printer */
+if (count == 0) {
+    unblock_user();
+} else {
+    *printer_data_register = p[i];
+    count = count - 1;
+    i = i + 1;
+}
+acknowledge_interrupt();
+return_from_interrupt();
+\end{lstlisting}
+
+\bold{Pros}: Better than programmed I/O because CPU can execute another process in the meantime. Also avoid inefficient polling
+
+\bold{Cons}: An interrupt occurs on every character. Interrupts take time, so it wastes CPU cycles. 
+
+\subsubsection{I/O using DMA}
+
+In I/O using DMA, the DMA controller does all the work, it uses interrupts for notification, but CPU needs to program the DMA controller. The DMA controller reads/writes directly from/to memory. It has access to the system bus independent of the CPU.
+
+\begin{enumerate}
+    \item The CPU sets up the operatin
+    \item DMAC does the transfer
+    \item When the transfer is complete, the DMAC notifies the CPU with a single interrupt
+\end{enumerate}
+
+\begin{lstlisting}[language=C, caption=Printing a string using DMA]
+/* Syscall code. Executed when the print system call is made */
+copy_from_user(buffer,p,count);
+set_up_DMA_controller();
+scheduler();
+
+/* Interrupt handler code */
+acknowledge_interrupt();
+unblock_user();
+return_from_interrupt();
+\end{lstlisting}
+
 
 \end{document}
