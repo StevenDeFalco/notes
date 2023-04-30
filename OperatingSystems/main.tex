@@ -1164,11 +1164,11 @@ File systems are used for long term information storage, i.e.
 \b Multiple processes must be able to access information concurrently
 \endlist 
 
-A \bold{file} is ab abstraction that is a logical unit of information created by processes managed by the operating system. The \bold{file system} is the subssytem that deals with files (part of the kernel). In UNIX, extensions are just conventions that sometimes determine how a file should be opened, but are mostly information for the user: the kernl does not care. \\ 
+A \bold{file} is an abstraction that is a logical unit of information created by processes managed by the operating system. The \bold{file system} is the subssytem that deals with files (part of the kernel). In UNIX, extensions are just conventions that sometimes determine how a file should be opened, but are mostly information for the user: the kernel does not care. \\ 
 
 To read a byte using \bold{sequential access}, all previous bytes must be read first. To read a byte using \bold{random access}, you can read any byte at any time. \\ 
 
-\bold{Directories} are persistent data structures for organizing and maintaining information about files (they are also files themselves). The \bold{file system} consists of the kernel's file system subsystem organized into layers and teh file system data is stored in storage. 
+\bold{Directories} are persistent data structures for organizing and maintaining information about files (they are also files themselves). The \bold{file system} consists of the kernel's file system subsystem organized into layers and the file system data is stored in storage. 
 
 \subsection{Disks}
 
@@ -1196,7 +1196,7 @@ In contiguous allocation, each file occupies a set of contiguous disk blocks. En
 \b \bold{Performance excellent}: the entire file system can be read in a single operation
 \endlist 
 
-\bold{Pros} of contiguous allocation:
+\bold{Cons} of contiguous allocation:
 
 \newlist 
 \b \bold{Wasteful of space}: external fragmentation, may require compaction
@@ -1205,7 +1205,7 @@ In contiguous allocation, each file occupies a set of contiguous disk blocks. En
 
 \subsubsection{Linked List Allocation}
 
-In linked list allocation, each file is a linked list of disk blocks. THe first bytes of the block contain a pointer to the next block. Blocks may be scattered anywhere on the disk. \\
+In linked list allocation, each file is a linked list of disk blocks. The first bytes of the block contain a pointer to the next block. Blocks may be scattered anywhere on the disk. \\
 
 \bold{Pros} of linked list allocation:
 
@@ -1220,19 +1220,19 @@ In linked list allocation, each file is a linked list of disk blocks. THe first 
 
 This implementation is a variant of linked list allocation that uses a \bold{file-allocation table (FAT)}. We keep the pointer in a separate table rather than as part of data blocks. In the table, each entry corresponds to the disk block number and contains a pointer to the next block. The table is on disk but copied into the memory for speed. \\ 
 
-\bold{Pros}: Faster raandom access
+\bold{Pros}: Faster random access
 
 \bold{Cons}: Entire table must be in memory (huge problem for very large disks)
 
 \subsubsection{Indexed Allocation}
 
-In indexed allocation, we associate a block-sized data structure called index-node (i-node) to each file which lists the attributes and lists the disk addresses of the file's blocks. The last address(es) is for another blcok of addresses. \\
+In indexed allocation, we associate a block-sized data structure called index-node (i-node) to each file which lists the attributes and lists the disk addresses of the file's blocks. The last address(es) is for another block of addresses. \\
 
 \bold{Pros} of indexed allocation:
 
 \newlist 
 \b efficient random access
-\b dynamic access withotu external fragmentation
+\b dynamic access without external fragmentation
 \b lower overhead than FAT
 \endlist
 
@@ -1244,7 +1244,7 @@ An i-node can contain a pointer to direct block (data blocks), single indirect, 
 
 \subsection{Implementation of Directories}
 
-To implement directories we first start by mapping the file name to some attributes and data. Directories are stored as special files: the file contents are the directory entries. \bold{Directory blocks} include on entry for ecah file within that directory; directories with many files may span multiple blocks. Every file and directory is represented by an \bold{i-node} (index node). This index node contains two kinds of information:
+To implement directories we first start by mapping the file name to some attributes and data. Directories are stored as special files: the file contents are the directory entries. \bold{Directory blocks} include an entry for each file within that directory; directories with many files may span multiple blocks. Every file and directory is represented by an \bold{i-node} (index node). This index node contains two kinds of information:
 
 \newlist 
 \b Metadata describing the file or directory's owner, access rights, etc...
@@ -1257,7 +1257,7 @@ Because it can be convenient for a shared file to appear in different directorie
 
 \subsubsection{Symbolic Link}
 
-A \bold{symbolic link} is a special kind of file, the contents of which indicate the location of another file. These files have a special status that is indicated by the file attribute "sym link" bit being set. During name interpretation, symbolic link is read nd used to find the read file. You can use the Linux commmand \code{ln -s <source> <destination>} to create a symbolic link. To read the contents of a symbolic link file itself, you can use the \code{readlink} command. Only the original file actually links to the i-node; symbolic links only link to path names, not i-nodes. When the owner removes the real file, the link now points to a non-existent path name. \\ 
+A \bold{symbolic link} is a special kind of file, the contents of which indicate the location of another file. These files have a special status that is indicated by the file attribute "sym link" bit being set. During name interpretation, symbolic link is read and used to find the read file. You can use the Linux commmand \code{ln -s <source> <destination>} to create a symbolic link. To read the contents of a symbolic link file itself, you can use the \code{readlink} command. Only the original file actually links to the i-node; symbolic links only link to path names, not i-nodes. When the owner removes the real file, the link now points to a non-existent path name. \\ 
 
 \bold{Disadvantage}: extra overhead to parse symbolic links
 
@@ -1265,7 +1265,7 @@ A \bold{symbolic link} is a special kind of file, the contents of which indicate
 
 \subsection{Virtual File System}
 
-Many different file systems are in use even onthe same computer and under the same operating system. From the user's point of view, there is a single file-system hierarchy which encompasses multiple (incompatible) file systems. The UNIX kernel uses a \bold{virtual system layer} (VFS) which integrates multiple file systems into a single structure and abstracts over the details of each file system. All system calls related to file are directed to the VFS layer using standard POSIX calls. The lower VFS interface calls into the file system code. Internally, the VFS is object oriented and contains a superblock, v-node, and directory. 
+Many different file systems are in use even on the same computer and under the same operating system. From the user's point of view, there is a single file-system hierarchy which encompasses multiple (incompatible) file systems. The UNIX kernel uses a \bold{virtual system layer} (VFS) which integrates multiple file systems into a single structure and abstracts over the details of each file system. All system calls related to file are directed to the VFS layer using standard POSIX calls. The lower VFS interface calls into the file system code. Internally, the VFS is object oriented and contains a superblock, v-node, and directory. 
 
 \newpage
 \section{Input/Output}
@@ -1282,13 +1282,13 @@ The operating system...
 \b \bold{Provides an interface} between the devices and the user-space software that is simple, easy to use, and potentiall the same for all devices
 \endlist 
 
-One type of device that may perform I/O with the system are \bold{block devices} which store informatin in fixed-size blocks. In block devics, each block has its won address and transfers are in terms of entire blocks. 
+One type of device that may perform I/O with the system are \bold{block devices} which store information in fixed-size blocks. In block devics, each block has its own address and transfers are in terms of entire blocks. \\
 
 Another type is a \bold{character device} which delivers or accepts a stream of characters without any block structure. These are not strictly addressable and do not have any \emph{seek} operations. 
 
 \subsection{I/O Hardware}
 
-A \bold{port} is a connection point for a device. There a \bold{buses} such as {peripheral buses} such as PCI and PCIe and \bold{expansion buses} which connect relatively slow devices. There will be a \bold{controller (host adapter)} which operates the port, bus and devices. Sometimes this controller will be integrated on the motherboard while others times it may be on a separate circuit board. The controller contains the processor, microcode, private memory, bus controller, etc... \bold{Buses} are used to handle traffic between I/O devices and the processor. \bold{PCI/PCIe} connects with speed graphics, networking, etc and connects to low speed buses. \\ 
+A \bold{port} is a connection point for a device. There are \bold{buses} such as {peripheral buses} such as PCI and PCIe and \bold{expansion buses} which connect relatively slow devices. There will be a \bold{controller (host adapter)} which operates the port, bus, and devices. Sometimes this controller will be integrated on the motherboard while others times it may be on a separate circuit board. The controller contains the processor, microcode, private memory, bus controller, etc... \bold{Buses} are used to handle traffic between I/O devices and the processor. \bold{PCI/PCIe} connects with speed graphics, networking, etc and connects to low speed buses. \\ 
 
 Each device has both a mechanical and electronic component. The \bold{mechanical component} (the device itself) will have its own electronic controller too, but this is invisible to the kernel. The \bold{electronic component} (chip on the motherboard) consists of the controller (host adapter) which may be able to handle multiple or only a single device at once. The controller's tasks are to convert bit streams to bytes, perform error correction when necessary, and move data to/from host memory. 
 
@@ -1311,10 +1311,10 @@ All controller registers and buffers are mapped into the normal RAM address spac
 \b Protection of I/O device registers and buffers is the same as memory protection. Can be accessed from kernel mode and user mode (if you have the right permissions). 
 \endlist 
 
-\bold{Advantages} of memory mapped I/O:
+\bold{Disadvantages} of memory mapped I/O:
 
 \newlist
-\b Need to disable cachine to memory-mapped I/O
+\b Need to disable caching to memory-mapped I/O
 \b For one address, RAM controller and I/O devices will examine the memory reference. 
 \endlist
 
@@ -1324,7 +1324,7 @@ A \bold{hybrid I/O implementation} uses both I/O ports and memory-mapped I/O. To
 
 \begin{enumerate}
     \item Puts the address it needs on the bus address line
-    \item Asserts a read signla on a bus control line
+    \item Asserts a read signal on a bus control line
     \item A second signal line to tell I/O space or memory space
 \end{enumerate}
 
@@ -1339,26 +1339,25 @@ A \bold{hybrid I/O implementation} uses both I/O ports and memory-mapped I/O. To
 \endlist 
 \endlist 
 
-The CPU can request data from an I/O controller on byte/word at a time; this wastes the CPU's time for big transfers. In \bold{offloaded communication}, the CPU can offload data transfers and do something else in the meantime. 
+The CPU can request data from an I/O controller one byte/word at a time; this wastes the CPU's time for big transfers. In \bold{offloaded communication}, the CPU can offload data transfers and do something else in the meantime. 
 
 \subsubsection{Direct Memory Access (DMA)}
 
-The \bold{direct memory access} (DMA) controller transfers data for the CPU from/to the I/O devices and between I/O devices. This implementation requires a DMA controller on the device host controller or on the motherboard. A \bold{DMA controller} contains registers to be read/written by the kernel include the memory address register, bute counter register, and control registers to indicate the direction of the transfer and the transfer unit. The CPU commands the DMA controller by writing to control registers of DMA device. DMA is no faster than CPU but frees the CPU from having to wait for everything to finish and thus is used to take care of all big memory transfers. To do \bold{multiple data transfers} at once (multiple channels), we need multiple sets of registers (one for each transfer channel). 
+The \bold{direct memory access} (DMA) controller transfers data for the CPU from/to the I/O devices and between I/O devices. This implementation requires a DMA controller on the device host controller or on the motherboard. A \bold{DMA controller} contains registers to be read/written by the kernel include the memory address register, byte counter register, and control registers to indicate the direction of the transfer and the transfer unit. The CPU commands the DMA controller by writing to control registers of DMA device. DMA is no faster than CPU but frees the CPU from having to wait for everything to finish and thus is used to take care of all big memory transfers. To do \bold{multiple data transfers} at once (multiple channels), we need multiple sets of registers (one for each transfer channel). 
 
 \paragraph{Data Transfer Bus Mode}
 
 In \bold{word-at-a-time} mode, the DMA controller requests for tansfer of one word. If the CPU wants the bus, it has to wait: this is called \bold{cycle stealing}. \\ 
 
-In \bold{block} mode, the DMA controller acquires the bus, issues a series of transfers, and releases the bus: this is also called \bold{burst} mode. An advantage to block mode is that it takes less time for acquiring the bus. A disadvantage of block mode is that it can block the CPU and other devices for a long time if there is a long burst. \\ 
+In \bold{block} mode, the DMA controller acquires the bus, issues a series of transfers, and releases the bus: this is also called \bold{burst} mode. An advantage of block mode is that it takes less time for acquiring the bus. A disadvantage of block mode is that it can block the CPU and other devices for a long time if there is a long burst. \\ 
 
 In \bold{fly-by} mode, the DMA controller demands the device controller to transfer data directly to the destination. \\
 
-In \bold{flow-through} mode, data transferred passes through the DMA controller. The DMA controller first reads data into an ainternal buffer and then writes it to the destination. This scheme requires an extra bus cycle per word transferred, but is more flexible because it can perform both device-to-device and memory-to-memory copies. \\
-
+In \bold{flow-through} mode, data transferred passes through the DMA controller. The DMA controller first reads data into an internal buffer and then writes it to the destination. This scheme requires an extra bus cycle per word transferred, but is more flexible because it can perform both device-to-device and memory-to-memory copies. \\
 
 \paragraph{Interrupts}
 
-DMA controllers are able to read and write \bold{directly from/to memory} and/or I/O devices with not kernel intervention in the meantime. DMA hardware enables data transfer to be accomplished without using the CPU except for configuration. Interrupts are sent to the interrupt controller from the device; the controller issues the interrupt to the CPU and the CPU acknowledges the interruipt. \\ 
+DMA controllers are able to read and write \bold{directly from/to memory} and/or I/O devices with no kernel intervention in the meantime. DMA hardware enables data transfer to be accomplished without using the CPU except for configuration. Interrupts are sent to the interrupt controller from the device; the controller issues the interrupt to the CPU and the CPU acknowledges the interrupt. \\ 
 
 There are type types of interrupts: external interrupt and internal interrupts (referring to whether the interrupt comes from within our outside of the CPU). \bold{Processing} any type of \bold{interrupt} is almost identical: 
 
@@ -1374,14 +1373,14 @@ There are type types of interrupts: external interrupt and internal interrupts (
 
 \paragraph{Processing Interrupts}
 
-The CPU checks for interrupts after executing every instruction. In the case that there is an interrupt, the hardware looks up the \bold{interrupt vectory} (configured by the kernel at boot time) to fetch a new program counter. The new program counters points at the code of the right kernel \bold{interrupt handler} which is then executed. 
+The CPU checks for interrupts after executing every instruction. In the case that there is an interrupt, the hardware looks up the \bold{interrupt vector} (configured by the kernel at boot time) to fetch a new program counter. The new program counters points at the code of the right kernel \bold{interrupt handler} which is then executed. 
 
 \subsection{Goals of I/O software}
 
 Some of the goals of I/O software include the following:
 
 \newlist 
-\b \bold{device independence}: programs can easily access any I/O device without having to specify the device in advance.
+\b \bold{Device independence}: programs can easily access any I/O device without having to specify the device in advance.
 \b \bold{Uniform naming}: name of a file or device should be a string independently of device
 \b \bold{Error handling}: errors should be handled as close to the hardware as possible
 \b \bold{Synchronous} (blocking) vs. \bold{asynchronous} (interrupt-driven)
@@ -1410,7 +1409,7 @@ return_to_user();
 
 \subsubsection{Interrupt-driven I/O}
 
-In interrupt-driven I/O, the CPU does the work but interrupts tell when to do that work. We use interrupts because I/O devices are slower than memory or CPU and there is uncertaintly of when the device will be ready. The OS needs to know when the I/O device has completed an operation and when the I/O operation has encountered an error. \bold{Instead of waiting}, the CPU continues with other computations. The device, then, interrupts the processor when operatin completes or there is an error. 
+In interrupt-driven I/O, the CPU does the work but interrupts tell when to do that work. We use interrupts because I/O devices are slower than memory or CPU and there is uncertaintly of when the device will be ready. The OS needs to know when the I/O device has completed an operation and when the I/O operation has encountered an error. \bold{Instead of waiting}, the CPU continues with other computations. The device, then, interrupts the processor when operation completes or there is an error. 
 
 \begin{lstlisting}[language=C, caption=Writing a string to the printer using interrupt driven I/O]
 /* Executes at the time the print system call is made */
@@ -1441,7 +1440,7 @@ return_from_interrupt();
 In I/O using DMA, the DMA controller does all the work, it uses interrupts for notification, but CPU needs to program the DMA controller. The DMA controller reads/writes directly from/to memory. It has access to the system bus independent of the CPU.
 
 \begin{enumerate}
-    \item The CPU sets up the operatin
+    \item The CPU sets up the operation
     \item DMAC does the transfer
     \item When the transfer is complete, the DMAC notifies the CPU with a single interrupt
 \end{enumerate}
