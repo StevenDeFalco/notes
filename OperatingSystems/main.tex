@@ -1457,5 +1457,105 @@ unblock_user();
 return_from_interrupt();
 \end{lstlisting}
 
+\section{Disks}
+
+There are different types of persistent storage technologies. \bold{Magnetic disks} such as HDD and floppy disks have moving parts and on physical media, the reads and writes are equally fast. \bold{Solid-state drives} such as SSD and USB thumb drives do not have any moving parts (fully electronic) and on physical media, reads are faster than writes. \bold{Optical disks} such as CDs, DVDs, and blu-ray are mechanical (have moving parts) and are considered write-once, read multiple times implying that if re-writing, then writing is way slower than reading. There are, however, some \bold{problems} with using a single storage device such as any of the ones previously mentioned:
+
+\newlist 
+\b \bold{Slow}: disk is slower than other components of a computer
+\b \bold{Modest capacity} compared to organizational needs
+\ \bold{Unreliable}: a disk may fail totally (where it does not read/write data) or may have bad sectors which would imply that you cannot read what you have written. 
+\endlist
+
+\subsection{RAID}
+
+\bold{RAID} stands for \bold{redundant array of inexpensive disks} which consists of building a storage system that has an array of drives where data is distributed over multiple drives, data can be read in parallel, and data may be replicated. This system will appear like a single disk and can be applied to any storage technology. \\ 
+
+To implement a RAID system, one may use a \bold{RAID controller car} (hardware). In this implementation, each drive is connected to the RAID controller and the RAID controller can issue read in parallel among all disks. RAID can also be implemented at the operating system level through \bold{software}. This impementation is cheaper but slower, and typically fewer RAID levels/configurations are supported in OS than in specialized hardware. \\ 
+
+RAID is a layer of hardware/software that does more than just store the data. The following are some of the differnt RAID levels:
+
+\subsubsection{RAID 0 (Striping)}
+
+In RAID 0, data is striped (split) across disks. The total storage space across all disks is divided into \bold{strips} where every strip includes $k$ sectors. Strips are mapped round-robin to consecutive disks, and multipel steps can be fetched in parallel. There is \bold{no redundancy} in RAID 0. \\ 
+
+RAID 0 is \bold{fast} because it can do reads and writes in parallel. \\ 
+If one disk fails then all the files will be messed up because every file will have a piece of it missing). For smaller requests (small files), there are no performance gains; if software asks for one sector at at time, result is correct, but there is no parallelism. RAID 0 has \bold{worse reliability} than a single disk: adding more disks means that failures happen more often. To increase reliability, we can replicate data across multiple disks...
+
+\subsubsection{RAID 1 (Mirroring)}
+
+RAID 1 achieves redundancy by \bold{duplicating} all the data. Every disk has a mirror disk, storing the same data. A \bold{read} can be serviced by either of the two disks which contains the requested data (up to twice as a fast as RAID 0). A \bold{write} must be executed on both disks but can be done in parallel (same speed as RAID 0). \\ 
+
+RAID 1 requires double the amount of disks which can be \bold{expensive}. When installing a new drive to replace a broken once, have to copy an entire disk which will take a non-trivial amount of time. 
+
+\subsubsection{RAID 2 (bit-level striping with hamming-code}
+
+RAID 2 stripes (splits) each word/byte into bits, one bit per disk. It also adds \bold{hamming code bits}, one bit per extra disk. The hamming code is used to reconstruct the original data. The all drives \bold{write in sync} the same word/byte. \\ 
+
+RAID 2 is too complicated to do in practice. Additionally, all drives need to be rotationally in sync. RAID 2 requires very performant disk controllers: many disks for a good ratio of data to hamming bits. 
+
+
+\subsubsection{RAID 3}
+
+RAID 3 is the same as RAID 2 but uses \bold{parity} bits instead of hamming codes. Given $N$ bits {b1,b2,\dots,bN}, the parity bit P is the bit {0,1} that yields an even number of "1" bits in the set {b1,b2,\dots,bN,P}. If any bit in {b1,b2,\dots,bN} is lost, it can cause the remaining P bits to recover it. \\ 
+
+To implement RAID 3, we need to add an extra disk to store the parity bits. This handles one failing drive only. Additionally, RAID 3 is complex to implement because all drives need to be rotationally in sync. 
+
+\subsubsection{RAID 4}
+
+RAID 4 uses \bold{large strips} with a \bold{parity strip} (XOR). This is similar to RAID 3's parity bit but it is done at block level rather than bit level. If a drive crashes, lost bytes can be recomputed with parity. You must recompute parity whenever you change something on the disks. \\ 
+
+RAID 4 can handle only failing drive. Additionally, RAID 4 performs poorly for small updates. If one sector is changed, you need to read all drives in order to recalculate the parity which must then be rewritten on parity drive. This implementation results in a \bold{heavy load} on the parity drive. 
+
+\subsubsection{RAID 5}
+
+RAID 5 uses interleaved data and parity blocks. You rotate the assignment of data blocks and parity blocks among the drives. This avoids the bottleneck of a single disk for a parity disk and also allows multiple reads/writes to occur in parallel. \\ 
+
+RAID 5 handles one failing drive only. Reconstructing the contents of a failed drive is expensive. 
+
+\subsubsection{RAID 6}
+
+RAID 6 uses an additional parity block. The data is striped across the disks with \bold{two parity blocks instead of one}: two different parities. In this implementation, writes are a bit more expensive because of the parity calculations; reads incur no performance penalty. RAID 6 protects against two simultaneous disk failures and is thus good for very large RAID arrays. \\ 
+
+\subsection{Layering RAID levels}
+
+Note that layering one RAID level on top of the other provides both performance and redundancy...
+
+\subsubsection{RAID 0 + 1}
+
+Striped disks (RAID 0) are then mirrored (RAID 1). \\ 
+
+After one disk fails, one stripe is down, and the whole system will fail if any other disks fails on the other side of the mirror. 
+
+\subsubsection{RAID 1 + 0}
+
+Mirrored disk pairs (RAID 1) are then striped (RAID 0). \\ 
+
+After one disk fails, no pair is down, and the whole system will fail only if another disk fails in the same pair. This layering is more reliable than RAID 0 + 1. 
+
+\subsubsection{RAID 5 + 0}
+
+Stripes with distributed parity (RAID 5) and then striped (RAID 0). \\ 
+
+This layering increases reliability. RAID 5 can handle a maximum of one failed drive before data loss, but stripnig increases that to two failed drives. 
+
+\subsubsection{RAID 6 + 0}
+
+Stripes with double distributed parity (RAID 6) and then striped (RAID 0). \\ 
+
+RAID 6 can handle a maxmimum of two failed drives before data loss, but striping increases that to four failed drives. 
+
+\subsection{Error Handling}
+
+Storage devices must be capable of dealing with \bold{errors}. \bold{Magnetic disks} are difficult to make perfect and without defects. There are manufacturing defects which introduce bad sectors, what you read may not be what your wrote, and there may be too few bits in which case you can use error correcting codes (if implemented). \bold{Solid-state drives} are the same as magnetic disks but the unit is the block, not a sector. Errors in SSDs can be derived from bad block management in the SSD firmware. \\ 
+
+To deal with bad sectors: \bold{sector errors}. 
+
+\newlist 
+\b \bold{Internal hardware controller}. Before the disk is shipped it is tested. For each bad error, use spare sectors to substitute in. If the number attempting to be accessed corresponds to a bad sector, then the controller will direct the request to the designated spare sector that replaces the erroneous one. 
+\b \bold{Operating system}. Do the same as with the hardware controller except in software. Acquire a list of bad sectors; nbuild remapping tables; use the remapping tables when accessing the disk. 
+\endlist 
+
+ECC (error correcting code) protects against small sector errors while RAID protects against whole-disk failures. However, neither of these are a substitute for a backup system. 
 
 \end{document}
