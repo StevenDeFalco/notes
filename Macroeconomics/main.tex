@@ -10,12 +10,17 @@
 \usepackage{xcolor}   % to define custom colors
 \usepackage{titlesec} % to make custom section formatting 
 
+\newtheorem{example}{Example}[section]
 
 % Custom Commands...
 
 % \bold{} to bold the following text
 % usage: \bold ==> \bold{bolded text}
 \newcommand{\bold}[1]{\textbf{#1}}
+
+% \define{} to bold and italicize text 
+% usage: \define{<insert-definition>}
+\newcommand{\define}[1]{\textbf{\textit{#1}}}
 
 % \b to create a new list item
 % usage: \b this is a bullet in my list
@@ -90,13 +95,13 @@
 
 \subsection{Basic Definitions}
 
-\textbf{Scarcity} is a situation in which resources are limited and can be used in different ways, so we \emph{must sacrifice one thing for another}. \\ 
+\define{Scarcity} is a situation in which resources are limited and can be used in different ways, so we \emph{must sacrifice one thing for another}. \\ 
 
-\textbf{Labor} is the primary source for providing goods and services. \\
+\define{Labor} is the primary source for providing goods and services. \\
 
-\textbf{Opportunity cost} is what we give up when we make a choice or a decision. \\
+\define{Opportunity cost} is what we give up when we make a choice or a decision. \\
 
-\textbf{Economics} is the study of the choices made by people (\emph{individuals and societies}) who are faced with scarcity. The two major fields are microecnomics and macroeconomics. \emph{Microecnomics} studiees consumers and produces. \emph{Macroeconomics} studies the economy as a whole. \\ 
+\define{Economics} is the study of the choices made by people (\emph{individuals and societies}) who are faced with scarcity. The two major fields are microecnomics and macroeconomics. \emph{Microecnomics} studiees consumers and produces. \emph{Macroeconomics} studies the economy as a whole. \\ 
 
 \subsubsection{Economic questions a society is faced with...}
 
@@ -106,6 +111,51 @@
   \item Who consumes the goods and services produced?
 \end{enumerate}
 
+\subsection{Production Possibility Frontier (PPF)}
 
+The \define{PPF} is a graph that shows all possible combinations of goods and services that can be produced if all resources used efficiently. This is a limit that cannot be exceeded; it represents the best case scenario (in terms of efficiency). 
+
+\begin{example}
+Consider two goods: defense goods and non-defense goods. With limited resources only certain combinations can be produced; these include the following:
+  \begin{itemize}
+    \item[A] 200 units of defense goods and 0 units of non-defense goods
+    \item[B] 195 units of defense goods and 25 units of non-defense goods (opp. cost = 5)
+    \item[C] 188 units of defense goods and 50 units of non-defense goods (opp. cost = 7) 
+    \item[D] 175 units of defense goods and 75 units of non-defense goods (opp. cost = 13)
+    \item[E] 155 units of defense goods and 100 units of non-defense goods (opp. cost = 20)
+    \item[F] 125 units of defense goods and 125 units of non-defense goods (opp. cost = 30)
+    \item[G] 75 units of defense goods and 150 units of non-defense goods (opp.cost = 50)
+    \item[H] 0 units of defense goods and 160 units of non-defense goods (opp. cost = 75)
+  \end{itemize}
+\emph{Opportunity cost increases} as specialization in inputs to the labor must be given up. 
+\end{example}
+
+Graphically, the \define{PPF} represents the barrier between inefficient use of resources and unachievable levels of prdouction given the scenario. A coordinate under the PPF curve indicates under-utilization of resources A coordinate above the PPF is an impossible combination and, by definiton, unachievable. \\
+
+The PPF can be shifted (in the positive direction) if there is an \emph{increase in resurces} or an \emph{improvement in technology}; this is called \define{economic growth}. \define{International trade} can help a nation move beyond their maximum capabilities in terms of consumption (exceed their PPF). 
+
+\section{Demand and Supply Model}
+
+\define{Firms} produce and supply their output to the \define{consumers} who demand the product. 
+
+\subsection{Demand}
+
+The quantity (Q) \define{demanded} is the amount of a good or service that consumers are willing and able to buy. Willingness and ability are the primary determinants of demand. Price of a product is the main determinant of our willingness and ability to purchase a product. \\ 
+
+\bold{Determinants} of demand: 
+\begin{enumerate}
+  \item Price of the product (P) \\ 
+    \begin{itemize}
+      \item As the price of a product increases, the quantity of the product demanded decreases. \\ 
+      \item As the price of a product decreases, the quantity of the product demanded increases. \\ 
+      \item The \define{Law of Demand} is the negative relationship between price and quantity. 
+    \end{itemize}
+  \item Income (M)
+    \begin{itemize}
+      \item As income increases, the quantity of products demanded (typcially) increases. 
+      \item As income decreases, the quantity of products demanded decreases. 
+      \item For some products these relationships are the opposite. These products are considered \define{inferior goods}; such products are demanded more when income is lower due to the nature of the product (e.g. fast food or bus rides). 
+    \end{itemize}
+\end{enumerate}
 
 \end{document}
