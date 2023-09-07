@@ -9,7 +9,10 @@
 \usepackage{hyperref} % to get hot links in the table of contents
 \usepackage{xcolor}   % to define custom colors
 \usepackage{titlesec} % to make custom section formatting 
-\newtheorem{definition}{Definition}
+
+\newtheorem{example}{Example}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
 
 % Custom Commands...
 
@@ -91,7 +94,7 @@
 \subsection{Automata, Computability, and Complexity}
 
 The central question of \define{complexity theory} is \emph{what makes some problems computationally hard and others easy?}; the answer is unknown. Cryptography is unique in that is specifically requires computational problems that are hard, rather than easy. 
-In \define{complexirty theory}, the objective is to classify problems as easy ones and hard ones; whereas in \define{computability} theory, the classification of probelms is by those that are solvable and those that are not. 
+In \define{complexity theory}, the objective is to classify problems as easy ones and hard ones; whereas in \define{computability} theory, the classification of probelms is by those that are solvable and those that are not. 
 
 \define{Automata theory} deals with the definitions and properties of mathematical models of computations. 
 
@@ -224,7 +227,7 @@ Finite automata are good models for computers with an extremely limited amount o
 
 Finite automata can be represented by a \define{state diagram}. The \define{start state} is indicated by the arrow point at it from nowhere. The \define{accept state} is the one with a double circle. The arrows going from one state to another are called \define{transitions}. When this such automation receives an input, it processes that and produces an output; the output is either \define{accept} or \define{reject}. 
 
-\subsection{Formal Definition of Finite Automaton}
+\subsubsection{Formal Definition of Finite Automaton}
 
 A finite automaton has several parts. It has a set of states and rules for going from one state to another, depending on the input symbol. It has an input alphabet that indicates the allowed input symbols. It has a tart state and a set of accept states. The formal definition says that a finite automaton is a list of those five objects: set of states, input alphabet, rules for moving, start state, and accept states. In mathematical language, a list of five elements is often called a 5-tuple. Hence we define a finite automaton to be a 5-tuple consisting of these five parts. \\
 
@@ -245,7 +248,7 @@ If $A$ is the set of all strings that machine $M$ accepts, we say that $A$ is th
 
 A machine may accept several strings, but it always recognizes only one language. If the machine accepts no strings, it still recognizes one language-namely, the empty language  $\emptyset$. 
 
-\subsection{Formal Definition of Computation}
+\subsubsection{Formal Definition of Computation}
 
 Let $M = (Q, \Sigma, \delta, q_{0}, F)$ be a finite automaton and let $w=w_{1}w_{2} \cdots w_{n}$ be a string where each $w_{i}$ is a member of the alphabet $\Sigma$. Then $M$ \define{accepts} $w$ if a sequence of states $r_{0}, r_{1}, \dots, r_{n}$ in $Q$ exists with three conditions:
 
@@ -258,16 +261,24 @@ Let $M = (Q, \Sigma, \delta, q_{0}, F)$ be a finite automaton and let $w=w_{1}w_
 Condition 1 says that the machine starts in the start state. Condition 2 says that the machine goes from state to state according to the transition function. Condition 3 says that the machine accepts its input if it ends up in an accept state. We say that $M$ \define{recognizes language} $A$ if $A = \{w \vert M \textrm{ accepts } w \}$. 
 
 \begin{definition}
+  In state $q$, if the next input symbol is $a$, the next state is $\delta(q,a)$. \\ 
+  \define{Define:} $\Delta: Q \times \Sigma * \rightarrow Q$ recursively as follows: \\  \\ 
+    $\Delta(q,\epsilon) = q$ \\ 
+    $\Delta(q,ax) = \Delta(\delta(q,a)), a \in \Sigma, x \in \Sigma *$ \\ \\
+  $M = (Q,\Sigma,\delta, q_0, F)$ \define{accepts} a string $w = w_{1}w_{2} \cdots w_{n}$ iff $\Delta(q_{0},w) \in F$
+\end{definition}
+
+\begin{definition}
   A language is called a \define{regular language} if some finite automaton recognizes it. 
 \end{definition}
 
-\subsection{Designing Finite Automata}
+\subsubsection{Designing Finite Automata}
 
 Try putting yourself in the place of the machine you are trying to design and then see how you would go about performing the machine's task. Suppose that you are given some language and want to design a finite automaton that recognizes it. Pretending to be the automaton, you receive an inpuit string and must determine whether it is a member of the language the automaton is supposed to recognize. First, in order to make these decisions, you have to figure out what you need to remember about the string as you are reading it. For many languages, you don't need to remember the entire input. You need to remember only certain crucial information. Exactly which information is crucial depends on the particular language considered. \\ 
 
 Once you have determined the necessary information to remember about the string as it is being read, you represent this information as a finite lit of possibilities. Then you assign a state to each of the possibilities. Next, you assign the transitions by seeing how to go from one possibility to another upon reading a symbol. Next, you set the start state to be the stae corresponding to the possibility associated with having seen 0 symbols so far. Last, set the accept states to be those corresponding to the possibilities where you want to accept the input string. 
 
-\subsection{The Regular Operations}
+\subsubsection{The Regular Operations}
 
 In the theory of computation, the objects are languages and the tools include operations specifically designed for manipulating them. We define three operatioons on languages, called the \define{regular operations}, and use them to study properties of the regular languages. 
 
