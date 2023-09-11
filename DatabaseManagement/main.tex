@@ -1,0 +1,122 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+
+% Packages...
+\usepackage{listings} % to make nicely formatted code blocks
+\usepackage{hyperref} % to get hot links in the table of contents
+\usepackage{xcolor}   % to define custom colors
+\usepackage{titlesec} % to make custom section formatting 
+
+\newtheorem{example}{Example}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+
+% Custom Commands...
+
+% \bold{} to bold the following text
+% usage: \bold ==> \bold{bolded text}
+\newcommand{\bold}[1]{\textbf{#1}}
+
+% \define{} to bold and italicize text 
+% usage: \define{<insert-definition>}
+\newcommand{\define}[1]{\textbf{\textit{#1}}}
+
+% \b to create a new list item
+% usage: \b this is a bullet in my list
+\renewcommand{\b}{\item[$\circ$]}
+
+% \newlist to start an itemized list
+% usage: \newlist \\ \b bullet 1 ...
+\newcommand{\newlist}{\begin{itemize}}
+
+% \listend to end an itemized list
+% usage: ... \b {last bullet} \\ \endlist
+\renewcommand{\endlist}{\end{itemize}}
+
+% \code to format inline strings of code
+% usage: \code{print("Hello world!")}
+\newcommand{\code}[1]{\texttt{#1}}
+
+
+% formatting defaults...
+
+% removes paragraph indent by default
+\setlength{\parindent}{0pt}
+
+% custom colors for the code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% sets environment defaults for lstlistings (code blocks)
+\lstset{
+    backgroundcolor=\color{light-gray},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,       
+    numbersep=10pt,                  
+    tabsize=2,
+    frame=tb,
+    stepnumber=1,
+}
+
+% sets custom paragraph environment
+% layer of division that can be used with subsubsections
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
+% Heading information
+\title{CS561: Database Management Systems Notes}
+\author{Steven DeFalco}
+\date{Fall 2023}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+% Notes start here
+
+\section{Introduction}
+
+\define{Database management systems (DBMS)} consist of \bold{data}, \bold{software} (programs such as data interfaces), and \bold{environments} (operating systems). DBMS contains information about a particular enterprise. They are collections of interrelated data, a set of programs to access the data, and an environment that is both \emph{convenient} and \emph{efficient} to use. The \emph{user} should only have to define what it is that they want from the database, whereas the \emph{database} is responsible for defining how this query can be fulfilled; relational databases are good at this. \\
+
+Drawbacks to using \bold{file systems} to store data include the following: 
+
+\begin{itemize}
+  \item data \emph{redundancy} and \emph{inconsistency} (multiple formats, duplication of information, etc.)
+  \item difficulties in \emph{accessing} data 
+  \item data isolation (multiple files and formats) 
+  \item concurrency issues (among multiple users)
+  \item \emph{integrity} problems 
+  \item atomicity of updates
+  \item security problems (hard to provide varied levels of user access)
+\end{itemize}
+
+There are varying \define{levels of abstraction} in a database. The \define{physical level} defines how a record is stored. The \define{logical level} describes data stored in the database and the relationships among data. The \define{view level} is a way to hide details of data types and information for security purposes. \\ 
+
+The \define{schema} is the logical structure of the database; this is analagous to type information of a variable in a program. \define{Physical schema} refer to database design at the physical level. \define{Logical schema} refer to database design at the logical level. An \define{instance} is the actual content of the database at a particular time; this is analagous to the value of a variable. \define{Physical data independence} is the ability to modify the physical schema without changing the logical schema. \\ 
+
+\define{Data manipulation languages (DML)} are languages for accesing and manipulating the data organized in a DBMS. \define{Procedural languages} are ones in which the user specifies what data is required and how to get that data. \define{Declarative (nonprocedural) languages} are ones in which the user specifies what data is required without specifying how to get such data. \bold{SQL} is the most widely used query language. \\ 
+
+A \define{data definition language (DDL)} is the specific notation for defining the database schema. The \define{DDL compiler} generates a set of tables stored in a data dictionary. Data dictionary contains metadata. \\ 
+
+A \define{relational database} is based on the relational data model. Data and relationships among the data are represented by a collection of tables. These include both a \bold{DML} and \bold{DDL}. The most common relational database systems employ the \bold{SQL} query language. 
+
+\end{document}
