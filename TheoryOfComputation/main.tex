@@ -9,10 +9,14 @@
 \usepackage{hyperref} % to get hot links in the table of contents
 \usepackage{xcolor}   % to define custom colors
 \usepackage{titlesec} % to make custom section formatting 
+\usepackage{amsthm}   % to customize theorems etc.
 
 \newtheorem{example}{Example}[section]
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}
+\newtheorem*{remark}{Remark}
+\newtheorem*{assumption}{Assumption}
 
 % Custom Commands...
 
@@ -233,8 +237,7 @@ A finite automaton has several parts. It has a set of states and rules for going
 
 We use something called a \define{transition function}, frequently denoted $\delta$, to define the rules for moving. If the finite automaton has an arrow from a state $x$ to a state $y$ labeled with the input symbol 1, that means that if the automaton is in state $x$ when it reads a 1, it then moves to state $y$. We can indicate the same thing with the transition function by saying that $\delta(x,1) = y$. This notation is a kind of mathematical shorthand. \\ 
 
-\begin{definition}
-A \define{finite automaton} is a 5-tuple $(Q,\Sigma,\delta,q_{0},F)$, where 
+\begin{definition}[\define{Finite automaton}:] A 5-tuple $(Q,\Sigma,\delta,q_{0},F)$, where 
 \begin{enumerate}
   \item $Q$ is a finite set called the \define{states},
   \item $\Sigma$ is a finite set called the \define{alphabet},
@@ -268,8 +271,8 @@ Condition 1 says that the machine starts in the start state. Condition 2 says th
   $M = (Q,\Sigma,\delta, q_0, F)$ \define{accepts} a string $w = w_{1}w_{2} \cdots w_{n}$ iff $\Delta(q_{0},w) \in F$
 \end{definition}
 
-\begin{definition}
-  A language is called a \define{regular language} if some finite automaton recognizes it. 
+\begin{definition}{\define{Regular Language}:} 
+  A language that is recognized by some finite automaton
 \end{definition}
 
 \subsubsection{Designing Finite Automata}
@@ -282,7 +285,7 @@ Once you have determined the necessary information to remember about the string 
 
 In the theory of computation, the objects are languages and the tools include operations specifically designed for manipulating them. We define three operatioons on languages, called the \define{regular operations}, and use them to study properties of the regular languages. 
 
-\begin{define}
+\begin{define}{\define{Regular Operations}:}
   Let $A$ and $B$ be languages. We define the regular operations \define{union}, \define{concatenation}, and \define{star} as follows:
   \begin{itemize}
     \item \define{Union}: $A \cup B = \{x  \vert x \in A \textrm{ or } x \in B \}$ 
@@ -291,10 +294,88 @@ In the theory of computation, the objects are languages and the tools include op
   \end{itemize}
 \end{define}
 
-The union operation takes all the strings in both $A$ and $B$ and lumps them together into one language. The concatenation operation attaches a string from $A$ in front of a string from $B$ in all possible ways to get the strings in the new language. The star operation is \define{unary operation} instead of a \define{binary operation}. It works by attaching any number of strings in $A$ together to get a string in the new language. 
+The union operation takes all the strings in both $A$ and $B$ and lumps them together into one language. The concatenation operation attaches a string from $A$ in front of a string from $B$ in all possible ways to get the strings in the new language. The star operation is \define{unary operation} instead of a \define{binary operation}. It works by attaching any number of strings (including 0) in $A$ together to get a string in the new language. Even if $A$ doesn't contain the empty string, $A*$ \emph{does} contain the empty string. 
+
+\begin{example}
+  Let $A = \{oreo,ginger\} \textrm{ and } B = \{cookie,icecream\}$... \\ 
+  $A \cup B = \{oreo,ginger,cookie,icecream\}$ \\ 
+  $A \circ B = \{oreocookie,oreoicecream,gingercookie,gingericecream\}$ \\ 
+  $A* = \{\epsilon,oreo,ginger, \dots\}$ \\
+\end{example}
+
+\begin{proof}
+  \bold{Proof:} Let $A,B$ be regular languages recognized by DFAs $M_1$ and $M_2$. \\ 
+  Let $M_1 = (Q_1, \Sigma, \delta_1, q_1, F_1)$ and $M_2 = (Q_2, \Sigma, \delta_2, q_2, F_2)$ \\ 
+  Define a new DFA $M = (Q, \Sigma, \delta, q, F)$: \\ 
+  $Q = Q_1 \times Q_2$ \hfill each state of $M$ is a pair of states, one from $M_1$, and the other from $M_2$ \\ 
+  $\delta((r_1, r_2),a) = (\delta_1(r_1,a), \delta_2(r_2,a))$ \hfill a transition in $M$ tracks transitions in both $M_1 ,M_2$ \\
+  $q_0 = (q_1, q_2)$ \hfill start $M$ in the start states of $M_1, M_2$ \\ 
+  $F = (F_1 \times Q_2) \cup (Q_1 \times F_2)$ \hfill accept if one of the machines end in an accept state \\ 
+  $\cdots$A formal proof of correctness proceeds by induction on the length of the input string$\cdots$
+\end{proof}
 
 \subsection{Nondeterminism}
 
-% page 71...
+When a machine is in a given state and reads the next input symbol, we know what the next state will be---it is determined. We call this \define{deterministic} computation. In a \define{nondeterministic} machine, several choices may exist for the next state at any point. Nondeterminism is a generalization of determinism, so every determinsitic finite automaton is atuomatically a nondeterministic finite automaton. \\ 
+
+Every state of a DFA always has exactly one exiting transition arrow for each symbol in the alphabet. NFAs may violate that rule. In an NFA, a state may have zero, one, or many exiting arrows for ecah alphabet symbol. Additionally, in a DFA, labels on the transition arrows are symbols from the alphabet. An NFA may have arrows labeled with members of the alphabet or $\epsilon$. Zero, one, or many arrows may exit from each state with the label $\epsilon$. \\ 
+
+So how does an NFA compute$\dots$ Suppose that we are running an NFA on an input string and come to a state with multiple ways to proceed. After reading said symbol, the machine splits into multiple copies of itself and follows \emph{all} the possibilities in parallel. Each copy of the machine takes one of the possible ways to proceed and continues as before. If there are subsequent choices, the machine splits again. If the next input symbol doesn't appear on any of the arrows exiting the state occupied by a copy of the machine, that copy of the machine dies, along with the branch of the computation associated with it. Finally, if \emph{any one} of these copies of the machine is in an accept state at the end of the input, the NFA accepts the input string. \\ 
+
+If a state with an $\epsilon$ symbol on an exiting arrow is encountered, something similar happens. Without reading any input, the machine splits into multiple copies, one following each of the exiting $\epsilon$-labeled arrows and one staying at the current staea. Then the machine proceeds nondeterministically as before. \\ 
+
+
+\begin{definition}[\define{Nondeterministic Finite State Automata (NFA)}:] 
+ a 5-tuple $(Q,\Sigma,\delta,q_0,F)$, where
+  \begin{enumerate}
+    \item $Q$ is a finite set of states 
+    \item $\Sigma$ is a finite alphabet 
+    \item $\delta: Q \times \Sigma_{\epsilon} \rightarrow P(Q)$ is the transition function 
+    \item $q_0 \in Q$ is the start state 
+    \item $F \subseteq Q$ is the set of accept states
+  \end{enumerate}
+  For any set $Q$ we write $P(Q)$ to be the collection of all subsets of $Q$. Here $P(Q)$ is called the \define{power set} of $Q$. For any alphabet $\Sigma$, we write $\Sigma_{\epsilon}$ to be $\Sigma \cup \{\epsilon\}$. Thus, we can write the formal description of the type of the transitioon function in an NFA as $\delta: Q \times \Sigma_{\epsilon} \rightarrow P(Q)$. 
+\end{definition}
+
+\begin{definition}{\define{Compuitation for an NFA}:}
+  Let $N=(Q,\Sigma,\delta,q_0,F)$ be an NFA and $w$ a string over the alphabet $\Sigma$. Then we say that $N$ \emph{accepts} $w$ if we can write $w$ as $w = y_{1}y_{2}\cdots y_{m}$, where each $y_i$ is a member of $\Sigma_{\epsilon}$ and a sequence of states $r_0 , r_1 , \dots , r_{m}$ exists in $Q$ with three conditions.  \\ 
+  \begin{enumerate}
+    \item $r_0 = q_0$ 
+    \item $r_{i + 1} \in \delta(r_{i}, y_{i+1})$, for $i = 0, \dots , m-1$ 
+    \item $r_m \in F$
+  \end{enumerate}
+  Condition 1 says that the machine starts out in the start state. Condition 2 says that state $r_{i+1}$ is one of the allowable next states when $N$ is in the state $r_i$ and reading $y_{i+1}$. Observe that $\delta(r_{i},y_{i+1})$ is the \emph{set} of allowable next states and so we say that $r_{i+1}$ is a member of that set. Finally, condition 3 says that the machine accepts its input if the last state is an accept state. 
+\end{definition}
+
+\subsection{Equivalence of NFAs and DFAs}
+
+Deterministic and nondeterministic finite automato recognize the same class of languages. Say that two machines are \define{equivalent} if they recognize the same language. 
+
+\begin{theorem}
+  Every nondeterministic finite automaton has an equivalent deterministic finite automaton
+\end{theorem}
+
+\begin{lemma}
+  A language is regular if and only if some nondeterminstic finite automaton recognizes it. \\ 
+  One part of the conditioon states that a language is regular if some NFA recognizes it. Consequently, if an NFA recognizes some language, so does some DFA, and hence the language is regular. The condition also states that a language is regular only if some NFA recognizes it. That is, if a language is regular, some NFA must be recognizing it. 
+\end{lemma}
+
+\subsection{Closure under the Regular Operations}
+
+\begin{theorem}
+  The class of regular languages is closed under the union operation. In other wrods, if $A,B$ are both regular langauges then $A \cup B$ is regular as well.  
+\end{theorem}
+
+\begin{theorem}
+  The class of regular languages is closed under the concatenation operation. 
+\end{theorem}
+
+\begin{theorem}
+  The class of regular languages is closed under the star operation. 
+\end{theorem}
+
+\section{Regular Expressions} 
+
+% page 87
 
 \end{document}
