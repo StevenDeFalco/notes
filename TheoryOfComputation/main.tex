@@ -11,6 +11,7 @@
 \usepackage{titlesec} % to make custom section formatting 
 \usepackage{amsthm}   % to customize theorems etc.
 
+\theoremstyle{definition}
 \newtheorem{example}{Example}[section]
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}[section]
@@ -318,12 +319,19 @@ The union operation takes all the strings in both $A$ and $B$ and lumps them tog
 
 When a machine is in a given state and reads the next input symbol, we know what the next state will be---it is determined. We call this \define{deterministic} computation. In a \define{nondeterministic} machine, several choices may exist for the next state at any point. Nondeterminism is a generalization of determinism, so every determinsitic finite automaton is atuomatically a nondeterministic finite automaton. \\ 
 
+Machine is initially in start state. From the start state, clones appear in all states reachable using only $\epsilon$ transitions. Each clone in its current state. 
+\begin{enumerate}
+  \item Reads the next input symbol $a$ 
+  \item If there is no outgoing transition labeeld $a$: the clone dies 
+  \item For each outoging transition labeled $a$: a clone appears at the next state 
+  \item ...
+\end{enumerate}
+
 Every state of a DFA always has exactly one exiting transition arrow for each symbol in the alphabet. NFAs may violate that rule. In an NFA, a state may have zero, one, or many exiting arrows for ecah alphabet symbol. Additionally, in a DFA, labels on the transition arrows are symbols from the alphabet. An NFA may have arrows labeled with members of the alphabet or $\epsilon$. Zero, one, or many arrows may exit from each state with the label $\epsilon$. \\ 
 
 So how does an NFA compute$\dots$ Suppose that we are running an NFA on an input string and come to a state with multiple ways to proceed. After reading said symbol, the machine splits into multiple copies of itself and follows \emph{all} the possibilities in parallel. Each copy of the machine takes one of the possible ways to proceed and continues as before. If there are subsequent choices, the machine splits again. If the next input symbol doesn't appear on any of the arrows exiting the state occupied by a copy of the machine, that copy of the machine dies, along with the branch of the computation associated with it. Finally, if \emph{any one} of these copies of the machine is in an accept state at the end of the input, the NFA accepts the input string. \\ 
 
-If a state with an $\epsilon$ symbol on an exiting arrow is encountered, something similar happens. Without reading any input, the machine splits into multiple copies, one following each of the exiting $\epsilon$-labeled arrows and one staying at the current staea. Then the machine proceeds nondeterministically as before. \\ 
-
+If a state with an $\epsilon$ symbol on an exiting arrow is encountered, something similar happens. Without reading any input, the machine splits into multiple copies, one following each of the exiting $\epsilon$-labeled arrows and one staying at the current state. Then the machine proceeds nondeterministically as before. \\ 
 
 \begin{definition}[\define{Nondeterministic Finite State Automata (NFA)}:] 
  a 5-tuple $(Q,\Sigma,\delta,q_0,F)$, where
@@ -360,10 +368,12 @@ Deterministic and nondeterministic finite automato recognize the same class of l
   One part of the conditioon states that a language is regular if some NFA recognizes it. Consequently, if an NFA recognizes some language, so does some DFA, and hence the language is regular. The condition also states that a language is regular only if some NFA recognizes it. That is, if a language is regular, some NFA must be recognizing it. 
 \end{lemma}
 
+For a NFA with $n$ states, the equivalent NFA will need to have $2^{n}$ states. 
+
 \subsection{Closure under the Regular Operations}
 
 \begin{theorem}
-  The class of regular languages is closed under the union operation. In other wrods, if $A,B$ are both regular langauges then $A \cup B$ is regular as well.  
+  The class of regular languages is closed under the union operation. In other words, if $A,B$ are both regular langauges then $A \cup B$ is regular as well.  
 \end{theorem}
 
 \begin{theorem}
@@ -376,6 +386,80 @@ Deterministic and nondeterministic finite automato recognize the same class of l
 
 \section{Regular Expressions} 
 
-% page 87
+We can use the regular operations to build up expressions describing languages, which are called \define{regular expressions}. The value of a regular expression is a language. 
+
+\begin{definition}{\define{Formal Definition of a Regular Expression}}
+  \\ Say that $R$ is a \define{regular expression} if $R$ is$\dots$ 
+  \begin{enumerate}
+    \item $a$ for some $a$ in the alphabet $\Sigma$ 
+    \item $\epsilon$ 
+    \item $\emptyset$ 
+    \item $(R_1 \cup R_2)$, where $R_1$ and $R_2$ are regular expressions 
+    \item $(R_1 \circ R_2)$, where $R_1$ and $R_2$ are regular expressions 
+    \item $(R_{1}^{*})$, where $R_1$ and $R_2$ are regular expressions 
+  \end{enumerate}
+  In items 1 and 2, the regular expressions $a$ and $\epsilon$ represent the languages $\{a\}$ and $\{\epsilon \}$, respectively. In item 3, the regular expression $\emptyset$ represents the empty language. In items 4, 5, and 6, the expressions represent the languages obtained by taking the union of concatenation of the languages $R_1$ and $R_2$, or the star of the language $R_1$, respectively.  
+\end{definition}
+
+\begin{remark}
+  The expression $\epsilon$ represents the language containing a single string---namely, the empty string---wheras $\emptyset$ represents the language that doesn't contain any strings. 
+\end{remark}
+
+\begin{remark}
+  If we let $R$ be any regular expression, we have the following identities. 
+  \begin{itemize}
+    \item $R \cup \emptyset = R$ \\ Adding the empty language to any other language will not change it 
+    \item $R \circ \epsilon = R$ \\ Joining the empty string to any string will not change it
+  \end{itemize}
+  However, exchanging $\emptyset$ and $\epsilon$ in the preceding identities may cause the equalities to fail. 
+  \begin{itemize}
+    \item $R \cup \epsilon$ may not equal $R$. \\ For example if $R = 0$, then $L(R) = \{0\} but L(R \cup \epsilon) = \{0,\epsilon \}$. 
+    \item $R \circ \emptyset$ may not equal $R$. \\ For example if $R = 0$, then $L(R) = \{0\} but L(R \circ \emptyset) = \emptyset$. 
+  \end{itemize}
+\end{remark}
+
+Elemental objects in a programming language, called \define{tokens}, such as the variable names and constants, may be described with regular expressions. Once the syntax of a programming language has been described with a regular expression in terms of its toekns, automatic systems can generate the \define{lexical analyzer}, the part of a compiler that initially process the input program.  
+
+\subsection{Equivalence with Finite Automata}
+
+Regular expressions and finite automata are equivalent in their descriptive power. However, any regular expression can be converted into a finite automaton that recognizes the language it describes, and vice versa. 
+
+\begin{theorem}
+  A language is regular if and only if some regular expression describes it.
+\end{theorem}
+
+\begin{lemma}
+  If a language is described by a regular expression, then it is regular. 
+\end{lemma}
+
+\begin{lemma}
+  If a language is regular, then it is described by a regular expression
+\end{lemma}
+
+\begin{definition}{\define{Generalized nondeterministic finite automaton}}
+  are nondeterministic finite automata wherein the transition arrows may have any regular expressions as labels, instead of only memebers of the alphabet or $\epsilon$. The GFNA reads blocks of symbols from the input, not necessarily just one symbol at a time as in an ordinary NFA. The GFNA moves along a transition arrow connecting two states by reading a block of symbols from the input, which themselves constitute a string described by the regular expression on that arrow.  
+\end{definition}
+
+\begin{definition}{Formal Definition of GFNA}
+  A \define{generalized nondeterministic finite automaton} is a 5-tuple, $(Q,\Sigma,\delta,q_{\textrm{start}},q_{\textrm{accept}})$, where 
+  \begin{enumerate}
+    \item $Q$ is the fintie set of states 
+    \item $\Sigma$ is the input alphabet 
+    \item $\delta : (Q - \{q_{\textrm{accept}}\}) \times (Q - \{q_{\textrm{start}}\}) \rightarrow R$ is transition function
+    \item $q_{\textrm{start}}$ is the start state 
+    \item $q_{\textrm{accept}}$ is the accept state
+  \end{enumerate}
+\end{definition}
+
+A GFNA accepts a string $w$ in $\Sigma^{*}$ if $w=w_1 w_2 \dots w_k$, where each $w_i$ is in $\Sigma^{*}$ and a sequence of states $q_0 , q_1 , \dots , q_k$ exists such that 
+\begin{enumerate}
+  \item $q_0 = q_{\textrm{start}}$ is the start state, 
+  \item $q_k = q_{\textrm{accept}}$ is the accept state 
+  \item for each $i$, we have $w_i \in L(R_i)$, where $R_i = \delta(q_i - 1, q_i)$; in other words, $R_i$ is the expression on the arrow from $q_{i-1}$ to $q_i$. 
+\end{enumerate}
+
+\section{Nonregular Languages}
+
+% page 101
 
 \end{document}
