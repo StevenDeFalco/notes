@@ -9,11 +9,14 @@
 \usepackage{hyperref} % to get hot links in the table of contents
 \usepackage{xcolor}   % to define custom colors
 \usepackage{titlesec} % to make custom section formatting 
+\usepackage{amsthm}   % to customize theorems etc.
 
 \newtheorem{example}{Example}[section]
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{note}{Note}[section]
+\newtheorem{lemma}{Lemma}
+\newtheorem*{remark}{Remark}
+\newtheorem*{assumption}{Assumption}
 
 % Custom Commands...
 
@@ -195,24 +198,67 @@ The quantity (Q) \define{demanded} is the amount of a good or service that consu
 
 \end{example}
 
-\begin{note}
+\begin{remark}
   A change in price results in movement along the demand curve. 
-\end{note}
+\end{remark}
 
-\begin{note}
+\begin{remark}
   Demand curve shifting...
   \begin{itemize}
     \item The demand curve shifts to the right when there is an increase in demand. 
     \item The demand curve shifts to the left when there is a decrease in demand.  
   \end{itemize}
-\end{note}
+\end{remark}
 
 \begin{definition}
   \define{celeris paribus} means "other things being equal". For example when modeling examples, we draw conclusions given that everything besides what we specifically study is constant. 
 \end{definition}
 
-\begin{definition}
-  \define{Market demand} is---simply---the sum of all individual demands. 
+\begin{definition}{\define{Market demand}}
+  the sum of all individual demands. 
 \end{definition}
+
+\subsection{Supply}
+
+The \define{quantity supplied} is the amount of a good or service that sellers are willing and able to sell. Some determinants of the \emph{quantity supplied} are as follows$\dots$
+
+\begin{enumerate}
+  \item \bold{Price (P)}: as the price (of the product/service) increases, the quantity supplied increases; as the price decreases, the quantity supplied decreases. This is called the \define{law of supply}. 
+  \item \bold{Cost of production}: as the cost of production increases, the quantity supplied decreases; as the cost of production decreases, the quantity supplied increases. 
+  \item \bold{Number of producers}
+  \item \bold{Expectations of the firms}: beliefs about future performance
+\end{enumerate}
+
+The \define{supply curve} shows the positive relationship between price and quantity (P/Q). A change in the price results in movement along the supply curve. If any of the other determinants change then there is a shift of the supply curve. \\ 
+
+\begin{remark}
+  An increase in quantity supplied results in a \emph{right-shift} of the supply curve. A decrease in the quantity supplied results in a \emph{left-shift} of the supply curve. 
+\end{remark}
+
+\begin{definition}{\define{Market supply}}
+  the sum of all that is supplied by all producers.
+\end{definition}
+
+\begin{definition}{\define{Market equilibrium}}
+  a situation in which the quantity demanded is equal to the quantity supplied. $$Q_{D}=Q_{S}$$ The market equilibrium is---graphically---where the supply and demand curves intersect: when the quantity demanded and supplied are exactly the same. 
+\end{definition}
+
+Markets that are \emph{not} in equilibrium are \bold{inefficeint}. 
+\begin{itemize}
+  \item \define{Excess supply (surplus)} refers to a scenario where producers are willing to produce more than consumers are willing to buy. In this case, the price will start to decrease and the quantity supplied decreases/quantity demanded increases until equilibrium is reached. 
+  \item \define{Excess demand (shortage)} refers to a scenario where the consumers are willing to buy more than producers are willing to produce. The price will start to increase and---thus---the quantity demanded will decrease and the quantity produced will increase until equilibrium is met. 
+\end{itemize}
+
+\begin{example}{Solving for equilibrium}
+  \\ Demand curve: $Q_D = 1600 - 300P$
+  \\ Supply curve: $Q_S = 1400 + 700P$  \\ 
+  Equilibrium: $Q_D = Q_S$ 
+  $$1600-300P=1400+700P$$
+  $$1000P=200$$
+  $$P=0.2$$
+  Substitute $P$ into either $Q_D$ or $Q_S$ 
+  $$Q_D = 1600-300(0.2) = 1540$$ 
+  $$Q_S = 1400+700(0.2) = 1540$$
+\end{example}
 
 \end{document}
