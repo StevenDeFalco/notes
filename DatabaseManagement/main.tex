@@ -97,6 +97,8 @@
 
 \define{Database management systems (DBMS)} consist of \bold{data}, \bold{software} (programs such as data interfaces), and \bold{environments} (operating systems). DBMS contains information about a particular enterprise. They are collections of interrelated data, a set of programs to access the data, and an environment that is both \emph{convenient} and \emph{efficient} to use. The \emph{user} should only have to define what it is that they want from the database, whereas the \emph{database} is responsible for defining how this query can be fulfilled; relational databases are good at this. \\
 
+The three primary data models are \define{entity-relationship model} (diagrams), \define{relational model} (relational algebra), \define{relational database} (SQL). \\
+
 Drawbacks to using \bold{file systems} to store data include the following: 
 
 \begin{itemize}
@@ -118,5 +120,47 @@ The \define{schema} is the logical structure of the database; this is analagous 
 A \define{data definition language (DDL)} is the specific notation for defining the database schema. The \define{DDL compiler} generates a set of tables stored in a data dictionary. Data dictionary contains metadata. \\ 
 
 A \define{relational database} is based on the relational data model. Data and relationships among the data are represented by a collection of tables. These include both a \bold{DML} and \bold{DDL}. The most common relational database systems employ the \bold{SQL} query language. 
+
+\section{Entity-Relationship Model}
+
+A \emph{database} can be modeled as a collection of entities or a relationship among entities. An \define{entity} is an object that exists and is distinguishable from other objects (e.g. specific person, company, even, plant). These \emph{entities} have \define{attributes} (e.g. people hvae names and addresses). An \define{entity set} is a set of entities of the same type that share the same properties (e.g. set of all persons, companies). In the ER-model we refer to specific objects as \emph{entities} which have \emph{attributes} and are all a part of the entire \emph{entity set}. \\ 
+
+A \define{relationship} is an association among several entties. A \define{relationship set} is a mathematical relation among $n \geq 2$ entties, each taken from entity sets. $$\{(e_1, e_2, \dots e_n) \vert e_1 \in E_1, e_2 \in E_2, \dots, e_n \in E_n\}$$ where $(e_1 , e_2 , \dots e_n)$ is a relationship. \\ 
+
+\subsection{Attributes}
+
+An \define{attribute} can also be property of a relationship set. For instance, the \emph{depositer} relationship set between entity sets \emph{customer} and \emph{account} may have the attribute \emph{access-date}. Relationshup sets that involve, two entity sets are \define{binary} (degree two). Relationship sets may involve more than two entity sets. Relationships between more than two entity sets are rare (i.e. most are binary). \\ 
+
+An \define{entity} is represented by a set of attributes, that is descriptive properties possessed by all members of an entity set. \define{Domain} is the set of permitted values for each attribute. The \bold{types of attributes} include the following:
+
+\begin{itemize}
+  \item \emph{simple} (atomic) and \emph{composite} attributes 
+  \item \emph{single-valued} and \emph{multi-valued} attributes
+  \item \emph{derived} attributes (can be computed from other attributes)
+\end{itemize}
+
+When attributes are \emph{simple} and \emph{single-valued}, then we say that the data is in \define{First Normal Form}. 
+
+\subsection{Keys}
+
+A \define{super key} of an entity set is a set of one or more attributes whose values uniquely determine each entity. Once you have defined a \emph{super key}, you can add attributes and it is still considered a \emph{super key}. A \define{candidate key} of an entity set is a minimal super key (e.g. \emph{cusomer\_id} is a candidate key of \emph{customer}). Candidate keys \emph{only} contain the necessary attributes to make something unique. Although several candidate keys may exist, one of the candidate keys is selected to be the \define{primary key}. \\ 
+
+The combination of primary keys of the participating entity sets forms a super key of relationship set. This means a pair of entity sets can have at most one relationship for each access. 
+
+\subsection{E-R Diagrams}
+
+Rectangles represent entity sets. Diamonds represent relationship sets. Lines link attributes to entity sets and entity sets to relationship sets. Ellipses represent attributes: double ellipses represent multivalued attributes while dashed ellipses denote derived attributes. Underline indicates primary key attributes. 
+
+\section{Relational Model}
+
+Formally, given sets $D_1 , D_2 , \dots D_n$ a \define{relation} $r$ is a subset of $$D_1 \times D_2 \times \dots \times D_n$$ Thus, a relation is a set of $n$-uples $(a_1 , a_2 , \dots a_n)$ where each $a_i \in D_i$. \\ 
+
+Each attribute of a relation has a name. The set of allowed valued for each attribtue is called the \define{domain} of the attribute. Attribute values are (normally) required to be \define{atomic}; that is, indivisible. Domain is said to be atomic if all its members are atomic. The special value \emph{null} is a member of every domain. The null value causes complications in the definition of many operations. 
+ 
+$A_1 , A_2 , \dots A_n$ are attributes. $R= (A_1 , A_2 , \dots , A_n)$ is a \define{relation schema}. $r(R)$ denotes a relation $r$ on the relation schema $R$. \\ 
+
+The current values (\define{relation instance}) of a relation is specified by a table. An element $t$ of $r$ is a \emph{tuple}, represented by a row in a table. Relations are unordered and thus the roder of tuples is irrelevant (tuples may be stored in an arbitrary order). \\ 
+
+A database consists of multiple relations. Information about an enterprise is broken up into parts, with each relation storing one part of the information. 
 
 \end{document}
