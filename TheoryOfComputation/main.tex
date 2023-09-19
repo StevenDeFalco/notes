@@ -398,7 +398,7 @@ We can use the regular operations to build up expressions describing languages, 
     \item $(R_1 \circ R_2)$, where $R_1$ and $R_2$ are regular expressions 
     \item $(R_{1}^{*})$, where $R_1$ and $R_2$ are regular expressions 
   \end{enumerate}
-  In items 1 and 2, the regular expressions $a$ and $\epsilon$ represent the languages $\{a\}$ and $\{\epsilon \}$, respectively. In item 3, the regular expression $\emptyset$ represents the empty language. In items 4, 5, and 6, the expressions represent the languages obtained by taking the union of concatenation of the languages $R_1$ and $R_2$, or the star of the language $R_1$, respectively.  
+  In items 1 and 2, the regular expressions $a$ and $\epsilon$ represent the languages $\{a\}$ and $\{\epsilon \}$, respectively. In item 3, the regular expression $\emptyset$ represents the empty language. In items 4, 5, and 6, the expressions represent the languages obtained by taking the union or concatenation of the languages $R_1$ and $R_2$, or the star of the language $R_1$, respectively.  
 \end{definition}
 
 \begin{remark}
@@ -414,9 +414,28 @@ We can use the regular operations to build up expressions describing languages, 
   However, exchanging $\emptyset$ and $\epsilon$ in the preceding identities may cause the equalities to fail. 
   \begin{itemize}
     \item $R \cup \epsilon$ may not equal $R$. \\ For example if $R = 0$, then $L(R) = \{0\} but L(R \cup \epsilon) = \{0,\epsilon \}$. 
-    \item $R \circ \emptyset$ may not equal $R$. \\ For example if $R = 0$, then $L(R) = \{0\} but L(R \circ \emptyset) = \emptyset$. 
+    \item $R \circ \emptyset$ may not equal $R$. \\ For example if $R = 0$, then $L(R) = \{0\}$ but $L(R \circ \emptyset) = \emptyset$ (i.e. $R \cup \epsilon = R iff \epsilon \in R$). 
+    \item $R \circ \emptyset = \emptyset$ 
+    \item $R \circ \epsilon = R$ 
+    \item $\emptyset^{*} = \{\epsilon\}$ 
   \end{itemize}
 \end{remark}
+
+\begin{example}
+  \item Let $\Sigma = \{0,1\}$
+  \begin{itemize}
+    \item $L_1 = \{\textrm{3rd last bit is 1}\}$ \\ 
+      $(0 \cup 1)^{*} 1 (0 \cup 1) (0 \cup 1)$ or $\Sigma^{*}1\Sigma\Sigma$
+  \item $L_2 = \{\textrm{strings in which every 0 is followed by at least one 1}\}$ \\
+    $(0 1 \cup 1)^{*}$ or $1^{*}(011^{*})^{*}$
+  \item $L_3 = \{\textrm{strings starting with 0 and followed by any number of 1s OR strings with no 0}\}$ \\ 
+    $01^{*} \cup 1^{*}$ or $(0 \cup \epsilon)1^{*}$
+  \item $L_4 = \{\textrm{strings with lengths that are multiples of 3}\}$ \\ 
+    $((0 \cup 1) (0 \cup 1) (0 \cup 1))^{*}$ or $(\Sigma \Sigma \Sigma)^{*}$
+  \item $L_5 = \{\textrm{strings that end with 01}\}$ \\ 
+    $\Sigma^{*} 01$
+  \end{itemize}
+\end{example}
 
 Elemental objects in a programming language, called \define{tokens}, such as the variable names and constants, may be described with regular expressions. Once the syntax of a programming language has been described with a regular expression in terms of its toekns, automatic systems can generate the \define{lexical analyzer}, the part of a compiler that initially process the input program.  
 
