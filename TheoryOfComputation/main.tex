@@ -3,80 +3,8 @@
 
 \documentclass{article}
 
-
-% Packages...
-\usepackage{listings} % to make nicely formatted code blocks
-\usepackage{hyperref} % to get hot links in the table of contents
-\usepackage{xcolor}   % to define custom colors
-\usepackage{titlesec} % to make custom section formatting 
-\usepackage{amsthm}   % to customize theorems etc.
-
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\newtheorem{definition}{Definition}[section]
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}{Lemma}
-\newtheorem*{remark}{Remark}
-\newtheorem*{assumption}{Assumption}
-
-% Custom Commands...
-
-% \bold{} to bold the following text
-% usage: \bold ==> \bold{bolded text}
-\newcommand{\bold}[1]{\textbf{#1}}
-
-% \define{} to bold and italicize text 
-% usage: \define{<insert-definition>}
-\newcommand{\define}[1]{\textbf{\textit{#1}}}
-
-% \newlist to start an itemized list
-% usage: \newlist \\ \b bullet 1 ...
-\newcommand{\newlist}{\begin{itemize}}
-
-% \listend to end an itemized list
-% usage: ... \b {last bullet} \\ \endlist
-\renewcommand{\endlist}{\end{itemize}}
-
-% \code to format inline strings of code
-% usage: \code{print("Hello world!")}
-\newcommand{\code}[1]{\texttt{#1}}
-
-
-% formatting defaults...
-
-% removes paragraph indent by default
-\setlength{\parindent}{0pt}
-
-% custom colors for the code
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{light-gray}{gray}{0.95}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-
-% sets environment defaults for lstlistings (code blocks)
-\lstset{
-    backgroundcolor=\color{light-gray},   
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    numbers=left,       
-    numbersep=10pt,                  
-    tabsize=2,
-    frame=tb,
-    stepnumber=1,
-}
-
-% sets custom paragraph environment
-% layer of division that can be used with subsubsections
-\setcounter{secnumdepth}{4}
-\titleformat{\paragraph}
-{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
-\titlespacing*{\paragraph}
-{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
-
+% import note styles
+\usepackage{../styles}
 
 % Heading information
 \title{CS334: Theory of Computation Notes}
@@ -238,7 +166,7 @@ A finite automaton has several parts. It has a set of states and rules for going
 
 We use something called a \define{transition function}, frequently denoted $\delta$, to define the rules for moving. If the finite automaton has an arrow from a state $x$ to a state $y$ labeled with the input symbol 1, that means that if the automaton is in state $x$ when it reads a 1, it then moves to state $y$. We can indicate the same thing with the transition function by saying that $\delta(x,1) = y$. This notation is a kind of mathematical shorthand. \\ 
 
-\begin{definition}[\define{Finite automaton}:] A 5-tuple $(Q,\Sigma,\delta,q_{0},F)$, where 
+\begin{definition}[Finite automaton] A 5-tuple $(Q,\Sigma,\delta,q_{0},F)$, where 
 \begin{enumerate}
   \item $Q$ is a finite set called the \define{states},
   \item $\Sigma$ is a finite set called the \define{alphabet},
@@ -272,7 +200,7 @@ Condition 1 says that the machine starts in the start state. Condition 2 says th
   $M = (Q,\Sigma,\delta, q_0, F)$ \define{accepts} a string $w = w_{1}w_{2} \cdots w_{n}$ iff $\Delta(q_{0},w) \in F$
 \end{definition}
 
-\begin{definition}{\define{Regular Language}:} 
+\begin{definition}[Regular Language] 
   A language that is recognized by some finite automaton
 \end{definition}
 
@@ -286,7 +214,7 @@ Once you have determined the necessary information to remember about the string 
 
 In the theory of computation, the objects are languages and the tools include operations specifically designed for manipulating them. We define three operatioons on languages, called the \define{regular operations}, and use them to study properties of the regular languages. 
 
-\begin{define}{\define{Regular Operations}:}
+\begin{define}[Regular Operations]
   Let $A$ and $B$ be languages. We define the regular operations \define{union}, \define{concatenation}, and \define{star} as follows:
   \begin{itemize}
     \item \define{Union}: $A \cup B = \{x  \vert x \in A \textrm{ or } x \in B \}$ 
@@ -333,7 +261,7 @@ So how does an NFA compute$\dots$ Suppose that we are running an NFA on an input
 
 If a state with an $\epsilon$ symbol on an exiting arrow is encountered, something similar happens. Without reading any input, the machine splits into multiple copies, one following each of the exiting $\epsilon$-labeled arrows and one staying at the current state. Then the machine proceeds nondeterministically as before. \\ 
 
-\begin{definition}[\define{Nondeterministic Finite State Automata (NFA)}:] 
+\begin{definition}[Nondeterministic Finite State Automata (NFA)] 
  a 5-tuple $(Q,\Sigma,\delta,q_0,F)$, where
   \begin{enumerate}
     \item $Q$ is a finite set of states 
@@ -345,7 +273,7 @@ If a state with an $\epsilon$ symbol on an exiting arrow is encountered, somethi
   For any set $Q$ we write $P(Q)$ to be the collection of all subsets of $Q$. Here $P(Q)$ is called the \define{power set} of $Q$. For any alphabet $\Sigma$, we write $\Sigma_{\epsilon}$ to be $\Sigma \cup \{\epsilon\}$. Thus, we can write the formal description of the type of the transitioon function in an NFA as $\delta: Q \times \Sigma_{\epsilon} \rightarrow P(Q)$. 
 \end{definition}
 
-\begin{definition}{\define{Compuitation for an NFA}:}
+\begin{definition}[Compuitation for an NFA]
   Let $N=(Q,\Sigma,\delta,q_0,F)$ be an NFA and $w$ a string over the alphabet $\Sigma$. Then we say that $N$ \emph{accepts} $w$ if we can write $w$ as $w = y_{1}y_{2}\cdots y_{m}$, where each $y_i$ is a member of $\Sigma_{\epsilon}$ and a sequence of states $r_0 , r_1 , \dots , r_{m}$ exists in $Q$ with three conditions.  \\ 
   \begin{enumerate}
     \item $r_0 = q_0$ 
@@ -388,8 +316,8 @@ For a NFA with $n$ states, the equivalent NFA will need to have $2^{n}$ states.
 
 We can use the regular operations to build up expressions describing languages, which are called \define{regular expressions}. The value of a regular expression is a language. 
 
-\begin{definition}{\define{Formal Definition of a Regular Expression}}
-  \\ Say that $R$ is a \define{regular expression} if $R$ is$\dots$ 
+\begin{definition}[Formal Definition of a Regular Expression]
+  Say that $R$ is a \define{regular expression} if $R$ is$\dots$ 
   \begin{enumerate}
     \item $a$ for some $a$ in the alphabet $\Sigma$ 
     \item $\epsilon$ 
@@ -455,11 +383,11 @@ Regular expressions and finite automata are equivalent in their descriptive powe
   If a language is regular, then it is described by a regular expression
 \end{lemma}
 
-\begin{definition}{\define{Generalized nondeterministic finite automaton}}
+\begin{definition}[Generalized nondeterministic finite automaton]
   are nondeterministic finite automata wherein the transition arrows may have any regular expressions as labels, instead of only memebers of the alphabet or $\epsilon$. The GFNA reads blocks of symbols from the input, not necessarily just one symbol at a time as in an ordinary NFA. The GFNA moves along a transition arrow connecting two states by reading a block of symbols from the input, which themselves constitute a string described by the regular expression on that arrow.  
 \end{definition}
 
-\begin{definition}{Formal Definition of GFNA}
+\begin{definition}[Formal Definition of GFNA]
   A \define{generalized nondeterministic finite automaton} is a 5-tuple, $(Q,\Sigma,\delta,q_{\textrm{start}},q_{\textrm{accept}})$, where 
   \begin{enumerate}
     \item $Q$ is the fintie set of states 
