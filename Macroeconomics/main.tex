@@ -3,84 +3,8 @@
 
 \documentclass{article}
 
-
-% Packages...
-\usepackage{listings} % to make nicely formatted code blocks
-\usepackage{hyperref} % to get hot links in the table of contents
-\usepackage{xcolor}   % to define custom colors
-\usepackage{titlesec} % to make custom section formatting 
-\usepackage{amsthm}   % to customize theorems etc.
-
-\theoremstyle{definition}
-\newtheorem{example}{Example}[section]
-\newtheorem{definition}{Definition}[section]
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}{Lemma}
-\newtheorem*{remark}{Remark}
-\newtheorem*{assumption}{Assumption}
-
-% Custom Commands...
-
-% \bold{} to bold the following text
-% usage: \bold ==> \bold{bolded text}
-\newcommand{\bold}[1]{\textbf{#1}}
-
-% \define{} to bold and italicize text 
-% usage: \define{<insert-definition>}
-\newcommand{\define}[1]{\textbf{\textit{#1}}}
-
-% \b to create a new list item
-% usage: \b this is a bullet in my list
-\renewcommand{\b}{\item[$\circ$]}
-
-% \newlist to start an itemized list
-% usage: \newlist \\ \b bullet 1 ...
-\newcommand{\newlist}{\begin{itemize}}
-
-% \listend to end an itemized list
-% usage: ... \b {last bullet} \\ \endlist
-\renewcommand{\endlist}{\end{itemize}}
-
-% \code to format inline strings of code
-% usage: \code{print("Hello world!")}
-\newcommand{\code}[1]{\texttt{#1}}
-
-
-% formatting defaults...
-
-% removes paragraph indent by default
-\setlength{\parindent}{0pt}
-
-% custom colors for the code
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{light-gray}{gray}{0.95}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-
-% sets environment defaults for lstlistings (code blocks)
-\lstset{
-    backgroundcolor=\color{light-gray},   
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    numbers=left,       
-    numbersep=10pt,                  
-    tabsize=2,
-    frame=tb,
-    stepnumber=1,
-}
-
-% sets custom paragraph environment
-% layer of division that can be used with subsubsections
-\setcounter{secnumdepth}{4}
-\titleformat{\paragraph}
-{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
-\titlespacing*{\paragraph}
-{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
-
+% import note styles
+\usepackage{../styles}
 
 % Heading information
 \title{BT243: Macroeconomics Notes}
@@ -215,7 +139,7 @@ The quantity (Q) \define{demanded} is the amount of a good or service that consu
   \define{celeris paribus} means "other things being equal". For example when modeling examples, we draw conclusions given that everything besides what we specifically study is constant. 
 \end{definition}
 
-\begin{definition}{\define{Market demand}}
+\begin{definition}[Market demand]
   the sum of all individual demands. 
 \end{definition}
 
@@ -236,11 +160,11 @@ The \define{supply curve} shows the positive relationship between price and quan
   An increase in quantity supplied results in a \emph{right-shift} of the supply curve. A decrease in the quantity supplied results in a \emph{left-shift} of the supply curve. 
 \end{remark}
 
-\begin{definition}{\define{Market supply}}
+\begin{definition}[Market supply]
   the sum of all that is supplied by all producers.
 \end{definition}
 
-\begin{definition}{\define{Market equilibrium}}
+\begin{definition}[Market equilibrium]
   a situation in which the quantity demanded is equal to the quantity supplied. $$Q_{D}=Q_{S}$$ The market equilibrium is---graphically---where the supply and demand curves intersect: when the quantity demanded and supplied are exactly the same. 
 \end{definition}
 
