@@ -384,7 +384,22 @@ Regular expressions and finite automata are equivalent in their descriptive powe
 \end{lemma}
 
 \begin{definition}[Generalized nondeterministic finite automaton]
-  are nondeterministic finite automata wherein the transition arrows may have any regular expressions as labels, instead of only memebers of the alphabet or $\epsilon$. The GFNA reads blocks of symbols from the input, not necessarily just one symbol at a time as in an ordinary NFA. The GFNA moves along a transition arrow connecting two states by reading a block of symbols from the input, which themselves constitute a string described by the regular expression on that arrow.  
+  are nondeterministic finite automata wherein the transition arrows may have any regular expressions as labels, instead of only memebers of the alphabet or $\epsilon$. The GFNA reads blocks of symbols from the input, not necessarily just one symbol at a time as in an ordinary NFA. The GFNA moves along a transition arrow connecting two states by reading a block of symbols from the input, which themselves constitute a string described by the regular expression on that arrow. \\ 
+
+  \bold{Like an NFA}, but the \emph{start state} has no incoming transition and has outoging transitions to every state. The \emph{accept state} has no outgoing transition, has incoming transitions from every state, and is distinct from the start state. All the \emph{other states} have outgoing transitions to every state. Transitions are labeled with regular expressions. 
+\end{definition}
+
+\begin{definition}[DFA to GFNA Conversion]
+  \begin{enumerate}
+    \item Convert the DFA into a generalized NFA (DFA $M$ $\rightarrow$ GNFA $G$)
+      \begin{itemize}
+        \item Create a new start state with outgoing $\epsilon$-transition to the start state of $M$ 
+        \item Create a new accept state with incoming $\epsilon$-transitions from every accept state of $M$ 
+        \item If there are multiple labels on any transition, replace it with the union of the labels
+      \end{itemize}
+    \item Derive the regular expression from the GNFA. \\ 
+      The idea is to manipulate labels so that the label on $(s,a)$ describes all strings accepted by the GNFA. Elimintae states one-at-a-time updating labels at each step. /
+  \end{enumerate}
 \end{definition}
 
 \begin{definition}[Formal Definition of GFNA]
