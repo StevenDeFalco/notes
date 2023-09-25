@@ -44,6 +44,10 @@ There are varying \define{levels of abstraction} in a database. The \define{phys
 
 The \define{schema} is the logical structure of the database; this is analagous to type information of a variable in a program. \define{Physical schema} refer to database design at the physical level. \define{Logical schema} refer to database design at the logical level. An \define{instance} is the actual content of the database at a particular time; this is analagous to the value of a variable. \define{Physical data independence} is the ability to modify the physical schema without changing the logical schema. \\ 
 
+\begin{remark}
+  The schema of a table is the attributes of the table. For example, the schema of a table whose column titles are "A,B,C,D" is simply A,B,C,D. 
+\end{remark}
+
 \define{Data manipulation languages (DML)} are languages for accesing and manipulating the data organized in a DBMS. \define{Procedural languages} are ones in which the user specifies what data is required and how to get that data. \define{Declarative (nonprocedural) languages} are ones in which the user specifies what data is required without specifying how to get such data. \bold{SQL} is the most widely used query language. \\ 
 
 A \define{data definition language (DDL)} is the specific notation for defining the database schema. The \define{DDL compiler} generates a set of tables stored in a data dictionary. Data dictionary contains metadata. \\ 
@@ -74,7 +78,9 @@ When attributes are \emph{simple} and \emph{single-valued}, then we say that the
 
 A \define{super key} of an entity set is a set of one or more attributes whose values uniquely determine each entity. Once you have defined a \emph{super key}, you can add attributes and it is still considered a \emph{super key}. A \define{candidate key} of an entity set is a minimal super key (e.g. \emph{cusomer\_id} is a candidate key of \emph{customer}). Candidate keys \emph{only} contain the necessary attributes to make something unique. Although several candidate keys may exist, one of the candidate keys is selected to be the \define{primary key}. \\ 
 
-The combination of primary keys of the participating entity sets forms a super key of relationship set. This means a pair of entity sets can have at most one relationship for each access. 
+The combination of primary keys of the participating entity sets forms a super key of relationship set. This means a pair of entity sets can have at most one relationship for each access. \\
+
+A relation schema may have an attribute that corresponds to the primary key of another relation. The attribute is called a \define{foreign key}. Foreign key is the primary key of the parent table. Only values occurring in the primary key attribute of the \bold{referenced relation} may occur in the foreign key attribute of the \bold{referencing relation}.  
 
 \subsection{E-R Diagrams}
 
@@ -90,6 +96,37 @@ $A_1 , A_2 , \dots A_n$ are attributes. $R= (A_1 , A_2 , \dots , A_n)$ is a \def
 
 The current values (\define{relation instance}) of a relation is specified by a table. An element $t$ of $r$ is a \emph{tuple}, represented by a row in a table. Relations are unordered and thus the roder of tuples is irrelevant (tuples may be stored in an arbitrary order). \\ 
 
-A database consists of multiple relations. Information about an enterprise is broken up into parts, with each relation storing one part of the information. 
+A \define{database} consists of multiple relations. Information about an enterprise is broken up into parts, with each relation storing one part of the information. 
+
+The two types of database management systems are OLTP (\define{Online Transactional Processing}) and OLAP (\define{Online Analytical Processing}). OLTP databases are update/change oriented (\emph{most} common databases are this category): write oriented. OLAP databases are for viewing and analyzing the data: read oriented. In OLTP, a good table is a table about \emph{one thing only}: \define{third normal form}. For example, a good OLTP table will have a table containing information about customers only and customers only. OLTP tables are normalized, but OLAP tables must be denormalized and this can be achieved by using \define{join operations}. 
+
+\subsection{Query Languages}
+
+A \define{query language} is a language in which users request information from the database. \define{Pure languages} are relational algebra, tuple relational calculus, or domain relational calculus. \emph{Pure langauges} form the underlying basis of query languages that poeple use. 
+
+\subsection{Relational Algebra}
+
+\define{Relational algebra} is a procedural language with six basic operators:
+\begin{itemize}
+  \item select: $\sigma$ \hfill \bold{WHERE} in SQL
+  \item project: $\prod$ \hfill \bold{SELECT} in SQL
+  \item union: $\cup$ \hfill \bold{UNION} in SQL
+  \item set difference: $-$ \hfill \bold{EXCEPT} in SQL
+  \item cartesian product: $\times$ \hfill \bold{, (comma)} in SQL
+  \item rename: $\rho$ \hfill \bold{AS} in SQL
+\end{itemize}
+The operators take one or two relations as inputs and produce a new relation as a result. 
+
+\begin{example}
+  Translate the following relational algebra to SQL$\dots$
+  \begin{itemize}
+    \item $\sigma_{A=B \textrm{ \^{} } D>5}(r)$ \\ 
+      \code{SELECT * FROM r WHERE A=B and D>5}
+    \item $\prod_{A,C}(r)$ \\ 
+      \code{SELECT A,C FROM R}
+    \item $r \cup s$ \\ 
+      \code{SELECT * FROM r \\ UNION \\ SELECT * FROM S}
+  \end{itemize}
+\end{example}
 
 \end{document}
