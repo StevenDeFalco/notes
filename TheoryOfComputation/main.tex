@@ -312,7 +312,7 @@ For a NFA with $n$ states, the equivalent NFA will need to have $2^{n}$ states.
   The class of regular languages is closed under the star operation. 
 \end{theorem}
 
-\section{Regular Expressions} 
+\subsection{Regular Expressions} 
 
 We can use the regular operations to build up expressions describing languages, which are called \define{regular expressions}. The value of a regular expression is a language. 
 
@@ -447,8 +447,20 @@ A GFNA accepts a string $w$ in $\Sigma^{*}$ if $w=w_1 w_2 \dots w_k$, where each
   Add all pairs $(p,a)$ where exactly one is an accept state to $D$. While True do: Scan over all pairs $(p,q)$ of states not yet distinguished. For each alphabet symbol $a$. If the pair $(\delta(p,a),\delta(q,a))$ is a distinguished, add $(p,q)$ to $D$. If no new pair of states is added to $D\dots$ break. Return D
 \end{definition}
 
-\section{Nonregular Languages}
+\subsection{Nonregular Languages}
 
-% page 101
+The \define{pumping lemma} states taht all regular languages have a special property. If we can show that a language does not have this property, we are guaranteed that it is not regular. The property states that all strings in the language can be "pumped" if they are at least as long as a certain special value called the \define{pumping length}. That means each such string contains a section that can be repeated any number of times with the resulting string remaining in the language. 
+\begin{theorem}[Pumping Lemma]
+  If $A$ is a regular language, then there is a number $p$ (the pumping length) where if $s$ is any string in $A$ of lenght at least $p$, then $s$ may be divided into three pieces, $s=xyz$, satisfying the following conditions: 
+  \begin{enumerate}
+    \item for each $i \geq 0$, $xy^{i}z \in A$, 
+    \item $|y| > 0$, 
+    \item $|xy| \leq p$
+  \end{enumerate}
+  Recall the notation where $|s|$ represents the length of the string $s$, $y^i$ means that $i$ copies of $y$ are concatenated together, and $y^0$ equals $\epsilon$. \\ 
+  When $s$ is divided into $xyz$, either $x$ or $z$ may be $\epsilon$, but condition 2 says that $y \neq \epsilon$. Observe that without condition 2 the theorem would be trivially true. Condition 3 states that the pieces $x$ and $y$ together have length at most $p$. It is an extract technical condition that we occasionally find useful when proving certain languagtes to be nonregular. 
+\end{theorem}
+
+% page 125
 
 \end{document}
