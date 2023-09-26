@@ -420,6 +420,33 @@ A GFNA accepts a string $w$ in $\Sigma^{*}$ if $w=w_1 w_2 \dots w_k$, where each
   \item for each $i$, we have $w_i \in L(R_i)$, where $R_i = \delta(q_i - 1, q_i)$; in other words, $R_i$ is the expression on the arrow from $q_{i-1}$ to $q_i$. 
 \end{enumerate}
 
+\begin{theorem}
+  For every regular language $L$, there exists a \emph{unique} minimal DFA $M$ such that $L=L(M)$. However, this is \emph{not true} for NFAs; there is not necessarily a unique minimal DFA.  
+\end{theorem}
+
+\begin{definition}[Indistinguishable States]
+  States $p$ and $q$ are indistinguishable: $p \sim q$ if for every string $w$, the computation starting in state $p$ reaches an accept state if and only if the computation from $q$ reaches an accept state. 
+\end{definition}
+
+\begin{lemma}
+  The indistinguishability relation, $\sim$, is an equivalence relation. \bold{Proof}$\dots$
+  \begin{itemize}
+    \item \bold{Reflexive}: $p \sim p$ 
+    \item \bold{Symmetric}: $p \sim q \leftrightarrow q \sim p$
+    \item \bold{Transitive}: $(p \sim q \cap q \sim r) \rightarrow p \sim r$
+  \end{itemize}
+\end{lemma}
+
+\begin{lemma}[The Distinguishability Lemma]
+  If for some symbol $\delta(p,a) \not\sim \delta(q,a)$ then $p \not\sim q$
+\end{lemma}
+
+\begin{definition}[Finding Distinguishable Pairs of States]. \\
+  \bold{Initialize}: Create an empty set $D$ which will store pairs of distnguishable states 
+  \bold{Step 0}: \\ 
+  Add all pairs $(p,a)$ where exactly one is an accept state to $D$. While True do: Scan over all pairs $(p,q)$ of states not yet distinguished. For each alphabet symbol $a$. If the pair $(\delta(p,a),\delta(q,a))$ is a distinguished, add $(p,q)$ to $D$. If no new pair of states is added to $D\dots$ break. Return D
+\end{definition}
+
 \section{Nonregular Languages}
 
 % page 101
