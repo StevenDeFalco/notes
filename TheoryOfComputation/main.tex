@@ -457,10 +457,74 @@ The \define{pumping lemma} states taht all regular languages have a special prop
     \item $|y| > 0$, 
     \item $|xy| \leq p$
   \end{enumerate}
-  Recall the notation where $|s|$ represents the length of the string $s$, $y^i$ means that $i$ copies of $y$ are concatenated together, and $y^0$ equals $\epsilon$. \\ 
+  Recall the notation where $|s|$ represents the length of the string $s$, $y^i$ means that $i$ copies of $y$ are concatenated together, and $y^0$ equals $\epsilon$. \\
+
   When $s$ is divided into $xyz$, either $x$ or $z$ may be $\epsilon$, but condition 2 says that $y \neq \epsilon$. Observe that without condition 2 the theorem would be trivially true. Condition 3 states that the pieces $x$ and $y$ together have length at most $p$. It is an extract technical condition that we occasionally find useful when proving certain languagtes to be nonregular. 
 \end{theorem}
 
-% page 125
+\section{Context-Free Languages}
+
+In this chapter, we present \define{context-free grammers}, a more powerful method of describing languages. Suych grammars can describe features that have a recursive structure, which makes them useful in a variety of applications. \\ 
+
+The collection of languages associated with context-free grammars are called the \define{context-free languages}. They include all the regular languages of context-free grammars and study the properties of context-free lagnuages. We also introduce \define{pushdown automata}, a class of machines recognizing the context-gree languages. 
+
+\subsection{Context-Free Grammars}
+
+A grammar consists of a collection of \define{substitution rules}, also called \define{productions}. Each rule appears as a line in the grammar, comprising a symbol and a string separated by an arrow. The symbol is called a \define{variable}. The string consists of variables and other symbols called \define{terminals}. The variable symbols often are represented by capital letters. The terminals are analagous to the input alphabet and often are represented by lowercase letters, numbers, or special symbols. One variable is designated as the \define{start variabele}. It usually occurs on the left-hand side of the topmost rule. \\ 
+
+You use a grammar to describe a language by generating each string of that language in the following manner.  
+\begin{enumerate}
+  \item Write down the start variable. It is the variable on the left-hand side of the top rule, unless specified otherwise. 
+  \item Find a variable that is written down and a rule that starts with that variable. Replace the written down variable with the right-hand side of that rule. 
+  \item Repeat step 2 until no variables remain. 
+\end{enumerate}
+
+For example, grammar $G_1$ generates the string $000\#111$. The sequence of substitutions to obtain a string is called a \define{derivation}. A derivation of string $000\#111$ in grammar $G_1$ is $$A \rightarrow 0A1 \rightarrow 00A11 \rightarrow 000A111 \rightarrow 000B111 \rightarrow 000\#111$$ You may also represent the same information pictorially with a \define{parse tree}. \\ 
+
+\begin{definition}[Formal Definition of a Context-Free Grammar]
+  A \define{context-free grammar} is a 4-tuple $(V, \Sigma, R, S)$, where 
+  \begin{enumerate}
+    \item $V$ is a finite set called the \define{variables}
+    \item $\Sigma$ is a finite set, disjoint from $V$, called the \define{terminals}
+    \item $R$ is a finite set of \define{rules}, with ecah rule being a variable and a string of variables and terminals 
+    \item $S \in V$ is the start variable.
+  \end{enumerate}
+\end{definition}
+
+If $u$, $v$, and $w$ are strings of variables and terminals, and $A \rightarrow w$ is a rule of the grammar, we say that $uAv$ \define{yields} $uwv$, written $uAv \rightarrow uwv$. Say that $u$ \define{derives} $v$, written $u \rightarrow v$, if $u = v$ or if a sequence $u_1 , u_2 , \dots , u_k$ exists for $k \geq 0$ and $$u \rightarrow u_1 \rightarrow u_2 \rightarrow \cdots \rightarrow u_k \rightarrow v$$ The \define{language of the grammar} is $\{w \in \Sigma^{*} \vert S \rightarrow w \}$.
+
+\subsubsection{Designing Context-Free Grammars}
+
+First, many CFLs are the union of simple CFLs. If you must construct a CFG for a CFL that you can break into simpler pieces, do so and then construct indivdual grammars for each piece. These individual grammars can be easily merged into a grammar for the original language by combining their rules and then adding the new rule $S \rightarrow S_1 \vert S_2 \vert \cdots \vert S_k$, where the variables $S_i$ are the start variables for the individual grammars. \\ 
+
+Second, constructing a CFG for a language that happens to be regular is easy if you can first construct a DFA for that language. You can convert any DFA into an equivalence CFG as follows. Make a variable $R_i$ for each state $q_i$ of the DFA. Add the rule $R_i \rightarrow \epsilon$ if $q_i$ is an accept state of the DFA. Make $R_0$ the start variable of the grammar where $q_0$ is the start state of the machine. Verify on your own that the resulting CFG generates the same langauge that the DFA recognizes. \\ 
+
+Third, certain context-free languages contain strings with two substrings that are "linked" in the sense that a machine for such a language would need to remember an unbounded amount of information about one of the substrings to verify that it corresponds properly to the other substring. This situation occurs in the language $\{0^n 1^n \vert n \geq 0\}$ because a machine would need to rememeber the number of 0s in order to verify that it equals the number of 1s. You can construct a CFG to handle this situation by using a rule of the form $R \rightarrow uRv$, which generates strings wherein the portion containing the $u$'s corresponds to the poertion containing the $v$'s. \\ 
+
+Finally, in more complex languages, the strings may contain certain structures that appear recursively as part of other (or the same) structures. Any time the symbol $a$ appears, an entire parenthesized expressin might appear recursively instead. To achieve this effect, place the variable symbol generating the structure in the location of the rules corresponding to where that structure may recursively appear. 
+
+\subsubsection{Ambiguity}
+
+Sometimes a grammar can generate the same string in several different ways. Such a string will have several different parse trees and thus several different meanings. This result may be undesirable for certain applications, such as programming languages, where a program should have a unique interpretation. If a grammar generates the same string in several different ways, we say that the string is derived \emph{ambiguously} in that grammar. If a grammar generates some string ambiguously, we say that the grammar is \emph{ambiguous}. \\ 
+
+\begin{definition}
+  A string $w$ is derived \define{ambiguously} in context-free grammar $G$ if it has two or more different leftmost derivations. Grammar $G$ is \define{ambiguous} if it generates some string ambiguously. 
+\end{definition}
+
+Sometimes when we have an ambiguous grammar we can find an unambigous grammar that generates the same language. Some context-free languages, however, can be generated only by ambiguous grammars. Such languages are called \define{inherently ambiguous}. 
+
+\subsubsection{Chomsky Normal Form}
+
+When working with context-free grammars, it is often convenient to have them in simplified form. One of the simplest and most useful forms is called the Chomsky normal form. Chomsky normal form is useful in giving algorithms for working with context-free grammars. 
+
+\begin{definition}[Chomsky Normal Form]
+  A context-free grammar is in \define{Chomsky normal form} if every rule is of the form $$A \rightarrow BC$$ $$A \rightarrow a$$ where $a$ is any terminal and $A$, $B$, and $C$ are any variables---except that $B$ and $C$ may not be the start variable. In addition, we permit the rule $S \rightarrow \epsilon$, where $S$ is the start variable. 
+\end{definition}
+
+\begin{theorem}
+  Any context-free language is generated by a context-free grammar in Chomsky normal form.
+\end{theorem}
+
+% page 135
 
 \end{document}
