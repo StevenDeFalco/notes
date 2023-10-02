@@ -123,10 +123,33 @@ The operators take one or two relations as inputs and produce a new relation as 
     \item $\sigma_{A=B \textrm{ \^{} } D>5}(r)$ \\ 
       \code{SELECT * FROM r WHERE A=B and D>5}
     \item $\prod_{A,C}(r)$ \\ 
-      \code{SELECT A,C FROM R}
+      \code{SELECT A,C FROM r}
     \item $r \cup s$ \\ 
-      \code{SELECT * FROM r \\ UNION \\ SELECT * FROM S}
+      \code{SELECT * FROM r \\ UNION \\ SELECT * FROM s}
+    \item $r - S$ \\ 
+      \code{SELECT * FROM r \\ EXCEPT \\ SELECT * FROM s}
   \end{itemize}
 \end{example}
+
+When writing a \define{SQL query} always pull all your data togther into a single view. This means that you will start with a \code{FROM} clause. In OLTP, all of the tables are denormalized into a single table so that when making queries, you can have a simple \code{FROM} clause where the data is already in a single view. \define{Join} is a more selective version of \define{cartesian product}. \bold{Join} is essentially a cartesian product followed by a select operation. Both \bold{join} and \bold{cartesian product} are $\mathcal{O}(n^2)$, but \bold{join} will very likely run faster in most cases. \\ 
+
+\begin{definition}[Rename Operation]
+  ALlows us to name, and therefore to refer to, the results of relational algebra expressions. For example, $$\rho_{x}(E)$$ returns the expressio $E$ under the name $X$. If a relational algebra expression $E$ has an arit $n$, then $$\rho_{x(A_1 , A_2 , \dots , A_N)}(E)$$ returns the result fo expression $E$ under the name $X$, and with the attributes renamed to $A_1 , A_2 , \dots , A_n$. 
+\end{definition}
+
+\bold{How to write a query (SQL / rel. algebra) based on English Description}$\dots$ 
+\begin{enumerate}
+  \item Identify \emph{data elements}: attributes and columns (e.g. \code{cusomername})
+  \item Identify the \emph{sources} of the data elements in \bold{Step 1} (e.g. \code{customer})
+  \item Identify some \emph{meaningful} relationships between/among the elements in \bold{Step 2} (join/cartesian product followed by selection)
+\end{enumerate}
+
+\begin{example}[Query Translation Practice]
+  Find all loans of over \$ 1200. $$\sigma_{\textrm{amount } > 1200}(loan)$$ \code{SELECT * \\ FROM loan \\ WHERE amt > 1200}. \\ 
+
+  Find the loan number for each loan of an amount greater than \$ 1200. $$\prod_{\textrm{loan\_number}}(\sigma_{\textrm{amount}>1200}(loan))$$ \code{SELECT loan\_numb \\ FROM loan \\ WHERE amt > 1200}. 
+\end{example}
+
+\define{Pushing down of selection operation} is the idea where we perform selection as early as possible to attempt to make the table resulting from a join smaller. This can be used to help optimize SQL queries. Try to minimize the size of the table (reduce the number of rows and columns) that is generated with a join. Push down of the selection operation reduces the number of rows. Projection operation reduces the number of columns. \define{Heuristic optimization} is this process and is done by the DBMS. 
 
 \end{document}
