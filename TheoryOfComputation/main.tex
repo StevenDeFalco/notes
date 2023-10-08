@@ -255,7 +255,7 @@ Machine is initially in start state. From the start state, clones appear in all 
   \item ...
 \end{enumerate}
 
-Every state of a DFA always has exactly one exiting transition arrow for each symbol in the alphabet. NFAs may violate that rule. In an NFA, a state may have zero, one, or many exiting arrows for ecah alphabet symbol. Additionally, in a DFA, labels on the transition arrows are symbols from the alphabet. An NFA may have arrows labeled with members of the alphabet or $\epsilon$. Zero, one, or many arrows may exit from each state with the label $\epsilon$. \\ 
+Every state of a DFA always has exactly one exiting transition arrow for each symbol in the alphabet. NFAs may violate that rule. In an NFA, a state may have zero, one, or many exiting arrows for each alphabet symbol. Additionally, in a DFA, labels on the transition arrows are symbols from the alphabet. An NFA may have arrows labeled with members of the alphabet or $\epsilon$. Zero, one, or many arrows may exit from each state with the label $\epsilon$. \\ 
 
 So how does an NFA compute$\dots$ Suppose that we are running an NFA on an input string and come to a state with multiple ways to proceed. After reading said symbol, the machine splits into multiple copies of itself and follows \emph{all} the possibilities in parallel. Each copy of the machine takes one of the possible ways to proceed and continues as before. If there are subsequent choices, the machine splits again. If the next input symbol doesn't appear on any of the arrows exiting the state occupied by a copy of the machine, that copy of the machine dies, along with the branch of the computation associated with it. Finally, if \emph{any one} of these copies of the machine is in an accept state at the end of the input, the NFA accepts the input string. \\ 
 
@@ -479,14 +479,22 @@ You use a grammar to describe a language by generating each string of that langu
   \item Repeat step 2 until no variables remain. 
 \end{enumerate}
 
-For example, grammar $G_1$ generates the string $000\#111$. The sequence of substitutions to obtain a string is called a \define{derivation}. A derivation of string $000\#111$ in grammar $G_1$ is $$A \rightarrow 0A1 \rightarrow 00A11 \rightarrow 000A111 \rightarrow 000B111 \rightarrow 000\#111$$ You may also represent the same information pictorially with a \define{parse tree}. \\ 
+\begin{definition}[LL(1) Grammar]
+  a language where you process the input left-to-right with the leftmost derivation first and lookahead 1 symbol at a time.
+\end{definition}
+
+For example, grammar $G_1$ generates the string $000\#111$. The sequence of substitutions to obtain a string is called a \define{derivation}. A derivation of string $000\#111$ in grammar $G_1$ is $$A \rightarrow 0A1 \rightarrow 00A11 \rightarrow 000A111 \rightarrow 000B111 \rightarrow 000\#111$$ You may also represent the same information pictorially with a \define{parse tree}.  
+
+\begin{remark}
+  To get the derived string when given a parse tree, take the pre-order traversal of leaves in the parse tree. 
+\end{remark}
 
 \begin{definition}[Formal Definition of a Context-Free Grammar]
   A \define{context-free grammar} is a 4-tuple $(V, \Sigma, R, S)$, where 
   \begin{enumerate}
     \item $V$ is a finite set called the \define{variables}
     \item $\Sigma$ is a finite set, disjoint from $V$, called the \define{terminals}
-    \item $R$ is a finite set of \define{rules}, with ecah rule being a variable and a string of variables and terminals 
+    \item $R$ is a finite set of \define{rules}, with each rule being a variable and a string of variables and terminals 
     \item $S \in V$ is the start variable.
   \end{enumerate}
 \end{definition}
@@ -513,9 +521,13 @@ Sometimes a grammar can generate the same string in several different ways. Such
 
 Sometimes when we have an ambiguous grammar we can find an unambigous grammar that generates the same language. Some context-free languages, however, can be generated only by ambiguous grammars. Such languages are called \define{inherently ambiguous}. 
 
+\begin{example}
+  $\{0^i 1^j 2^k : i=j \textrm{ or } j=k\}$ is inherently ambiguous
+\end{example}
+
 \subsubsection{Chomsky Normal Form}
 
-When working with context-free grammars, it is often convenient to have them in simplified form. One of the simplest and most useful forms is called the Chomsky normal form. Chomsky normal form is useful in giving algorithms for working with context-free grammars. 
+When working with context-free grammars, it is often convenient to have them in simplified form. One of the simplest and most useful forms is called the Chomsky normal form. Chomsky normal form is useful in giving algorithms for working with context-free grammars. This form of a grammar is preferred because the parse tree will be a \bold{binary tree}. 
 
 \begin{definition}[Chomsky Normal Form]
   A context-free grammar is in \define{Chomsky normal form} if every rule is of the form $$A \rightarrow BC$$ $$A \rightarrow a$$ where $a$ is any terminal and $A$, $B$, and $C$ are any variables---except that $B$ and $C$ may not be the start variable. In addition, we permit the rule $S \rightarrow \epsilon$, where $S$ is the start variable. 
@@ -525,6 +537,35 @@ When working with context-free grammars, it is often convenient to have them in 
   Any context-free language is generated by a context-free grammar in Chomsky normal form.
 \end{theorem}
 
-% page 135
+\begin{definition}[Pumping Lemma for Context-Free Languages]. \\
+  $\forall \textrm{ context-free language } A$ \\ 
+  $\exists p$ (the pumping length) \\ 
+  $\forall s \in A, |s| \geq p \rightarrow \exists u,v,x,y,z:s = uvxyz$ where 
+  \begin{enumerate}
+    \item $\forall i \geq 0, uv^i xy^i z \in A$ 
+    \item $|vy| > 0$ 
+    \item $|vxy| \leq p$
+  \end{enumerate}
+
+  \bold{Proof:} Since $A$ is a CFL, there is a grammar $G = (V, \Sigma, R, S)$ that generates $A$. Let $b \geq 2$ be the maximum length of the RHS of a rule in $G$. Then, each node in the parse tree has at most $b$ children. Thus, the maximum length of any string generted by a parse tree of height $h$ is $b^h$. \\ 
+
+If we choose $h = |V| + 1$ one of the $|V|$ non-terminals must repeat. Select $p=b^h = b^{|V|+1}$ so that every string $s, |s| \geq p$, has a repeated non-terminal along a root to-leaf path. We've chosen $p= b^{|V| +1}$ so that condition 1 will be satisfied. Now we show that the string $s(|s| \geq p)$ can be divided into 5 pieces to satisfy 2 and 3. \\ 
+
+  Consider the smallest parse tree of $s$ (fewest number of nodes) with the repeated non-terminal. To satisfy condition 3, choose $R$ which occurs twice within the bottom $|V| + 1$ non-terminals along any path. Then $|vxy \leq b^{|v|+1} = p$.
+\end{definition}
+
+\section{Non-Context-Free Languages}
+
+Here we present a similar pumping lemma for context-free languages. It states that every context-free language has a special value called the \define{pumping length} such that all longer strings in the language can be \emph{pumped}. \emph{Pumped} means that the string can be divided into five parts so that the second and the fourth parts may be repreated together any number of times and the resulting string still remains in the language. 
+
+\begin{theorem}[Pumping lemma for context-free languages]
+  If $A$ is a context-free language, then there is a number $p$ (the pumping length) where, if $s$ is any string in $A$ of length at least $p$, then $s$ may be divided into five pieces $s=uvxyz$ satisfying the conditions
+  \begin{enumerate}
+    \item for each $i \geq 0, uv^i xy^i z \in A$, 
+    \item $|vy| > 0$, 
+    \item $|vxy| \leq p$
+  \end{enumerate}
+  When $s$ is being divided into $uvxyz$, condition 2 says that either $v$ or $y$ is not the empty string. Otherwise the theorem would be trivially true. Condition 3 states that the pieces $v$,$x$, and $y$ together have length at most $p$. This technical condition sometimes is useful in provin that certain languages are not context free. 
+\end{theorem}
 
 \end{document}
