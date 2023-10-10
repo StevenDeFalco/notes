@@ -152,4 +152,49 @@ When writing a \define{SQL query} always pull all your data togther into a singl
 
 \define{Pushing down of selection operation} is the idea where we perform selection as early as possible to attempt to make the table resulting from a join smaller. This can be used to help optimize SQL queries. Try to minimize the size of the table (reduce the number of rows and columns) that is generated with a join. Push down of the selection operation reduces the number of rows. Projection operation reduces the number of columns. \define{Heuristic optimization} is this process and is done by the DBMS. 
 
+\begin{definition}[Set-Intersection Operation ($r \cap s$)]
+  Set intersection is defined as $r \cap s = \{t \vert t \in r \textrm{ and } t \in s\}$. Where we assume that $r$,$s$ have the same \emph{arity} and attributes of $r$ and $s$ are compatible. Note that $r \cap s = r - (r - s)$. 
+\end{definition}
+
+\begin{definition}[Natural-Join Operation ($r \bowtie s$)]
+  Let $r$ and $s$ be relations on schemas $R$ and $S$ repsectively. Then $r \bowtie s$ is a relation on schema $R \cup S$ obtained as follows: 
+  \begin{itemize}
+    \item Consider each pair of tuples $t_r$ and $r$ and $t_s$ from s. 
+    \item If $t_r$ and $t_s$ have the same value on each of the attributes in $R \cap S$, add a tuple $t$ to the result where 
+      \begin{itemize}
+        \item $t$ has the same value as $t_r$ on $r$ 
+        \item $t$ has the same value as $t_s$ on $s$
+      \end{itemize}
+  \end{itemize}
+\end{definition}
+
+\begin{example}[Natural-Join Example]
+  Let $R = (A,B,C,D)$ and $S = (E,B,D)$. \\ 
+  Result schema = $(A,B,C,D,E)$ \\ 
+  $r \bowtie s$ is defined as $\prod_{r.A,r.B,r.C,r.D,r.E}(\sigma_{r.B = s.B \wedge r.D = s.D}(r \times s))$ \\ 
+
+  \code{SELECT *} \\ 
+  \code{FROM r natural join s} \\ 
+
+  \emph{or} \\ 
+
+  \code{SELECT y.A, y.B, y.C, y.D, S.E} \\ 
+  \code{FROM Y,S} \\ 
+  \code{WHERE Y.B = S.B} \\ 
+  \code{and Y.D = S.D}
+\end{example}
+
+\begin{definition}[Division Operation ($r \vert s$)]
+  This operation is suited to queries that include the phrase "for all". Let $r$ and $s$ be relations on schemas $R$ and $S$ respectively where 
+  \begin{itemize}
+    \item $R = (A_1 , \dots , A_m , B_1 , \dots B_n)$ 
+    \item $S = (B_1 , \dots , B_n)$
+  \end{itemize}
+  The result of $r \vert s$ is a relation on schema $R - S = (A_1 , \dots , A_m)$ $$r \vert s = \{t \vert t \in \prod_{R-S}(r) \wedge \forall u \in s (tu \in r)\}$$ where $tu$ means the concatenation of tuples $t$ and $u$ to produce a single tuple.
+\end{definition}
+
+\begin{remark}
+  Let $q = r \vert s$, then $q$ is the largest relatin satisfying $q \times s \subseteq r$. 
+\end{remark}
+
 \end{document}
