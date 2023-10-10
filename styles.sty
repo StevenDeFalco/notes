@@ -44,6 +44,10 @@
 % usage: \code{print("Hello world!")}
 \newcommand{\code}[1]{\texttt{#1}}
 
+% to make \vert put spaces on either side 
+\let\oldvert\vert 
+\renewcommand{\vert}{\,\oldvert\,}
+
 
 % formatting defaults...
 
