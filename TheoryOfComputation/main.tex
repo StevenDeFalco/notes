@@ -554,7 +554,56 @@ If we choose $h = |V| + 1$ one of the $|V|$ non-terminals must repeat. Select $p
   Consider the smallest parse tree of $s$ (fewest number of nodes) with the repeated non-terminal. To satisfy condition 3, choose $R$ which occurs twice within the bottom $|V| + 1$ non-terminals along any path. Then $|vxy \leq b^{|v|+1} = p$.
 \end{definition}
 
-\section{Non-Context-Free Languages}
+\subsection{Pushdown Automata}
+
+We will introduce a new type of computational model called \define{pushdown automata}. These automata are like nondeterministic finite automata but have an extra component called \define{stack}. The stack provides additional memory beyond the finite amount available in the control. The stack allows pushdown automata to recognize some nonregular languages. \\ 
+
+Pushdown automata are equivalent in power to context-free grammar. This means that we can prove a language is context free by giving either a context-free grammar generating it or a pushdown automata recognizing it. \\ 
+
+A pushdown automaton (PDA) can write symbols on the stack and read them back later. Writing a symbol \emph{pushes down} all the other symnbols on the stack. At any time the symbol on the top of the stack can be read and removed. THe remaining symbols then move back up. Writing a symbol on the stack is referred to as \define{pushing} the symbol, and removing a symbol is referred to as \define{popping} it. Note that all access to the stack, for both reading and writing, may be done only at the top. \\ 
+
+\subsubsection{Formal Definition of a Pushdown Automaton}
+
+\begin{definition}[Formal Definition of a Pushdown Automaton]
+  A \define{pushdown automaton} is a 6-tuple $(Q, \Sigma, \Gamma, \delta, q_0 , F)$, where $Q, \Sigma, \Gamma, and F$ are all finite sets, and 
+  \begin{enumerate}
+    \item $Q$ is the set of states 
+    \item $\Sigma$ is the input alphabet 
+    \item $\Gamma$ is the stack alphabet 
+    \item $\delta: Q \times \Sigma_{\epsilon} \times \Gamma_{\epsilon} \rightarrow P(Q \times \Gamma_{\epsilon})$ is the transition function 
+    \item $q_0 \in Q$ is the start state 
+    \item $F \subseteq Q$ is the set of accept states
+  \end{enumerate}
+\end{definition}
+
+A pushdown automaton $M = (Q, \Sigma, \Gamma, \delta, q_0 , F)$ computes as follows. It accepts input $w$ if $w$ can be written as $w = w_1 w_2 \cdots w_m$, where each $w_i \in \Sigma_{\epsilon}$ and sequences of states $r_0 , r_1 , \dots , r_m \in Q$ and strings $s_0 , s_1 , \dots , s_m \in \Gamma^{*}$ exist that satisfy the following three conditions. The strings $s_i$ represent the sequence of stack contents that $M$ has on the accepting branch of the computation. 
+\begin{enumerate}
+  \item $r_0 = q_0$ and $s_0 = \epsilon$. This condition signifies that $M$ starts out properly, in the start state and with an empty stack. 
+  \item For $i = 0, \dots , m-1$, we have $(r_{i+1},b) \in \delta(r_i , w_{i+1}, a)$, where $s_i = at$ and $s_{i+1} = bt$ for some $a,b \in \Gamma_{\epsilon}$ and $t \in \Gamma^{*}$. This condition states that $M$ moves properly according to the state, stack, and next input symbol. 
+  \item $r_m \in F$. This condition states that an accept state occurs at the input end. 
+\end{enumerate}
+
+\begin{remark}
+  The formal definition of a PDA contains no explicit mechanism to allow the PDA to tet for an empty stack.
+\end{remark}
+
+\subsubsection{Equivalence with Context-Free Grammars}
+
+We will show that contexdt-free grammars and pushdown automata are equivalent in power. Both are capable of describing the class of context-free languages. 
+
+\begin{theorem}
+  A language is context free if and only if some pushdown automaton recognizes it. 
+\end{theorem}
+
+\begin{lemma}
+  If a language is context free, then some pushdown automaton recognizes it.
+\end{lemma}
+
+\begin{lemma}
+  If a pushdown automaton recognizes some language, then it is context free. 
+\end{lemma}
+
+\subsection{Non-Context-Free Languages}
 
 Here we present a similar pumping lemma for context-free languages. It states that every context-free language has a special value called the \define{pumping length} such that all longer strings in the language can be \emph{pumped}. \emph{Pumped} means that the string can be divided into five parts so that the second and the fourth parts may be repreated together any number of times and the resulting string still remains in the language. 
 
