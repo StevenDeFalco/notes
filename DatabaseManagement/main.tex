@@ -5,6 +5,7 @@
 
 % import note styles
 \usepackage{../styles}
+\usepackage{amsmath}
 
 % Heading information
 \title{CS561: Database Management Systems Notes}
@@ -196,5 +197,80 @@ When writing a \define{SQL query} always pull all your data togther into a singl
 \begin{remark}
   Let $q = r \vert s$, then $q$ is the largest relatin satisfying $q \times s \subseteq r$. 
 \end{remark}
+
+\begin{definition}[Generalized Projection]
+  Extends the prjection operation by allowing arithmetic functions to be used in the projection list $$\prod_{F_1 , F_2 , \dots , F_n}(E)$$ where $E$ is any relational-algebra expression. Each of $F_1 , F_2, \dots F_n$ are arithmetic expressions involving constants and attributes in the schema of E. 
+\end{definition}
+
+An \define{aggregation function} takes a collection of values and returns a single value as a result. For example, average value, minimum value, maximum value, sum of values, and number of values are all aggregation functions. 
+
+\begin{definition}[Aggregate Operation]
+  $$_{G_1 , G_2, \dots , G_n}g_{F_1(A_1), F_2(A_2 , \dots , F_n(A_n))}(E)$$ where $E$ is any relational-algebra expression. 
+  \begin{itemize}
+    \item $G_1 , G_2 , \dots , G_n$ is a list of attributes on which to group (can be empty) 
+    \item Each $F_i$ is an aggregate function 
+    \item Each $A_i$ is an attribute name
+  \end{itemize}
+\end{definition}
+
+\begin{example}[Group By Examples]
+  \begin{itemize}
+    \item $g_{\textrm{sum}(c)}(r)$ \\ 
+      \code{SELECT sum(c)} \\ 
+      \code{FROM r}
+    \item $_{branch\_name}g_{\textrm{sum}(balance)}(account)$ \\ 
+      \code{SELECT branch\_name, sum(balance)} \\ 
+      \code{FROM account} \\
+      \code{Group By branch\_name}
+  \end{itemize}
+\end{example}
+
+The result of an aggregation does not have a name, but we can use the rename operation to give it a name. For convenience, we permit renaming as a part of aggregate operation: $$_{branch\_name}g_{\textrm{sum}(balance) \textrm{ as }sum_balance}(account)$$
+
+\begin{definition}[Outer Join]
+  an extension of the join operation that avoids loss of information. \define{Outer Join} computes the join and then adds tuples from one relation that does not match tuples in the other relation to the result of the join. This uses \emph{null} values which signify that the value is unknown or does not exist. All comparisons involving \emph{null} are false by definition. \\ 
+
+  Within this, there is left and right outer join. In \define{left outer join}, the results include those from inner join and the entities from the first entity set that are not included in result of an inner join. Values that are missing (the reason they are not included in the inner join) will have null-values. There is also \define{full outer join} which is the union of both left and right inner join. 
+\end{definition}
+
+It is possible for tuples to have a null value, denoted by \emph{null}, for some of their attributes. \emph{null} signified an unknown value or that a value does not exist. The result of any arithmetic expression involving \emph{null} is \emph{null}. Aggregate functions simply ignore null values. For duplicate elimination and grouping, null is treated like any other value, and two nulls are assumed to be the same. \\ 
+
+Comparisons with null values return the special truth value: \define{unknown}. There are special rules involving the \emph{unknown} truth value:
+\begin{itemize}
+  \item OR \\
+    \begin{align*}
+      (unknown \textrm{ or } true) &= true, \\ 
+      (unknown \textrm{ or } false) &= unknown \\ 
+      (unknown \textrm{ or } unknown) &= unknown
+    \end{align*}
+  \item AND 
+    \begin{align*}
+      (true \textrm{ and } unknown) &= unknown, \\ 
+      (false \textrm{ and } unknown) &= false \\ 
+      (unknown \textrm{ and } unknown) &= unknown 
+    \end{align*}
+  \item (\bold{not} $unknown$) = $unknown$
+\end{itemize}
+
+\begin{definition}[Deletion]
+  A delete request is expressed similarly to a query, except instead of displaying tuples to the user, the selected tuples are removed from the data base. Can only delete whole tuples; cannot delete values on only particular values. A deletion is expressed in relational algebra by: $$r \leftarrow r - E$$ where $r$ is a relation and $E$ is a relational algebra query. 
+\end{definition}
+
+\begin{definition}[Insertion]
+  To insert data into a relation, we either: 
+  \begin{itemize}
+    \item specify a tuple to be inserted 
+    \item write a query whose result is a set of tuples to be inserted 
+  \end{itemize}
+  In relational algebra, an insertion is expressed by: $$r \leftarrow r \cup E$$ where $r$ is a relation and $E$ is a relational algebra expression. The insertion of a single tuple is expressed by letting $E$ be a constant relation containing one tuple. 
+\end{definition}
+
+\begin{definition}[Updating]
+  A mechanism to change a value in a tuple without charting all values in the tuple. Use the generalized projection operator to do this task $$r \leftarrow \prod_{F_1, F_2, \dots , F_l}(r)$$ Each $F_i$ is either 
+  \begin{itemize}
+    \item The $l^{\textrm{th}}$ attribute of $r$, if the $l^{\textrm{th}}$ attribute is not updated, or, 
+    \item if the attribute to be updated $F_i$ is an expression, involving only constants and the attributes of $r$, which gives the new value for the attribute
+  \end{itemize}
+\end{definition}
 
 \end{document}
