@@ -8,6 +8,7 @@
 \usepackage{titlesec} % to make custom section formatting 
 \usepackage{amsthm}   % to customize theorems 
 \usepackage{changepage}
+\usepackage{amsmath}  % to get align* environment
 
 % Define our custom definition environment
 \newtheoremstyle{mydefinition}
@@ -48,6 +49,9 @@
 \let\oldvert\vert 
 \renewcommand{\vert}{\,\oldvert\,}
 
+% to make \wedge put spaces on either side 
+\let\oldwedge\wedge
+\renewcommand{\wedge}{\,\oldwedge\,}
 
 % formatting defaults...
 
