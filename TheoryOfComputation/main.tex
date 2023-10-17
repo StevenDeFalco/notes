@@ -584,8 +584,49 @@ A pushdown automaton $M = (Q, \Sigma, \Gamma, \delta, q_0 , F)$ computes as foll
 \end{enumerate}
 
 \begin{remark}
-  The formal definition of a PDA contains no explicit mechanism to allow the PDA to tet for an empty stack.
+  The formal definition of a PDA contains no explicit mechanism to allow the PDA to test for an empty stack.
 \end{remark}
+
+\begin{remark}[At each step of reading a PDA]$\dots$
+  \begin{enumerate}
+    \item Choose whether or not to read an input symbol. 
+      \begin{itemize}
+        \item Input head advances if input symbol is read 
+      \end{itemize}
+    \item Choose whether or not to pop the stack 
+    \item Choose whether or not to push symbol on stack 
+    \item Choose next state, pushed symbol depending on 
+      \begin{itemize}
+        \item Current state 
+        \item Input symbol (if one was read) 
+        \item Stack symbol (if one was popped)
+      \end{itemize}
+  \end{enumerate}
+\end{remark}
+
+The PDA \bold{accepts the input} when:
+\begin{itemize}
+  \item One or more computation paths end in an accept state 
+  \item All the input is consumed 
+  \item (no requirement for the stack)
+\end{itemize}
+The PDA \bold{rejects} when every computation path: 
+\begin{itemize}
+  \item Ends in a non-accepting state, or
+  \item is incomplete (the transition function is undefined at some point during computation)
+\end{itemize}
+
+\begin{remark}[Language for transition function]
+  Some PDA transition function $a,b \rightarrow c$ says that in the current state$\dots$ if we read symbol $a$ as input, and can pop symbol $b$ from the top of the stack, then we take this transition and push symbol $c$ to the top of the stack. If we do not read symbol $a$ or symbol $b$ is not at the top of the stack, then we cannot take this transition. We may also use $\epsilon$ in place of any symbol to describe the lack of a requirement to accept/do anything with that symbol.
+\end{remark}
+
+\begin{example}[Transition function]
+  For example some transition function $\epsilon , \epsilon \rightarrow S$ allows us to start in the current state and push a $S$ symbol to the stack without transitioning state or requiring any pops from the stack
+\end{example}
+
+\begin{definition}[Deterministic Pushdown Automata]
+  A deterministic-PDA has the same properties as a normal (non-deterministic) PDA except for the transition function. Each state must have exactly one transition defined for every possible input symbol. That is the transition function $\delta: Q \times (\Sigma \cup \{\epsilon\}) \times (\Gamma \cup \{\epsilon\}) \cup \{\epsilon\}$ for every $q \in Q, a \in \Sigma, x \in \Gamma$ exactly one of $\delta(q,a,x), \delta(q,\epsilon,x), \delta(q,a,\epsilon), \delta(q,\epsilon,\epsilon)$
+\end{definition}
 
 \subsubsection{Equivalence with Context-Free Grammars}
 
@@ -614,7 +655,7 @@ Here we present a similar pumping lemma for context-free languages. It states th
     \item $|vy| > 0$, 
     \item $|vxy| \leq p$
   \end{enumerate}
-  When $s$ is being divided into $uvxyz$, condition 2 says that either $v$ or $y$ is not the empty string. Otherwise the theorem would be trivially true. Condition 3 states that the pieces $v$,$x$, and $y$ together have length at most $p$. This technical condition sometimes is useful in provin that certain languages are not context free. 
+  When $s$ is being divided into $uvxyz$, condition 2 says that either $v$ or $y$ is not the empty string. Otherwise the theorem would be trivially true. Condition 3 states that the pieces $v$,$x$, and $y$ together have length at most $p$. This technical condition sometimes is useful in proving that certain languages are not context free. 
 \end{theorem}
 
 \end{document}
