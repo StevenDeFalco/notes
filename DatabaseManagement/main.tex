@@ -273,4 +273,73 @@ Comparisons with null values return the special truth value: \define{unknown}. T
   \end{itemize}
 \end{definition}
 
+\section{SQL}
+
+An SQL relation si defined using the \define{create table} command: 
+\begin{align*}
+  \textrm{create table } r &(A_1 D_1 , A_2 , D_2 , \dots A_n D_n , \\
+  &(\textrm{integrity-constraint}_1), \\ 
+  &\dots , \\ 
+  &(\textrm{integrity-constraint}_k))
+\end{align*}
+\begin{itemize}
+  \item $r$ is the name of the relation 
+  \item each $A_i$ is an attribute name in the schema of relation $r$ 
+  \item $D_i$ is the data type of values in the domain of attribute $A_i$
+\end{itemize}
+
+The \define{drop table} command deletes all information about the dropped relation from the database. The \define{alter table} command is used to add attributes to an existing relation $$\textrm{alter table } r \textrm{ add } A \, D$$ where $A$ is the name of the attribute to be added to relation $r$ and $D$ is the domain of $A$. All tuples in the relation are assigned $null$ as the value for the new attribute. The \define{alter table} command can also be used to drop attributes of a relation $$\textrm{alter table } r \textrm{ drop } A$$ where $A$ is the name of an attribute of relation $r$. Dropping of attributes is not supported by many databases. \\ 
+
+SQL is based on a set and relational operations with certain modifications and enhancements. A typical SQL query has the form: 
+\begin{align*}
+  &\textrm{select } A_1 , A_2 , \dots A_n \\ 
+  &\textrm{from } r_1 , r_2 , \dots , r_m \\ 
+  &\textrm{where } P 
+\end{align*}
+\begin{itemize}
+  \item $A$ represents an attribute 
+  \item $R_i$ represents a relation 
+  \item $P$ is a predicate 
+\end{itemize}
+This query is equivalent to the relation algebra expression $$\prod_{A_1 , A_2 , \dots , A_n}(\sigma_p (r_1 \times r_2 \times \dots \times r_m))$$ The result of an SQL query is a relation. \\ 
+
+The \define{select} clause lists the attributes desired in the result of a query, and this corresponds to the projection operation of the relational algebra. SQL allows duplicaties in relations as wlel as in query results; to force the elimination of duplicates, insert he keyword \bold{distinct} after select. The keyword \bold{all} specifies that duplicates not be removed. An asterisk in the select clause denotes \emph{all attributes}. The \bold{select} clause can contain arithmetic expressions involvin the operation +,-,*, and /, and operating on constants or attributes of tuples. \\ 
+
+The \bold{where} clause specifies conditions that the result must satisfy; this corresponds to the selection predicate of the relational algebra. Compraison results can be combined using the logical connectives \bold{and}, \bold{or}, and \bold{not}. Comparisons can be applied to results of arithmetic expressions. SQL includes a between comparison operator. 
+\begin{example}[Between operator] 
+  Find the loan number of those loans with loan amounts bewtween \$90,000 and \$100,000. \\ 
+  \begin{lstlisting}[language=SQL]
+    select loan_number 
+    from loan 
+    where amount between 90000 and 100000
+  \end{lstlisting}
+\end{example}
+
+The \define{from} clause lists the relations involved in the query; this corresponds to the Cartesian product operation of the relational algebra. \\ 
+
+SQL allows renaming relations and attributes using the \bold{as} clause: $$old-name \textrm{ as } new-name$$
+
+SQL includes a string-matching oeprator for comparisons on character strings. The operator \emph{like} uses patterns that are described using two special characters: 
+\begin{itemize}
+  \item percent (\%). The \% character matches any substring 
+  \item underscore (\_). The \_ character matches any character
+\end{itemize}
+SQL supports a variety of string operations such as 
+\begin{itemize}
+  \item concatentation (using "||")
+  \item concerting from upper to lower case (and vice versa) 
+  \item finding string length, extracting substrings, etc.
+\end{itemize}
+
+We may specify \define{desc} for descending order or \define{asc} for ascending order, for each attribute; ascending order is the default 
+\begin{lstlisting}[language=SQL]
+  order by customer_name desc
+\end{lstlisting}
+
+The set operations \bold{union}, \bold{intersect}, and \bold{except} operate on relations and correspond to the rleational algebra operations $\cup$, $\cap$, $-$. Each of the operations automatically eliminates duplicates; to retain all duplicates use the corresponding multiset versions \bold{union all}, \bold{intersect all}, and \bold{except all}. 
+
+\begin{remark}
+  Predicates in the \bold{having} clause are applied after the formation of groups whereas predicates in the \bold{where} clause are applied before forming groups. 
+\end{remark}
+
 \end{document}
