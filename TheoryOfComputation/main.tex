@@ -658,4 +658,66 @@ Here we present a similar pumping lemma for context-free languages. It states th
   When $s$ is being divided into $uvxyz$, condition 2 says that either $v$ or $y$ is not the empty string. Otherwise the theorem would be trivially true. Condition 3 states that the pieces $v$,$x$, and $y$ together have length at most $p$. This technical condition sometimes is useful in proving that certain languages are not context free. 
 \end{theorem}
 
+\section{The Church-Turing Thesis}
+
+\subsection{Turing Machines}
+
+\define{Turing machines} are fimilar to finite automaton but with an unlimited and unrestricted memory; they are much more accurate models of a general purpose computer. The \define{turing machine} uses an infinite tapes as its unlimited memory. It has a tape head that can read and write symbols and move around on the tape. Initially the tape contains only the input string and is blank everywhere else. If the machine needs to store information, it may write this information on the tape. To read the information that it has written, the macnine can move its head back over it. The machine continues computing until it decides to produce an output. The outputs \emph{accept} and \emph{reject} are obtained by entering designated accepting and rejecting states. If it doesn't enter an accepting or a rejecting state, it will go on forever, never halting. \\ 
+
+The following list summarizes the differences between finite automata and turing machines. 
+\begin{enumerate}
+  \item A turing machine can both write on the tape and read from it 
+  \item The read-write head can move both to the left and to the right  
+  \item The tape is infinite 
+  \item The special states for rejecting and accepting take effect immediately
+\end{enumerate}
+
+The heart of the definition of a Turing machine is the transition function $\delta$ because it tells us how the machine gets from one step to the next. For a Turing machine, $\delta$ takes the form $Q \times \Gamma \rightarrow Q \times \Gamma \times \{L,R\}$. That is, when the machine is in a certain state $q$ and the head is over a tape square containing a symbol $a$, and if $\delta(q,a) = (r,b,L)$, the machine writes the symbol $b$ replacing the $a$, and goes to state $r$. The third component is either L or R and indicates whether the head moves to the left or right after writing. In this case, the L indicates a move to the left. 
+
+\begin{definition}[Formal Definition of a Turing Machine]
+  A \define{Turing machine} is a 7-tuple, $(Q, \Sigma , \Gamma, \delta, q_0 , q_{\textrm{accept}} , q_{\textrm{reject}})$, where $Q, \Sigma, \Gamma$ are all finite sets and 
+  \begin{enumerate}
+    \item $Q$ is the set of states 
+    \item $\Sigma$ is the input alphabet not containing the \define{blank symbol} \textvisiblespace
+    \item $\Gamma$ is the tape alphabet, where $\textvisiblespace \in \Gamma$ and $\Sigma \subseteq \Gamma$ 
+    \item $\delta: Q \times \Gamma \rightarrow Q \times \Gamma \times \{L,R\}$ is the transition function 
+    \item $q_0 \in Q$ is the start state 
+    \item $q_{\textrm{accept}} \in Q$ is the accept state 
+    \item $q_{\textrm{reject}} \in Q$ is the reject state, where $q_{\textrm{reject}} \neq q_{\textrm{accept}}$ 
+  \end{enumerate}
+\end{definition}
+
+A Turing machine $M=(Q, \Sigma, \Gamma , \delta , q_0 , q_{\textrm{accept}} , q_{\textrm{reject}})$ computes as follows. Initially, $M$ receives its input $w = w_1 w_2 \dots w_n \in \Sigma^{*}$ on the leftmost $n$ squares of the tape, and the rest of the tape is blank. The head starts on the leftmost square of the tape. Note that $\Sigma$ does not contain the blank symbol, so the first blank appearing on the tape marks the end of the input. Once $M$ has started, the computation proceeds according to the rules described by the transition function. If $M$ ever tries to move its head to the left off the left-hand end of the tape, the head stays in the same place for that move, even though the transition function indicates L. The computation continues until it enters either the accept or reject states, at which points it halts. If neither occurs, $M$ goes on forever.  \\ 
+
+As a Turing machine computes, changes occur in the current state, the current tape contents, and the current head location. A setting of these three items is called a \define{configuration} of the Turing machine. Configurations often are represented in a special way. For a state $q$ and two strings $u$ and $v$ over the tape alphabet $\Gamma$, we write $u q v$ for the configuration where the current state is $q$, the current tape contents is $uv$, and the current head location is the first symbol of $v$. The tape contains only blanks following the last symbol of $v$. \\ 
+
+Say that configuration $C_1$ \define{yields} configuration $C_2$ if the Turing machine can legally go from $C_1$ to $C_2$ in a single step. We define this notion formally as follows. \\ 
+Suppose that we have $a$, $b$, and $c$ in $\Gamma$, as well as $u$ and $v$ in $\Gamma^{*}$ and states $q_i$ and $q_j$. In that case, $uaq_i bv$ and $uq_j acv$ are two configurations. Say that $$uaq_i bv \textrm{  yields  } uq_j acv$$ if in the transition function $\delta(q_i,b) = (q_j , c , L)$. That handles the case where teh Turing machine moves leftward. For a rigthward move, say that $$uaq_i bv \textrm{  yields  } uacq_j v$$ if $\delta(q_i,b) = (q_j , c, R)$. \\ 
+
+Special cases occur when the head is at one of the ends of the configuratino. For the left-hand end, the configuration $q_i bv$ yeilds $q_j cv$ if the transition is left-moving (because we prevent the machine from going off the left-hand end of the tape), and it yields $c q_j v$ for the right-moving transition. FOr the right-hand end, the configuration $uaq_i$ is equivalent to $uaq_i \textvisiblespace$ because we assume that blanks follow the part of the tape represented in the configuration. Thus we can handle this case as before, with the head no longer at the right-hand end. \\ 
+
+The \define{start configuration} of $M$ on input $w$ is the configuration $q_0 w$, which indicates that the machine is in the start state $q_0$ with its head at the leftmost position on the tape. In an \define{accepting configuration}, the state of the configuration is $q_{\textrm{accept}}$. In a \define{rejecting configuration}, the state of the configuration is $q_{\textrm{reject}}$. Accepting and rejecting configurations are \define{halting conditions} and do not yield further configurations. Because the machine is defined to halt when in the states $q_{\textrm{accept}}$ and $q_{\textrm{reject}}$, we equivalently could have defined the transition function to have the more complicated form $\delta: Q' \times \Gamma \rightarrow Q \times \Gamma \times \{L,R\}$, where $Q'$ is $Q$ without $q_{\textrm{accept}}$ and $q_{\textrm{reject}}$. A Turing machine $M$ \define{accepts} input $w$ if a sequence of configurations $C_1 , C_2 , \dots , C_k$ exists, where 
+\begin{enumerate}
+  \item $C_1$ is the start configuration of $M$ on input $w$ 
+  \item each $C_i$ yields $C_{i+1}$ 
+  \item $C_k$ is an accepting configuration
+\end{enumerate}
+The collection of strings that $M$ accepts is \define{the language of M}, or \define{the language recognized by M}, denoted $L(M)$. 
+
+\begin{definition}
+  We call a language \define{Turing-recognizable} if some Turing machine recognizes it. 
+\end{definition}
+
+When we start a Turing machine on an input, three outcomes are possible. The machine may \emph{accept}, \emph{reject}, or \emph{loop}. By \define{loop} we mean that the machine simply does not halt. Looping may entail any simply or complex behavior that never leads to a halting state. \\ 
+
+A Turing machine $M$ can fail to accept an input by entering the $q_{\textrm{reject}}$ state and rejecting, or by looping. Sometimes distinguishing a machine that is looping from one that is merely taking a long time is difficult. For this reason, we prefer Turing machines that halt on all inputs; such machines never loop. These machines are called \define{deciders} because they always make a decision to accept or reject. A decider that recognizes some language also is said to \define{decide} that language. 
+
+\begin{definition}
+  Call a language \define{Turing-decidable} or simply \define{decidable} if some machine decides it.
+\end{definition}
+
+\subsection{Variants of Turing Machines} 
+
+% page 200
+
 \end{document}
