@@ -309,9 +309,9 @@ The \bold{where} clause specifies conditions that the result must satisfy; this 
 \begin{example}[Between operator] 
   Find the loan number of those loans with loan amounts bewtween \$90,000 and \$100,000. \\ 
   \begin{lstlisting}[language=SQL]
-    select loan_number 
-    from loan 
-    where amount between 90000 and 100000
+  select loan_number 
+  from loan 
+  where amount between 90000 and 100000
   \end{lstlisting}
 \end{example}
 
@@ -340,6 +340,60 @@ The set operations \bold{union}, \bold{intersect}, and \bold{except} operate on 
 
 \begin{remark}
   Predicates in the \bold{having} clause are applied after the formation of groups whereas predicates in the \bold{where} clause are applied before forming groups. 
+\end{remark}
+
+\code{FROM} clause creates a single table by taking the cartesian product of all the specified table. \code{WHERE} clause creates a smaller table that is a subset of the table created with \code{FROM}. Then \code{GROUP BY} creates a new smaller table with the desired attributes. Finally, \code{HAVING} accesses the small table that is created by the \code{GROUP BY} clause. \code{HAVING} only has access to the output of \code{GROUP BY}. \\ 
+
+SQL provides a mechanism for the nesting of subqueries. A \define{subquery} is a \bold{select-from-where} expression that is nested within another query. A common use of subqueries is to perform tests for set membershup, set comparisons, and set cardinality. 
+
+\begin{example}[Nested Subqueries] . \\
+  \begin{itemize}
+    \item Find all customers who have both an account and a loan at the bank
+      \begin{lstlisting}[language=SQL]
+  select distinct customer_name 
+    from borrower 
+    where customer_name in (select customer_name
+                            from depositor)
+      \end{lstlisting}
+      Without using nested subqueries, you could use intersection or natural join such as seen here. 
+      \begin{lstlisting}[language=SQL]
+  -- intersection
+  select customer_name from borrower 
+  intersect 
+  select customer_name from depositor
+
+
+  -- natural join 
+  select distinct customer_name 
+  from borrower natural join depositor
+      \end{lstlisting}
+
+    \item Find all customers who have a loan at the bank who do not have an account at the bank
+      \begin{lstlisting}[language=SQL]
+  select distinct customer_name 
+    from borrower 
+    where customer_name not in (select customer_name 
+                                from depositor)
+      \end{lstlisting}
+  \end{itemize}
+\end{example}
+
+\begin{definition}[Some Clause]
+  F <comp> \bold{some} $r \Leftrightarrow \exists t \in r$ such that (F <comp> $t$). Where <comp> can be: $<,\leq,>,=,\neq$. 
+\end{definition}
+
+\begin{definition}[All Clause]
+  F <comp> \bold{all} $r \Leftrightarrow \forall t \in r$ (F <comp> $t$)
+\end{definition}
+
+The \bold{exists} construct returns the value \bold{true} if the argument subquery is nonmepty. 
+\begin{center}
+  \bold{exists} $r \Leftrightarrow r \neq \phi$ \\ 
+  \bold{not exists} $r \Leftrightarrow r = \phi$
+\end{center}
+
+\begin{remark}
+  Nested subqueries are computed once and the output is used as reference. 
 \end{remark}
 
 \end{document}
