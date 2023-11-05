@@ -716,8 +716,91 @@ A Turing machine $M$ can fail to accept an input by entering the $q_{\textrm{rej
   Call a language \define{Turing-decidable} or simply \define{decidable} if some machine decides it.
 \end{definition}
 
-\subsection{Variants of Turing Machines} 
+\section{Decidability}
 
-% page 200
+\subsection{Decidable Languages}
+
+\subsubsection{Decidable Problems Concerning Regular Languages}
+
+This language contains the encodings of all DFAs together with strings that the DFAs accept. Let $$A_{\textrm{DFA}} = \{\langle B, w \rangle | B \textrm{ is a DFA that accepts input string } w\}$$ The problem of testing whether a DFA $B$ accepts an input $w$ is the same as the problem of testing whether $\langle B , w \rangle$ is a member of the language $A_{\textrm{DFA}}$. Showing that the language is decidable is the same as showing that the computational problem is decidable. 
+
+\begin{theorem}
+  $A_{\textrm{DFA}}$ is a decidable language. \\ 
+
+  We simply need to present a TM $M$ that decides $A_{\textrm{DFA}}$. \\ 
+  $M$ = On input $\langle B,w \rangle$, where $B$ is a DFA and $w$ is a string:
+  \begin{enumerate}
+    \item Simulate $B$ on input $w$. 
+    \item If the simulation ends in an accept state, \emph{accept}. If it ends in a nonaccepting state, \emph{reject}.
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $A_{\textrm{NFA}}$ is a decidable language. \\ 
+
+  We present a TM $N$ that decides $A_{\textrm{NFA}}$. We could design $N$ to operate like $M$, simulating an NFA instead of a DFA. Instead, we'll do it differently to illustrate a new idea: Have $N$ use $M$ as a subroutine. Because $M$ is designed to work with DFAs, $N$ first converts the NFA it receives as input to a DFA before basing it to $M$. \\ 
+  $N$ = On input $\langle B , w \rangle$, where $B$ is an NFA and $w$ is a string: 
+  \begin{enumerate}
+    \item Convert NFA $B$ to an equivalent DFA $C$, using the standard procedure. 
+    \item Run TM $M$ from the previous theorem on input $\langle C,w \rangle$. 
+    \item If $M$ accepts, \emph{accept}; otherwise, \emph{reject}. 
+  \end{enumerate}
+  Running TM $M$ in stage 2 means incorporating $M$ into the design of $N$ as a subprocedure. 
+\end{theorem}
+
+\begin{theorem}
+  $A_{\textrm{REX}}$ is a decidable language. \\ 
+
+  The following TM $P$ decides $A_{\textrm{REX}}$. \\ 
+  $P$ = On input $\langle R,w \rangle$, where $R$ is a regular expression and $w$ is a string: 
+  \begin{enumerate}
+    \item Convert regular expression $R$ to an equivalent NFA $A$ by using the procedure for this conversion. 
+    \item Run TM $N$ on input $\langle A,w \rangle$. 
+    \item If $N$ accepts, \emph{accept}; if $N$ rejects, \emph{reject}. 
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $E_{\textrm{DFA}}$ is a decidable language. \\ 
+  
+  A DFA accepts some string iff reaching an accept state from the start state by traveling along the arrows of the DFA is possible. To test this condition, we can design a TM $T$ that uses a marking algorithm. \\ 
+  $T$ = On input $\langle A \rangle$, where $A$ is a DFA: 
+  \begin{enumerate}
+    \item Mark the start state of $A$. 
+    \item Repeat until no new states get marked: 
+    \item \indent Mark any state that has a transition coming into it from any state that is already marked 
+    \item If no accept state is marked, \emph{accept}; otherwise, \emph{reject}. 
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $EQ_{\textrm{DFA}}$ is a decidable language. 
+\end{theorem}
+
+\subsubsection{Decidable Problems Concerning Context-Free Languages}
+
+Here, we begin to describe algorithms to determine wheter a CFG generates a particular string and to determine wheter the language of a CFG is empty. Let $$A_{\textrm{CFG}} = \{\langle G,w \rangle | G \textrm{ is a CFG that generates } w\}$$. 
+
+\begin{theorem}
+  $A_{\textrm{CFG}}$ is a decidable language. \\ 
+
+  The TM $S$ for a $A_{\textrm{CFG}}$ follows: \\ 
+  $S$ = On input $\langle G,w \rangle$, where $G$ is a CFG and $w$ is a string.  
+  \begin{enumerate}
+    \item Convert $G$ to an equivalent grammar in Chomsky Normal Form. 
+    \item List all derivations with $2n-1$ steps, where $n$ is the lenght of $w$; except if $n=0$, then instead list all derivations with one step. 
+    \item If any of these derivations generate $w$, \emph{accept}; if not, \emph{reject}. 
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $E_{\textrm{CFG}}$ is a decidable langauge. 
+\end{theorem}
+
+\begin{theorem}
+  Every context-free language is decidable. 
+\end{theorem}
+
+% page 225
 
 \end{document}
