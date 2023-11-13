@@ -379,11 +379,11 @@ SQL provides a mechanism for the nesting of subqueries. A \define{subquery} is a
 \end{example}
 
 \begin{definition}[Some Clause]
-  F <comp> \bold{some} $r \Leftrightarrow \exists t \in r$ such that (F <comp> $t$). Where <comp> can be: $<,\leq,>,=,\neq$. 
+  F $\langle$comp$\rangle$ \bold{some} $r \Leftrightarrow \exists t \in r$ such that (F $\langle$comp$\rangle$ $t$). Where $\langle$comp$\rangle$ can be: $<,\leq,>,=,\neq$. 
 \end{definition}
 
 \begin{definition}[All Clause]
-  F <comp> \bold{all} $r \Leftrightarrow \forall t \in r$ (F <comp> $t$)
+  F $\langle$comp$\rangle$ \bold{all} $r \Leftrightarrow \forall t \in r$ (F $\langle$comp$\rangle$ $t$)
 \end{definition}
 
 The \bold{exists} construct returns the value \bold{true} if the argument subquery is nonmepty. 
@@ -395,5 +395,74 @@ The \bold{exists} construct returns the value \bold{true} if the argument subque
 \begin{remark}
   Nested subqueries are computed once and the output is used as reference. 
 \end{remark}
+
+\define{Correlated} nested sub-queries expect a parameter from the outside query. When you can take a nested sub query out of the query and still run it, then we know that this is a \define{non-correlated} nested subquery. 
+
+\begin{remark}
+  Succinct expressions lead to efficient evaluation. 
+\end{remark}
+
+The \define{unique} construct tests whether a subquery has any duplicate tuples in its result. SQL allows a subquery expression to be used in the \bold{from} clause. 
+
+\begin{definition}[With Clause]
+  provides a way of defining a temporary view whose definition is available only to the query in which the with clause occurs. 
+\end{definition}
+
+In some cases, it is not desirable for all users to see the entire logical model. A \define{view} provides a mechanism to hide certain data from the view of certain users. Any relation that is not of the conceptual model but is made visible to a user as a \emph{virtual relation} is called a view. A view is defined using the \bold{create view} statement which has the form 
+\begin{center}
+  \bold{create view} $v$ \bold{as} $\langle$query expression $\rangle$
+\end{center}
+where $\langle$query expression$\rangle$ is any legal SQL expression. The view name is represented by $v$. Once a view is defined, the view name can be used to refer to the virtual relation that the view generates. When a view is created, the query expression is stored in the database; the expression is substituted into queries using the view. 
+
+\begin{remark}
+  When we create a view, a system table is created that maps the view name to the SQL code behind that view. It is when we access the view, that the SQL code is executed. This is to ensure \define{data recency} in the view. 
+\end{remark}
+
+One view may be used in the expression defining another view. A view relation $v_1$ is said to \define{depend directly} on a view relation $v_2$ if $v_2$ is used in the expression defining $v_1$. A view relation $v_1$ is said to \define{depend on} view relation $v_2$ if either $v_1$ depends directly to $v_2$ or there is a path of dependencies from $v_1$ to $v_2$. A view relation $v$ is said to be \define{recursive} if it depends on itself. \\
+
+\define{Join operations} take two relations and return as a result another relation. These additional operations are typically used as subquery expressiosn in the \bold{from} clause. \define{Join condition} defines which tuples in the two relations match, and what attributes are present in the result of the join. \define{Join type} defines how tuples in each relation that do not match any tuple in the other relation are treated. \emph{Join types} include inner join, left outer join, right outer join, and full outer jion. \emph{Join conditions} include natural, on $\langle$predicate$\rangle$, and using$(A_1 , A_2 , \dots , A_n)$. 
+
+\section{Advanced SQL}
+
+\begin{definition}[Built-in Data Types in SQL]
+  Some of the following are built-in SQL data types: 
+  \begin{itemize}
+    \item \define{date}: Dates, containing a (4 digit) year, month, and day 
+    \item \define{time}: Time of data, in hours, minutes, and seconds 
+    \item \define{timestamp}: date plus time of day 
+    \item \define{interval}: period of time 
+  \end{itemize}
+\end{definition}
+
+We can extract values from individual fields from date/time/timestamp using \bold{extract}. Users can define types using the \bold{create type} construct which creates user-defined type. \bold{create domain} creates user-defined domain types. 
+ 
+\begin{definition}[Domain constraints]
+  the most elementary form of integrity constraint. They test values inserted in the database, and test queries to ensure that the comparisons make sense. 
+\end{definition}
+
+Large objects are stored as \emph{large object}: 
+\begin{itemize}
+  \item \bold{blob}: binary large object---object is a large collection of uninterpreted binary data 
+  \item \bold{clob}: character large object---object is a large collection of character data
+\end{itemize}
+
+An \define{assertion} is a prediacte expressing a condition that we wish the database to always satisfy. When an assertion is made, the system tests it for validity, and tests it again on every update that may violate the assertion. \\ 
+
+Some forms of \define{authorization} on parts of the database are: 
+\begin{itemize}
+  \item \define{Read} allows reading, but not modification of data 
+  \item \define{Insert} allows insertion of new data, but notmodification of existing data 
+  \item \define{Update} allows modification, but no deletion of data 
+  \item \define{Delete} allows deletion of data
+\end{itemize}
+
+\section{Relational Database Design}
+
+A \emph{good table} in OLTP should$\dots$ 
+\begin{itemize}
+  \item Be about one \emph{thing} 
+  \item Should have one primary key where all the other attributes serve to describe that primary key. Key depends on rest of the columns 
+  \item Table is in \bold{BCNF} format or $3^{rd}$ normal form
+\end{itemize}
 
 \end{document}
