@@ -801,6 +801,130 @@ Here, we begin to describe algorithms to determine wheter a CFG generates a part
   Every context-free language is decidable. 
 \end{theorem}
 
-% page 225
+\begin{definition}[Language Enumerators]
+  An enumerator $\epsilon$ for a language $A$ is TM that, starting witha  blank input tape, prints all and only strings in $A$. $\epsilon$ never halts when $A$ is infinite. $\epsilon$ may print a string multiple times but must print every string in $A$ eventually (in finite time). So, if $A$ is finite, all its strings will be printed within a finite amount of time---just wait long enough!
+\end{definition}
+
+\begin{theorem}
+  A language $A$ is TM-recognizable if and only if there is an enumerator $\epsilon$ for it. $$\textrm{L is enumerable } \Leftrightarrow \textrm{ L is TM-recognizable}$$
+\end{theorem}
+
+\subsection{Undecidability}
+
+One theorem that establishes the undecidability of a specific language: the problem of determining whether a Turing machine accets a given input string. We call it $A_{TM}$ by analogy with $A_{DFA}$ and $A_{CFG}$. But, whereas $A_{DFA}$ and $A_{CFG}$ were decidable, $A_{TM}$ is not. Let $$A_{TM} = \{ \langle M,w \rangle | M \textrm{ is a TM and } M \textrm{ accepts } w\}$$. 
+
+\begin{theorem}
+  $A_{TM}$ is undecidable. We can show, however, that $A_{TM}$ is Turing-recognizable. The following Turing machine $U$ recognizes $A_{TM}$. \\ 
+  $U$  = On input $\langle M,w \rangle$, where $M$ is a TM and $w$ is a string: 
+  \begin{enumerate}
+    \item Simulate $M$ on input $w$ 
+    \item If $M$ ever enters its accept state, \emph{accept}; if $M$ ever enters its reject state, \emph{reject}. 
+  \end{enumerate}
+  Note that this machine loops on input $\langle M,w \rangle$ if $M$ loops on $w$, which is why this machine does not decide $A_{TM}$. If the algorithm had some way to determine that $M$ was no halting on $w$, it could \emph{reject} in this case. However, an algorithm has no way to make this determination. 
+\end{theorem}
+
+\subsubsection{The Diagonalization Method}
+
+If we have two infinite sets, how can we tell whether one is larger than the other or whether they are the same size? Cantor observed that two finite sets have the same size if the elements of one set can be paired with the elements of the other set. This method compares the sizes without resorting to counting. 
+
+\begin{definition}[Diagonalization]
+  Assume that we have sets $A$ and $B$ and a function $f$ from $A$ to $B$. Say that $f$ is \define{one-to-one} if it never maps two different elementts to the same place---that is, if $f(a) \neq f(b)$ whenever $a \neq b$. Say that $f$ is \define{onto} if it hits every element of $B$---that is, for every $b \in B$ there is an $a \in A$ such that $f(a) =b$. Say that $A$ and $B$ are the \define{same size} if there is a one-to-one; into function $f:A \rightarrow B$. A function that is both one-to-one and onto is called a \define{correspondence}. In a correspondence, every element of $A$ maps to a unique element of $B$ and each element of $B$ has a unique element of $A$ mapping to it. $A$ correspondence is simply a way of pairing the elements of $A$ with the elements of $B$. 
+\end{definition}
+
+Alternative common terminology for these types of functions is \define{injective} for one-to-one, \define{surjective} for onto, and \define{bijective} for one-to-one and onto. 
+
+\begin{definition}[Countability]
+  A set $A$ is \define{countable} if either it is finite or it has the same size as $N$
+\end{definition}
+
+\begin{theorem}
+  The set of real numbers, $R$, is uncountable. 
+\end{theorem}
+
+\begin{theorem}
+  Some languages are not Turing-recognizable
+\end{theorem}
+
+\subsubsection{A Turing-Unrecognizable Language}
+
+If both a language and its complement are Turing-recognizable, the language is decidable. Hence for any undecidable language, either it or its complement is not Turing-recognizable. Recall that the complement of a language is the language consisting of all strings that are not in the language. We say that a language is \define{co-Turing-recognizable} if it is the complement of a Turing-recognizable language. 
+
+\begin{theorem}
+  A language is decidable if and only if it is Turing-recognizable and co-Turing-recognizable. In other words, a language is decidable exactly when both it and its complement are Turing-recognizable. 
+\end{theorem}
+
+\section{Reducibility}
+
+A \define{reduction} is a way of converting one problem to another problem in such a way that a solution to the second problem can be used to solve the first problem. Reducibility always involves two problems, which we call $A$ and $B$. If $A$ reduces to $B$, we can use a solution to $B$ to solve $A$. 
+
+\subsection{Undecidable Problems from Language Theory}
+
+Let's consider $HALT_{TM}$, the problem of determining whether a Turing machine halts (by accepting or rejecting) on a given input. THis problem is widely known as the \define{halting problem}. We use the undecidability of $A_{TM}$ to prove the undecidability of the halting problem by reducing $A_{TM}$ to $HALT_{TM}$. Let $$HALT_{TM} = \{ \langle M,w \rangle | M \textrm{ is a  TM and } M \textrm{ ahlts on input } w$$ 
+
+\begin{theorem}
+  $HALT_{TM}$ is undecidable. \\ 
+  \bold{Proof}: Let's assume for the purpose of obtaining a contradiction that TM $R$ decides $HALT_{TM}$. We construct TM $S$ to decide $A_{TM}$, with $S$ operating as follows. \\ 
+  $S$ = On input $\langle M,w \rangle$, an encoding of a TM $M$ and a string $w$:
+  \begin{enumerate}
+    \item Run TM $R$ on input $\langle M,w \rangle$. 
+    \item If $R$ rejects, \emph{reject}. 
+    \item If $R$ accepts, simulate $M$ on $w$ until it halts. 
+    \item If $M$ has accepted, \emph{accept}; if $M$ has rejected, \emph{reject}. 
+  \end{enumerate}
+  Clearly, if $R$ decides $HALT_{TM}$, then $S$ decides $A_{TM}$. Because $A_{TM}$ is undecidable, $HALT_{TM}$ also must be undecidable. 
+\end{theorem}
+
+\begin{theorem}
+  $E_{TM}$ is undecidable where $$E_{TM} = \{ \langle M \rangle | M \textrm{ is a TM and } L(M) = \emptyset$$ 
+  \bold{Proof}: Let's write the modified machine described in the proof idea using our standard notation. We call it $M_1$. \\ 
+  $M_1$ = On input $x$: 
+  \begin{enumerate}
+    \item If $x \neq w$, \emph{reject}. 
+    \item If $x = w$, run $M$ on input $w$ and \emph{accept} if $M$ does. 
+  \end{enumerate}
+  This machine has the string $w$ as part of its description. It conducts the test of whether $x=w$ in the obvious way, by scanning the input and comparing it character by character with $w$ to determine whether they are the same. Putting all this together, we assume that TM $R$ decides $E_{TM}$ and construct TM $S$ that decides $A_{TM}$ as follows. \\
+  $S$ = On input $\langle M,w \rangle$, and encoding of a TM $M$ and a string $w$: 
+  \begin{enumerate}
+    \item Use the description of $M$ and $w$ to construct the TM $M_1$ just described. 
+    \item Run $R$ on input $\langle M_1 \rangle$. 
+    \item If $R$ accepts, \emph{reject}; if $R$ rejects, \emph{accept}. 
+  \end{enumerate}
+  Note that $S$ must actually be able to compute a description of $M_1$ from a description of $M$ and $w$. It is able to do so because it only needs to add extra states to $M$ that perform the $x=w$ test. If $R$ were a decider for $E_{TM}$, $S$ would be a decider for $A_{TM}$. A decider for $A_{TM}$ cannot exist, so we know that $E_{TM}$ must be undecidable. 
+\end{theorem}
+
+\begin{theorem}
+  $REGULAR_{TM}$ is undecidable where $$REGULAR_{TM} = \{ \langle M \rangle | M \textrm{ is a TM and } L(M) \textrm{ is a regular language}$$ 
+\end{theorem}
+
+\subsubsection{Reductions via Computation Histories}
+
+The computation history for a Turing machine on an input is simply the sequence of configurations that the machine goes through as it processes the input. It is a complete record of the machine. 
+
+\begin{definition}
+  Let $M$ be a Turing machine and $w$ an input string. An \define{accepting computation history} for $M$ on $w$ is a sequence of configurations, $C_1 , C_2 , \dots , C_{l}$, where $C_1$ is the start configuration of $M$ on $w$, $C_l$ is an accepting configuration of $M$, and each $C_i$ legally follows from $C_{i-1}$ acording to the rules of $M$. A \define{rejecting computation history} for $M$ on $w$ is defined similarly, except that $C_l$ is a rejecting configuration.
+\end{definition}
+
+Computation histories are finite sequences. If $M$ doesn't halt on $w$, no accepting or rejecting computation history exists for $M$ on $w$. Deterministic machines have at most one computation history on any given input. Nondeterministic machines may have many computation histories on a single input, corresponding to the various computation branches. 
+
+\begin{definition}
+  A \define{linear bounded automaton} is a restricted type of Turing machine wherein the tape head isn't permitted to move off the portion of the tape containing the input. If the machine tries to mofve its head off either end of the input, the head stays where it is---in the same way that the head will not move off the left-hand end of an ordinary Turing machine's type. 
+\end{definition}
+
+\begin{lemma}
+  Let $M$ be an LBA with $q$ states and $g$ symbols in the tape alphabet. There are exactly $qng^{n}$ distinct configurations of $M$ for a tape length of $n$. 
+\end{lemma}
+
+\begin{theorem}
+  $A_{LBA}$ is decidable. \\ 
+  \bold{Proof}: The algorithm that decides $A_{LBA}$ is as follows. \\ 
+  $L$ = On input $\langle M,w \rangle$, where $M$ is an LBA and $w$ is a string. 
+  \begin{enumerate}
+    \item Simulate $M$ on $w$ for $qng^{n}$ steps or until it halts. 
+    \item If $M$ has halted, \emph{accept} if it has accepted and \emph{reject} if it has rejected. If it has not halted, \emph{reject}. 
+  \end{enumerate}
+  If $M$ on $w$ has not halted within $qng^{n}$ steps it must be repeating a configuration and therefore looping. That is why our algorithm rejects in this instance. 
+\end{theorem}
+
+% page 227
 
 \end{document}
