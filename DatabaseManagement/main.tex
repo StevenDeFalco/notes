@@ -465,4 +465,62 @@ A \emph{good table} in OLTP should$\dots$
   \item Table is in \bold{BCNF} format or $3^{rd}$ normal form
 \end{itemize}
 
+\begin{remark}
+  The primary key in a relationship table is made up of foreign keys.
+\end{remark}
+
+\begin{remark}
+  Two symptoms of a bad table are repetition or a lot of null values. 
+\end{remark}
+
+The process of splitting a bad table into smaller, more simple, tables is called \define{decomposition}. If a decomposition is done well, then you will be able to natural join the new tables back together and get the original table back. Should a decomposition not meet these requirements, then it is called a \define{Lossy Decomposition} because there is a loss of integrity through this process. The goal is to perform a \define{Loss Less Join Decomposition} where a natural join of the new tables \emph{will} return the original table. \\
+
+In the case that a relation $R$ is not in \emph{good} form, we decompose it into a set of relations $\{R_1 , R_2 , \dots , R_n\}$ such that 
+\begin{itemize}
+  \item each relation is in good form 
+  \item the decomposition is a lossless-join decomposition
+\end{itemize}
+
+The domain is \define{atomic} if its elements are considered to be indivisiable units. A relation schema $R$ is in \define{first normal form} if the domains of all attributes of $R$ are atomic. Non-atomic values complicate storage and encourage redundant (repeated) storage of data. Atomicity is actually a property of how the elements of the domain are used. \\ 
+
+\define{Functional dependencies} require that the value for a certain set of attributes determines uniquely the value for another set of attributes. A functional dependency is a generalization of the notion of a \emph{key}.\\ 
+
+\begin{definition}[Functional Dependencies]
+  Let $R$ be a relation schema $$\alpha \subseteq R \textrm{ and } \beta \subseteq R$$ The functional dependency $$\alpha \rightarrow \beta$$ holds on $R$ if and only if for any legal relations $r(R)$, whenever any two tuples $t_1$ and $t_2$ of $r$ agree on the attributes $\alpha$, they also agree on the attributes $\beta$. That is, $$t_1 [\alpha] = t_2 [\alpha] \Rightarrow t_1 [\beta] = t_2 [\beta]$$
+\end{definition}
+
+We use functional dependencies to: 
+\begin{itemize}
+  \item Test relations to see if they are legal under a given set of functional dependencies: if a relation $r$ is legal under a set $F$ of functional dependencies, we say that $r$ satisfies $F$. 
+  \item Specify constraints on the set of legal relations: we say that $F$ holds on $R$ if all legal relations on $R$ satisfy the set of functional dependencies $F$. 
+\end{itemize}
+A functional dependency is \emph{trivial} if it is satisfied by all instances of a relation. In general, $\alpha \rightarrow \beta$ is trivial if $\beta \subseteq \alpha$. Given a set $F$ of functional dependencies, there are certain other functional dependencies that are logically implied by $F$. For example, if $A \rightarrow B$ and $B \rightarrow C$, then we can infer that $A \rightarrow C$. The set of all functional dependencies logically implies by $F$ is the \define{closure} of $F$. We denote the closure of $F$ by $F^{+}$. \\ 
+
+$K$ is a \define{superkey} for relation schema $R$ if and only if $K \rightarrow R$. $K$ is a \define{candidate key} for $R$ if and only if $K \rightarrow R$ and for no $\alpha \subseteq K, \alpha \rightarrow R$. \\
+
+\begin{definition}[Boyce-Codd Normal Form]
+  A relation schema $R$ is in BCNF with respect to a set $F$ of functinal dependencies if for all functional dependencies in $F^{+}$ of the form $$\alpha \rightarrow \beta$$ where $\alpha \subseteq R$ and $\beta \subseteq R$, at least once of the following holds: 
+  \begin{itemize}
+    \item $\alpha \rightarrow \beta$ is trivial (i.e. $\beta \subseteq \alpha$) 
+    \item $\alpha$ is a superkey for $R$
+  \end{itemize}
+  Suppose we have a schema $R$ and a non-trivial dependency $\alpha \rightarrow \beta$ causes a violation of BCNF. We decompose $R$ into: 
+  \begin{itemize}
+    \item $(\alpha \cup \beta)$ 
+    \item $(R - (\beta - \alpha))$
+  \end{itemize}
+\end{definition}
+
+If it is sufficient to test only those dependencies on each individual relation of a decomposition in order to ensure that \emph{all} functional dependencies hold, then that decomposition is \define{dependency preserving}. Because it is not always possible to achieve both BCNF and dependency preservation, we consider a weaker normal form, known as \emph{third normal form}. 
+
+\begin{definition}[Third Normal Form]
+  A relation schema $R$ is in third normal form (3NF) if for all: $$\alpha \rightarrow \beta \textrm{ in } F^{+}$$ at least one of the following holds: 
+  \begin{itemize}
+    \item $\alpha \rightarrow \beta$ is trivial (i.e. $\beta \in \alpha$) 
+    \item $\alpha$ is a superkey for $R$ 
+    \item Each attribute $A$ in $\beta - \alpha$ is contained in a candidate key for $R$
+  \end{itemize}
+  If a relation is in BCNF, then it is in 3NF. The third condition is a minimal relaxation of BCNF to ensure dependency preservation. 
+\end{definition}
+
 \end{document}
