@@ -523,4 +523,35 @@ If it is sufficient to test only those dependencies on each individual relation 
   If a relation is in BCNF, then it is in 3NF. The third condition is a minimal relaxation of BCNF to ensure dependency preservation. 
 \end{definition}
 
+Given a set $F$ of functional dependencies, there are certain other functional dependencies that are logically implied by $F$. For example, if $A \rightarrow B$ and $B \rightarrow C$, then we can infer that $A \rightarrow C$. The set of all functional dependencies logically implied by $F$ is the \define{closure} of $F$. We denote the closure of $F$ by $F^{+}$. We can find all of $F^{+}$ by applying Armstrong's Axioms: 
+\begin{itemize}
+  \item If $\beta \subseteq \alpha$, then $\alpha \rightarrow \beta$ \hfill \define{reflexivity}
+  \item If $\alpha \rightarrow \beta$, then $\gamma \alpha \rightarrow \gamma \beta$ \hfill \define{augmentation}
+  \item If $\alpha \rightarrow \beta$, then $\beta \rightarrow \gamma$, then $\alpha \rightarrow \gamma$ \hfill \define{transitivity}
+\end{itemize}
+These rules are \define{sound} (generate only functional dependencies that actually hold) and \define{complete} (generate all functional dependencies that hold). \\
+
+We can further simplify manual computationa of $F^{+}$ by using the following additional rules. 
+\begin{itemize}
+  \item If $\alpha \rightarrow \beta$ holds and $\alpha \rightarrow \gamma$ holds, then $\alpha \rightarrow \beta\gamma$ holds \hfill \define{union}
+  \item If $\alpha \rightarrow \beta\gamma$ holds, then $\alpha \rightarrow \beta$ holds and $\alpha \rightarrow \gamma$ holds \hfill \define{decomposition}  
+  \item If $\alpha \rightarrow \beta$ holds and $\gamma\beta \rightarrow \delta$ holds, then $\alpha \gamma \rightarrow \delta$ holds \hfill \define{pseudotransitivity}
+\end{itemize}
+These rules can all by inferred from Armstrong's Axioms. \\ 
+
+There are several uses of the attribute closure algorithm:
+\begin{itemize} 
+  \item To test if $\alpha$ is a superkey, we compute $\alpha^{+}$ and check if $\alpha^{+}$ contains all attributes of $R$. 
+  \item To check if a functional dependency $\alpha \rightarrow \beta$ holds, just check if $\beta \subseteq \alpha^{+}$. That is, we compute $\alpha^{+}$ by using attribute closure, and then check if contains $\beta$. 
+  \item For each $\gamma \subseteq R$, we find the cosure $\gamma^{+}$, and for each $S \subseteq \gamma^{+}$, we output a functional dependency $\gamma \rightarrow S$
+\end{itemize}
+
+\begin{definition}[Lossless-join Decomposition]
+  A decomposition of $R$ into $R_1$ and $R_2$ is lossless join if and only if at least one of the following dependencies is in $F^{+}$: 
+  \begin{itemize}
+    \item $R_1 \cap R_2 \rightarrow R_1$ 
+    \item $R_1 \cap R_2 \rightarrow R_2$
+  \end{itemize}
+\end{definition}
+
 \end{document}
