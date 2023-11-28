@@ -925,6 +925,131 @@ Computation histories are finite sequences. If $M$ doesn't halt on $w$, no accep
   If $M$ on $w$ has not halted within $qng^{n}$ steps it must be repeating a configuration and therefore looping. That is why our algorithm rejects in this instance. 
 \end{theorem}
 
-% page 227
+\subsection{Mapping Reducibility}
+
+\subsubsection{Computable Functions}
+
+A Turing machine computes a fucntion by starting with the input to the function on the tape and halting with the output of the function on the tape. 
+
+\begin{definition}
+  A function $f: \Sigma^{*} \rightarrow \Sigma^{*}$ is a \define{computable function} if some Turing machine $M$, on every input $w$, halts with just $f(w)$ on its tape. 
+\end{definition}
+
+\subsubsection{Formal Definition of Mapping Reducibility}
+
+\begin{definition}
+  Language $A$ is \define{mapping reducible} to language $B$, written $A \leq_{m} B$, if there is s a computable function $f: \Sigma^{*} \rightarrow \Sigma^{*}$, where for every $w$, $$w \in A \Leftrightarrow f(w) \in B$$ The function $f$ is called the \define{reduction} from $A$ to $B$.
+\end{definition}
+
+A mapping reduction of $A$ to $B$ provides a way to convert questions about membership testing in $A$ to membership testing in $B$. To test whether $w \in A$, we use the reduction $f$ to map $w$ to $f(w)$ and test whether $f(w) \in B$. If one problem is mapping reducible to a second, previously solved problem, we can thereby obtain a solution to the original problem. 
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $B$ is decidable, then $A$ is decidable. \\ 
+  \bold{Proof}: We let $M$ be the decider for $B$ and $f$ be the reduction from $A$ to $B$. We describe a decider $N$ for $A$ as follows: \\ 
+  $N$ = On input $w$: 
+  \begin{enumerate}
+    \item Compute $f(w)$. 
+    \item Run $M$ on input $f(2)$ and output whatever $M$ outputs. 
+  \end{enumerate}
+  Clearly, if $w \in A$, then $f(w) \in B$ because $f$ is a reduction from $A$ to $B$. Thus, $M$ accepts $f(w)$ whenever $w \in A$. Therefore, $N$ works as desired. 
+\end{theorem}
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $A$ is undecidable, then $B$ is undecidable.
+\end{theorem}
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $B$ is Turing-recognizable, then $A$ is Turing-recognizable. 
+\end{theorem}
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $B$ is not Turing-recognizable, then $A$ is not Turing-recognizable. 
+\end{theorem}
+
+\begin{theorem}
+  $EQ_{TM}$ is neither Turing-recognizable nor co-Turing-recognizable. 
+\end{theorem}
+
+\section{Advanced Topics in Computability Theory}
+
+\subsection{The Recursion Theorem}
+
+The recursion theorem is a mathematical result that plays an important role in advanced work in the theory of computability. It has connnections to mathetmatical logic, the theory of self-reproducing systems, and even computer viruses. \\ 
+
+ \begin{lemma}
+   There is a computable function $q: \Sigma^{*} \rightarrow \Sigma^{*}$ where if $w$ is any string, $q(w)$ is the description of a Turing machine $P_w$ that prints out $w$ and then halts. 
+ \end{lemma}
+
+ \begin{theorem}[Recursion Theorem]
+   Let $T$ be a Turing machine that computes a function $t:\Sigma^{*} \times \Sigma^{*} \rightarrow \Sigma^{*}$. There is a Turing machine $R$ that computes a function $r: \Sigma^{*} \rightarrow \Sigma^{*}$, where for every $w$, $$r(w) = t(\langle R \rangle, w)$$ The statement of this theorem seems a bit technical, but it actually represents something quite simple. To make a Turing machine that can obtain its own description and then compute with it, we need only make a machine, called $T$ in the statement, that receives the description of the machine as an extra input. Then the recursion theorem produces a new machine $R$, which operates exactly as $T$ does but with $R$'s description filled in automatically.
+ \end{theorem}
+
+ \begin{theorem}
+   $A_{TM}$ is undecidable. 
+ \end{theorem}
+
+\begin{definition}
+  If $M$ is a Turing machine, then we say that the length of the description $\langle M \rangle$ of $M$ is the number of symbols in the string describing $M$. Say that $M$ is \define{minimal} if there is no Turing machine equivalent to $M$ that has a shorter description. Let $$MIN_{TM} = \{\langle M \rangle \vert M \textrm{ is a minimal TM}\}$$
+\end{definition}
+
+\begin{theorem}
+  $MIN_{TM}$ is not Turing-recognizable. 
+\end{theorem}
+
+\begin{theorem}
+  Let $t: \Sigma^{*} \rightarrow \Sigma^{*}$ be a computable function. Then there is a Turing machine $F$ for which $t(\langle F \rangle)$ describes a Turing machine equivalent to $F$. Here we'll assume that if a string isn't a proper Turing machine encoding, it describes a Turing machine that always rejects immediately. \\ 
+  In this theorem, $t$ plays the role of the transformation, and $F$ is the fixed point.\\ 
+
+  \bold{Proof}: Let $F$ be the following Turing machine. \\ 
+  $F$ = On input $w$: 
+  \begin{enumerate}
+    \item Obtain, via the recursion theorem, own description $\langle F \rangle$. 
+    \item Compute $t(\langle F \rangle)$ to obtain the description of a TM $G$. 
+    \item Simulate $G$ on $w$
+  \end{enumerate}
+  Clearly $\langle F \rangle$ and $t(\langle F \rangle) = \langle G \rangle$ describe equivalent Turing machines because $F$ simulates $G$. 
+\end{theorem}
+
+\section{Time Complexity}
+
+% 7.3
+\subsection{The Class NP}
+
+One remarkable discovery shows that the complexities of many problems are linked. A polynomial time algorithm for one such problem can be used to solve an entire class of problems. \\ 
+
+The $HAMPATH$ problem has a feauter called \define{polynomial verifiability} that is important for understanding its complexity. Even though we don't know of a fast (i.e. polynomial time) way to determine whether a graph contains a Hamiltonian path, if such a path were discovered somehow, we could easily convince someone else of its existence simply by presenting it. In other words, \emph{verifying} the existence of a Hamiltonian path may be much easier than \emph{determining} its existence. 
+
+\begin{definition}[Verifier]
+  A \define{verifier} for a language $A$ is an algorithm $V$, where $$A = \{w | V \textrm{ accept } \langle w,c \rangle \textrm{ for some string } c\}$$ We measure the time of a verifier only in terms of the length of $w$, so a \define{polynomial time verifier} runs in polynomial time in the length of $w$. A language $A$ is \define{polynomially verifiable} if it has a polynomial time verifier. 
+\end{definition}
+
+A verifier uses additional information, represented by the symbol $c$ to verify that a string $w$ is a member of $A$. This information is called a \define{certificate} or \define {proof} of membership in $A$. Observe that for polynomial verifiers, the certificate has polynomial length (in the length of $w$) because that is all the verifier can access in its time bound.  
+
+\begin{definition}
+  \define{NP} is the class of languages that have polynomial time verifiers. 
+\end{definition}
+
+The term NP comes from \define{nondeterministic polynomial time} and is derived from an alternative characterization by using nondeterministic polynomial time Turing machines. 
+
+\begin{theorem}
+  A language is in NP if and only if it is decided by some nondeterministic polynomial time Turing machine. 
+\end{theorem}
+
+We define the nondeterministic time complexity class $NTIM(t(n))$ as analagous to the deterministic time complexity class $TIME(t(n))$. 
+
+\begin{definition}
+  $NTIME(t(n)) = \{L|L$ is a language decided by an $O(t(n))$ time nondeterministic Turing machine. 
+\end{definition}
+
+The class NP is insensitive to the choice of reasonable nondeterministic computational model because all such models are polynomially equivalent. When describing and analyzing nondeterministic polynomial time algorithms. Each stage of a nondeterministic polynomial time algorithm must have an obvious implementation in nondeterministic polynomial time on a reasonable nondeterministic computational model. We analyze the algorithm to show that every branch uses at most polynomially many stages. 
+
+\subsubsection{The P versus NP Question}
+
+NP is the class of languages that are solvable in polynomial time on a nondeterministic Turing machine; or, equivalently, it is the class of languages whereby membership in the language can be verified in polynomial time. P is the class of languages where membership can be tested in polynomial time. 
+\begin{center}
+  P = the class of languages for which membership can be \emph{decided} quickly \\ 
+  NP = the class of languages for which membership can be \emph{verified} quickly
+\end{center}
+There are examples of languages that are members of NP but that are not known to be in P. The power of polynomial verifiability seems to be much greater than that of polynomial decidability. But, hard as it may be to image, P and NP could be equal. We are unable to \emph{prove} the existence of a single language in NP that is not in P. 
 
 \end{document}
