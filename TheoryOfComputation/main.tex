@@ -1012,12 +1012,78 @@ The recursion theorem is a mathematical result that plays an important role in a
 
 \section{Time Complexity}
 
+\subsection{Measuring Complexity}
+
+The number of steps that an algorithm uses on a particular input may depend on several parameters. For instance, fi the input is a graph, the number of steps may depend on the number of nodes, the number of edges, and the maximum degree of teh graph, or some combination of these and/or other factors. For simplicity, we compute the running time of an algorithm purely as a function of the length of the string representing the input and don't consider any other parameters. In \define{worst-case analysis}, the form we consider here, we consider the longest running time of all inputs of a particular length. In \define{average-case analysis}, we consider the average of all the running time of inputs of a particular length. 
+
+\begin{definition}
+  Let $M$ be a deterministic Turing machine that halts on all inputs. The \define{running time} or \define{time complexity} of $M$ is the function $f: N \rightarrow N$, where $f(n)$ is the maximum number of steps that $M$ uses on any input of length $n$. If $f(n)$ is the running time of $M$, we say that $M$ runs in time $f(N)$ and that $M$ is an $f(n)$ time Turing machine. Customarily we use $n$ to represent the length of the input. 
+\end{definition}
+
+\subsubsection{Big-O and Small-O Notation}
+
+Because the exact running time of an algorithm often is a complex expression, we usually just estimate it. In one convenient form of estimation, called \define{asymptotic analysis}, we seek to understand the running time of the algorithm when it is run on large inputs. We do so by considering only the highest order term of the expression for the running time of the algorith, disregarding both the coefficient of that term and any lower order terms, because the highest order term dominates the other terms on large inputs. 
+
+\begin{definition}
+  Let $f$ and $g$ be functions $f,g: N \rightarrow R^{+}$. Say that $f(n) = O(g(n))$ if postive integers $c$ and $n_0$ exist such that for every integer $n \geq g_0$, $$f(n) \leq c g(n)$$ When $f(n) = O(g(n))$, we say that $g(n)$ is an \define{upper bound} for $f(n)$, or more precisely, that $g(n)$ is an \define{asymptotic upper bound} for $f(n)$, to emphasize that we are suppressing constant factors. 
+\end{definition}
+
+Frequently, we derive bounds of the form $n^c$ for $c$ greater than 0. Such bounds are called \define{polynomial bounds}. Bounds of the form $2^{n^{\delta}}$ are called \define{exponential bounds} when $\delta$ is a real number greater than 0. \\ 
+
+Big-$O$ notation has a companion called \define{small-o notation}. Big-O notation says that one function is asymptotically \emph{no more than} another. To say that one function is asymptotically \emph{less than} another, we use small-o notation. 
+
+\begin{definition}
+  Let $f$ and $g$ be functions $f,g: N \rightarrow R^{+}$. Say that $f(n) = o(g(n))$ if $$\lim_{n\to\infty} \frac{f(n)}{g(n} = 0$$ In other words, $f(n) = o(g(n))$ means that for any real number $c>0$, a number $n_0$ exists, where $f(n) < c g(n)$ for all $n \geq n_0$. 
+\end{definition}
+
+\begin{definition}
+  Let $t: N \rightarrow R^{+}$ be a function. Define the \define{time complexity class}, TIME$(t(n))$, to be the collection of all languages that are decidable by an $O(t(n))$ time Turing Machine. 
+\end{definition}
+
+\subsubsection{Complexity Relationships Among Models}
+
+\begin{theorem}
+  Let $t(n)$ be a function, where $t(n) \geq n$. Then every $t(n)$ time multitape Turing machine has an equivalent $O(t^{2}(n))$ time single-tape Turing machine. 
+\end{theorem}
+
+\begin{definition}
+  Let $N$ be a nondeterministic Turing machine that is a decider. The \define{running time} of $N$ is the function $f: N \rightarrow N$, where $f(n)$ is the maximum number of steps that $N$ uses on any branch of its computation on any lenght $n$. 
+\end{definition}
+
+\begin{theorem}
+  Let $t(n)$ be a function, where $t(n) \geq n$. Then every $t(n)$ time nondeterministic single-tape Turing machine has an equivalent $2^{O(t(n))}$ time deterministic single-tape Turing Machine. 
+\end{theorem}
+
+\subsection{The Class P}
+
+\subsubsection{Polynomial Time}
+
+Exponential time algorithms typically arise when we solve problems by exhaustively searching through a space of solutions, called \define{brute-force search}. Sometimes brute-force search may be avoided through a deeper understanding of a problem, which may reveal a polynomial time algorithm of greater utility. \\ 
+
+All reasonable deterministic computational models are \define{polynomially equivalent}. That is, any one of them can simulate another with only a polynomial increase in running time. When we say that all reasonable deterministic models are polynomially equivalent, we do not attempt to define \emph{reasonable}. However, we have in mind a notion broad enough to include models that closely approximate running times on actual computers. 
+
+\begin{definition}
+  \bold{P} is the class of languages that are decidable in polynomial time on a deterministic single-tape Turing machine. In other words, $$P \bigcup_{k} \textrm{TIME}(n^k)$$
+\end{definition}
+
+The class P plays a central role in our theory and is important because. 
+\begin{enumerate}
+  \item P is invariant for all models of computation that are polynomially equivalent to the deterministic single-tape Turing machine. 
+  \item P roughly corresponds to the class of problems that are realistically solvable on a computer. 
+\end{enumerate}
+
+Item 1 indicates that P is a mathematically robust class. It isn't affected by the particulars of the model of computation that we are using. Item 2 indicates that P is relevant from a practical standpoint. When a problem is in P, we have a method of solving it that runs in time $n^k$ for some constant $k$. 
+
+\begin{theorem}
+  Every context-free language is a member of P.
+\end{theorem}
+
 % 7.3
 \subsection{The Class NP}
 
 One remarkable discovery shows that the complexities of many problems are linked. A polynomial time algorithm for one such problem can be used to solve an entire class of problems. \\ 
 
-The $HAMPATH$ problem has a feauter called \define{polynomial verifiability} that is important for understanding its complexity. Even though we don't know of a fast (i.e. polynomial time) way to determine whether a graph contains a Hamiltonian path, if such a path were discovered somehow, we could easily convince someone else of its existence simply by presenting it. In other words, \emph{verifying} the existence of a Hamiltonian path may be much easier than \emph{determining} its existence. 
+The $HAMPATH$ problem has a feature called \define{polynomial verifiability} that is important for understanding its complexity. Even though we don't know of a fast (i.e. polynomial time) way to determine whether a graph contains a Hamiltonian path, if such a path were discovered somehow, we could easily convince someone else of its existence simply by presenting it. In other words, \emph{verifying} the existence of a Hamiltonian path may be much easier than \emph{determining} its existence. 
 
 \begin{definition}[Verifier]
   A \define{verifier} for a language $A$ is an algorithm $V$, where $$A = \{w | V \textrm{ accept } \langle w,c \rangle \textrm{ for some string } c\}$$ We measure the time of a verifier only in terms of the length of $w$, so a \define{polynomial time verifier} runs in polynomial time in the length of $w$. A language $A$ is \define{polynomially verifiable} if it has a polynomial time verifier. 
