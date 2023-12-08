@@ -1118,4 +1118,54 @@ NP is the class of languages that are solvable in polynomial time on a nondeterm
 \end{center}
 There are examples of languages that are members of NP but that are not known to be in P. The power of polynomial verifiability seems to be much greater than that of polynomial decidability. But, hard as it may be to image, P and NP could be equal. We are unable to \emph{prove} the existence of a single language in NP that is not in P. 
 
+\subsection{NP-Completeness}
+
+There are certain problems in NP whose individual complexity is related to that of the entire class. If a polynomial time algorithm exists for any of these problems, all problems in NP would be polynomial time solvable. These problems are called \define{NP-Complete}. 
+
+\begin{theorem}
+  $SAT \in P$ iff $P = NP$
+\end{theorem}
+
+\subsubsection{Polynomial Time Reducibility}
+
+When problem $A$ is \emph{efficienty} reducible to problem $B$, an efficient solution can be used to solve $A$ efficiently. 
+
+\begin{definition}
+  A function $f: \Sigma^{*} \rightarrow \Sigma^{*}$ is a \define{polynomial time computable function} if some polynomial time Turing Machine $M$ exists that halts with just $f(w)$ on its tape, when started on any input $w$. 
+\end{definition}
+
+\begin{definition}
+  Language $A$ is \define{polynomial time mapping reducible}, or simply \define{polynomial time reducible}, to language $B$, written $A \leq_{P} B$, if a polynomial time computable function $f: \Sigma^{*} \rightarrow \Sigma^{*}$ exists, where for every $w$, $$w \in A \Leftrightarrow f(w) \in B.$$ The function $f$ is called the \define{polynomial time reduction} of $A$ to $B$. 
+\end{definition}
+
+If one language is polynomial time reducible to a language already known to have a polynomial time solution, we obtain a polynomial time solution to the original language, as in the following theorem. 
+
+\begin{theorem}
+  If $A \leq_{P} B$ and $B \in P$, then $A \in P$. \\ 
+  \bold{Proof} Let $M$ be the polynomial time algorithm deciding $B$ and $f$ be the polynomial time reduction from $A$ to $B$. We describe a polynomial time algorithm $N$ deciding $A$ as follows. \\ 
+  $N$ = On inputs $w$: 
+  \begin{enumerate}
+    \item Compute $f(w)$. 
+    \item Run $M$ on input $f(w)$ and output whatever $M$ outputs
+  \end{enumerate}
+  We have $w \in A$ whenever $f(w) \in B$ because $f$ is a reduction from $A$ to $B$. Thus, $M$ accepts $f(w)$ whenever $w \in A$. Moreover, $N$ runs in polynomial time because each of its two stages runs in polynomial time.
+\end{theorem}
+
+\begin{definition}[NP-Completeness]
+  A language $B$ is \define{NP-complete} if it satisfies two conditions: 
+  \begin{enumerate}
+    \item $B$ is in NP 
+    \item every $A$ in NP is polynomial time reducible to $B$. 
+  \end{enumerate}
+\end{definition}
+
+\begin{theorem}
+  If $B$ is NP-complete and $B \in P$, then $P = NP$
+\end{theorem}
+
+\begin{theorem}
+  If $B$ is NP-complete and $B \leq_{P} C$ for $C$ in NP, then $C$ is NP-complete. \\ 
+  \bold{Proof} We already know that $C$ is in NP, so we must show that every $A$ in NP is polynomial time reducible to $C$. Because $B$ is NP-complete, every language is NP is polynomial time reducible to $B$, and $B$ in turn is polynomial time reducible to $C$. Polynomial time reductions compose; that is, if $A$ is polynomial time reducible to $B$ and $B$ is polynomial time reducible to $C$, then $A$ is polynomial time reducible to $C$. Hence, every language in NP is polynomial time reducible to $C$. 
+\end{theorem}
+
 \end{document}
