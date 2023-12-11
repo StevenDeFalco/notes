@@ -572,6 +572,15 @@ Given some column (attribute) $a$, this algorithm will find all the columns that
   To determine the superkeys of a schema given a schema, first run the attribute closure algorithm on every possible superkey (A, B, C, AB, AC, BC, ABC). Whichever closure returns the schema itself is a superkey. Essentially, the closure of the superkey must generate the entire schema. A candidate key will have no subsets whithin itself which also determine the schema
 \end{remark}
 
-
+It is always possible to decompose a relation into a set of relations that are in 3NF such that: 
+\begin{itemize}
+  \item the decomposition is lossless 
+  \item the dependencies are preserved
+\end{itemize}
+It is alwasy possible to decompose a relation into a set of relations that are in BCNF such that: 
+\begin{itemize}
+  \item the decomposition is lossless 
+  \item it may not be possible to preserve dependencies
+\end{itemize}
 
 \end{document}
