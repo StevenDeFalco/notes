@@ -1,0 +1,586 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+% import note styles
+\usepackage{../styles}
+\usepackage{amsmath}
+
+% Heading information
+\title{CS561: Database Management Systems Notes}
+\author{Steven DeFalco}
+\date{Fall 2023}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+% Notes start here
+
+\section{Introduction}
+
+\define{Database management systems (DBMS)} consist of \bold{data}, \bold{software} (programs such as data interfaces), and \bold{environments} (operating systems). DBMS contains information about a particular enterprise. They are collections of interrelated data, a set of programs to access the data, and an environment that is both \emph{convenient} and \emph{efficient} to use. The \emph{user} should only have to define what it is that they want from the database, whereas the \emph{database} is responsible for defining how this query can be fulfilled; relational databases are good at this. \\
+
+The three primary data models are \define{entity-relationship model} (diagrams), \define{relational model} (relational algebra), \define{relational database} (SQL). \\
+
+Drawbacks to using \bold{file systems} to store data include the following: 
+
+\begin{itemize}
+  \item data \emph{redundancy} and \emph{inconsistency} (multiple formats, duplication of information, etc.)
+  \item difficulties in \emph{accessing} data 
+  \item data isolation (multiple files and formats) 
+  \item concurrency issues (among multiple users)
+  \item \emph{integrity} problems 
+  \item atomicity of updates
+  \item security problems (hard to provide varied levels of user access)
+\end{itemize}
+
+There are varying \define{levels of abstraction} in a database. The \define{physical level} defines how a record is stored. The \define{logical level} describes data stored in the database and the relationships among data. The \define{view level} is a way to hide details of data types and information for security purposes. \\ 
+
+The \define{schema} is the logical structure of the database; this is analagous to type information of a variable in a program. \define{Physical schema} refer to database design at the physical level. \define{Logical schema} refer to database design at the logical level. An \define{instance} is the actual content of the database at a particular time; this is analagous to the value of a variable. \define{Physical data independence} is the ability to modify the physical schema without changing the logical schema. \\ 
+
+\begin{remark}
+  The schema of a table is the attributes of the table. For example, the schema of a table whose column titles are "A,B,C,D" is simply A,B,C,D. 
+\end{remark}
+
+\define{Data manipulation languages (DML)} are languages for accesing and manipulating the data organized in a DBMS. \define{Procedural languages} are ones in which the user specifies what data is required and how to get that data. \define{Declarative (nonprocedural) languages} are ones in which the user specifies what data is required without specifying how to get such data. \bold{SQL} is the most widely used query language. \\ 
+
+A \define{data definition language (DDL)} is the specific notation for defining the database schema. The \define{DDL compiler} generates a set of tables stored in a data dictionary. Data dictionary contains metadata. \\ 
+
+A \define{relational database} is based on the relational data model. Data and relationships among the data are represented by a collection of tables. These include both a \bold{DML} and \bold{DDL}. The most common relational database systems employ the \bold{SQL} query language. 
+
+\section{Entity-Relationship Model}
+
+A \emph{database} can be modeled as a collection of entities or a relationship among entities. An \define{entity} is an object that exists and is distinguishable from other objects (e.g. specific person, company, even, plant). These \emph{entities} have \define{attributes} (e.g. people hvae names and addresses). An \define{entity set} is a set of entities of the same type that share the same properties (e.g. set of all persons, companies). In the ER-model we refer to specific objects as \emph{entities} which have \emph{attributes} and are all a part of the entire \emph{entity set}. \\ 
+
+A \define{relationship} is an association among several entties. A \define{relationship set} is a mathematical relation among $n \geq 2$ entties, each taken from entity sets. $$\{(e_1, e_2, \dots e_n) \vert e_1 \in E_1, e_2 \in E_2, \dots, e_n \in E_n\}$$ where $(e_1 , e_2 , \dots e_n)$ is a relationship. \\ 
+
+\subsection{Attributes}
+
+An \define{attribute} can also be property of a relationship set. For instance, the \emph{depositer} relationship set between entity sets \emph{customer} and \emph{account} may have the attribute \emph{access-date}. Relationshup sets that involve, two entity sets are \define{binary} (degree two). Relationship sets may involve more than two entity sets. Relationships between more than two entity sets are rare (i.e. most are binary). \\ 
+
+An \define{entity} is represented by a set of attributes, that is descriptive properties possessed by all members of an entity set. \define{Domain} is the set of permitted values for each attribute. The \bold{types of attributes} include the following:
+
+\begin{itemize}
+  \item \emph{simple} (atomic) and \emph{composite} attributes 
+  \item \emph{single-valued} and \emph{multi-valued} attributes
+  \item \emph{derived} attributes (can be computed from other attributes)
+\end{itemize}
+
+When attributes are \emph{simple} and \emph{single-valued}, then we say that the data is in \define{First Normal Form}. 
+
+\subsection{Keys}
+
+A \define{super key} of an entity set is a set of one or more attributes whose values uniquely determine each entity. Once you have defined a \emph{super key}, you can add attributes and it is still considered a \emph{super key}. A \define{candidate key} of an entity set is a minimal super key (e.g. \emph{cusomer\_id} is a candidate key of \emph{customer}). Candidate keys \emph{only} contain the necessary attributes to make something unique. Although several candidate keys may exist, one of the candidate keys is selected to be the \define{primary key}. \\ 
+
+The combination of primary keys of the participating entity sets forms a super key of relationship set. This means a pair of entity sets can have at most one relationship for each access. \\
+
+A relation schema may have an attribute that corresponds to the primary key of another relation. The attribute is called a \define{foreign key}. Foreign key is the primary key of the parent table. Only values occurring in the primary key attribute of the \bold{referenced relation} may occur in the foreign key attribute of the \bold{referencing relation}.  
+
+\subsection{E-R Diagrams}
+
+Rectangles represent entity sets. Diamonds represent relationship sets. Lines link attributes to entity sets and entity sets to relationship sets. Ellipses represent attributes: double ellipses represent multivalued attributes while dashed ellipses denote derived attributes. Underline indicates primary key attributes. 
+
+\section{Relational Model}
+
+Formally, given sets $D_1 , D_2 , \dots D_n$ a \define{relation} $r$ is a subset of $$D_1 \times D_2 \times \dots \times D_n$$ Thus, a relation is a set of $n$-uples $(a_1 , a_2 , \dots a_n)$ where each $a_i \in D_i$. \\ 
+
+Each attribute of a relation has a name. The set of allowed valued for each attribtue is called the \define{domain} of the attribute. Attribute values are (normally) required to be \define{atomic}; that is, indivisible. Domain is said to be atomic if all its members are atomic. The special value \emph{null} is a member of every domain. The null value causes complications in the definition of many operations. 
+ 
+$A_1 , A_2 , \dots A_n$ are attributes. $R= (A_1 , A_2 , \dots , A_n)$ is a \define{relation schema}. $r(R)$ denotes a relation $r$ on the relation schema $R$. \\ 
+
+The current values (\define{relation instance}) of a relation is specified by a table. An element $t$ of $r$ is a \emph{tuple}, represented by a row in a table. Relations are unordered and thus the roder of tuples is irrelevant (tuples may be stored in an arbitrary order). \\ 
+
+A \define{database} consists of multiple relations. Information about an enterprise is broken up into parts, with each relation storing one part of the information. 
+
+The two types of database management systems are OLTP (\define{Online Transactional Processing}) and OLAP (\define{Online Analytical Processing}). OLTP databases are update/change oriented (\emph{most} common databases are this category): write oriented. OLAP databases are for viewing and analyzing the data: read oriented. In OLTP, a good table is a table about \emph{one thing only}: \define{third normal form}. For example, a good OLTP table will have a table containing information about customers only and customers only. OLTP tables are normalized, but OLAP tables must be denormalized and this can be achieved by using \define{join operations}. 
+
+\subsection{Query Languages}
+
+A \define{query language} is a language in which users request information from the database. \define{Pure languages} are relational algebra, tuple relational calculus, or domain relational calculus. \emph{Pure langauges} form the underlying basis of query languages that poeple use. 
+
+\subsection{Relational Algebra}
+
+\define{Relational algebra} is a procedural language with six basic operators:
+\begin{itemize}
+  \item select: $\sigma$ \hfill \bold{WHERE} in SQL
+  \item project: $\prod$ \hfill \bold{SELECT} in SQL
+  \item union: $\cup$ \hfill \bold{UNION} in SQL
+  \item set difference: $-$ \hfill \bold{EXCEPT} in SQL
+  \item cartesian product: $\times$ \hfill \bold{, (comma)} in SQL
+  \item rename: $\rho$ \hfill \bold{AS} in SQL
+\end{itemize}
+The operators take one or two relations as inputs and produce a new relation as a result. 
+
+\begin{example}
+  Translate the following relational algebra to SQL$\dots$
+  \begin{itemize}
+    \item $\sigma_{A=B \textrm{ \^{} } D>5}(r)$ \\ 
+      \code{SELECT * FROM r WHERE A=B and D>5}
+    \item $\prod_{A,C}(r)$ \\ 
+      \code{SELECT A,C FROM r}
+    \item $r \cup s$ \\ 
+      \code{SELECT * FROM r \\ UNION \\ SELECT * FROM s}
+    \item $r - S$ \\ 
+      \code{SELECT * FROM r \\ EXCEPT \\ SELECT * FROM s}
+  \end{itemize}
+\end{example}
+
+When writing a \define{SQL query} always pull all your data togther into a single view. This means that you will start with a \code{FROM} clause. In OLTP, all of the tables are denormalized into a single table so that when making queries, you can have a simple \code{FROM} clause where the data is already in a single view. \define{Join} is a more selective version of \define{cartesian product}. \bold{Join} is essentially a cartesian product followed by a select operation. Both \bold{join} and \bold{cartesian product} are $\mathcal{O}(n^2)$, but \bold{join} will very likely run faster in most cases. \\ 
+
+\begin{definition}[Rename Operation]
+  ALlows us to name, and therefore to refer to, the results of relational algebra expressions. For example, $$\rho_{x}(E)$$ returns the expressio $E$ under the name $X$. If a relational algebra expression $E$ has an arit $n$, then $$\rho_{x(A_1 , A_2 , \dots , A_N)}(E)$$ returns the result fo expression $E$ under the name $X$, and with the attributes renamed to $A_1 , A_2 , \dots , A_n$. 
+\end{definition}
+
+\bold{How to write a query (SQL / rel. algebra) based on English Description}$\dots$ 
+\begin{enumerate}
+  \item Identify \emph{data elements}: attributes and columns (e.g. \code{cusomername})
+  \item Identify the \emph{sources} of the data elements in \bold{Step 1} (e.g. \code{customer})
+  \item Identify some \emph{meaningful} relationships between/among the elements in \bold{Step 2} (join/cartesian product followed by selection)
+\end{enumerate}
+
+\begin{example}[Query Translation Practice]
+  Find all loans of over \$ 1200. $$\sigma_{\textrm{amount } > 1200}(loan)$$ \code{SELECT * \\ FROM loan \\ WHERE amt > 1200}. \\ 
+
+  Find the loan number for each loan of an amount greater than \$ 1200. $$\prod_{\textrm{loan\_number}}(\sigma_{\textrm{amount}>1200}(loan))$$ \code{SELECT loan\_numb \\ FROM loan \\ WHERE amt > 1200}. 
+\end{example}
+
+\define{Pushing down of selection operation} is the idea where we perform selection as early as possible to attempt to make the table resulting from a join smaller. This can be used to help optimize SQL queries. Try to minimize the size of the table (reduce the number of rows and columns) that is generated with a join. Push down of the selection operation reduces the number of rows. Projection operation reduces the number of columns. \define{Heuristic optimization} is this process and is done by the DBMS. 
+
+\begin{definition}[Set-Intersection Operation ($r \cap s$)]
+  Set intersection is defined as $r \cap s = \{t \vert t \in r \textrm{ and } t \in s\}$. Where we assume that $r$,$s$ have the same \emph{arity} and attributes of $r$ and $s$ are compatible. Note that $r \cap s = r - (r - s)$. 
+\end{definition}
+
+\begin{definition}[Natural-Join Operation ($r \bowtie s$)]
+  Let $r$ and $s$ be relations on schemas $R$ and $S$ repsectively. Then $r \bowtie s$ is a relation on schema $R \cup S$ obtained as follows: 
+  \begin{itemize}
+    \item Consider each pair of tuples $t_r$ and $r$ and $t_s$ from s. 
+    \item If $t_r$ and $t_s$ have the same value on each of the attributes in $R \cap S$, add a tuple $t$ to the result where 
+      \begin{itemize}
+        \item $t$ has the same value as $t_r$ on $r$ 
+        \item $t$ has the same value as $t_s$ on $s$
+      \end{itemize}
+  \end{itemize}
+\end{definition}
+
+\begin{example}[Natural-Join Example]
+  Let $R = (A,B,C,D)$ and $S = (E,B,D)$. \\ 
+  Result schema = $(A,B,C,D,E)$ \\ 
+  $r \bowtie s$ is defined as $\prod_{r.A,r.B,r.C,r.D,r.E}(\sigma_{r.B = s.B \wedge r.D = s.D}(r \times s))$ \\ 
+
+  \code{SELECT *} \\ 
+  \code{FROM r natural join s} \\ 
+
+  \emph{or} \\ 
+
+  \code{SELECT y.A, y.B, y.C, y.D, S.E} \\ 
+  \code{FROM Y,S} \\ 
+  \code{WHERE Y.B = S.B} \\ 
+  \code{and Y.D = S.D}
+\end{example}
+
+\begin{definition}[Division Operation ($r \vert s$)]
+  This operation is suited to queries that include the phrase "for all". Let $r$ and $s$ be relations on schemas $R$ and $S$ respectively where 
+  \begin{itemize}
+    \item $R = (A_1 , \dots , A_m , B_1 , \dots B_n)$ 
+    \item $S = (B_1 , \dots , B_n)$
+  \end{itemize}
+  The result of $r \vert s$ is a relation on schema $R - S = (A_1 , \dots , A_m)$ $$r \vert s = \{t \vert t \in \prod_{R-S}(r) \wedge \forall u \in s (tu \in r)\}$$ where $tu$ means the concatenation of tuples $t$ and $u$ to produce a single tuple.
+\end{definition}
+
+\begin{remark}
+  Let $q = r \vert s$, then $q$ is the largest relatin satisfying $q \times s \subseteq r$. 
+\end{remark}
+
+\begin{definition}[Generalized Projection]
+  Extends the prjection operation by allowing arithmetic functions to be used in the projection list $$\prod_{F_1 , F_2 , \dots , F_n}(E)$$ where $E$ is any relational-algebra expression. Each of $F_1 , F_2, \dots F_n$ are arithmetic expressions involving constants and attributes in the schema of E. 
+\end{definition}
+
+An \define{aggregation function} takes a collection of values and returns a single value as a result. For example, average value, minimum value, maximum value, sum of values, and number of values are all aggregation functions. 
+
+\begin{definition}[Aggregate Operation]
+  $$_{G_1 , G_2, \dots , G_n}g_{F_1(A_1), F_2(A_2 , \dots , F_n(A_n))}(E)$$ where $E$ is any relational-algebra expression. 
+  \begin{itemize}
+    \item $G_1 , G_2 , \dots , G_n$ is a list of attributes on which to group (can be empty) 
+    \item Each $F_i$ is an aggregate function 
+    \item Each $A_i$ is an attribute name
+  \end{itemize}
+\end{definition}
+
+\begin{example}[Group By Examples]
+  \begin{itemize}
+    \item $g_{\textrm{sum}(c)}(r)$ \\ 
+      \code{SELECT sum(c)} \\ 
+      \code{FROM r}
+    \item $_{branch\_name}g_{\textrm{sum}(balance)}(account)$ \\ 
+      \code{SELECT branch\_name, sum(balance)} \\ 
+      \code{FROM account} \\
+      \code{Group By branch\_name}
+  \end{itemize}
+\end{example}
+
+The result of an aggregation does not have a name, but we can use the rename operation to give it a name. For convenience, we permit renaming as a part of aggregate operation: $$_{branch\_name}g_{\textrm{sum}(balance) \textrm{ as }sum_balance}(account)$$
+
+\begin{definition}[Outer Join]
+  an extension of the join operation that avoids loss of information. \define{Outer Join} computes the join and then adds tuples from one relation that does not match tuples in the other relation to the result of the join. This uses \emph{null} values which signify that the value is unknown or does not exist. All comparisons involving \emph{null} are false by definition. \\ 
+
+  Within this, there is left and right outer join. In \define{left outer join}, the results include those from inner join and the entities from the first entity set that are not included in result of an inner join. Values that are missing (the reason they are not included in the inner join) will have null-values. There is also \define{full outer join} which is the union of both left and right inner join. 
+\end{definition}
+
+It is possible for tuples to have a null value, denoted by \emph{null}, for some of their attributes. \emph{null} signified an unknown value or that a value does not exist. The result of any arithmetic expression involving \emph{null} is \emph{null}. Aggregate functions simply ignore null values. For duplicate elimination and grouping, null is treated like any other value, and two nulls are assumed to be the same. \\ 
+
+Comparisons with null values return the special truth value: \define{unknown}. There are special rules involving the \emph{unknown} truth value:
+\begin{itemize}
+  \item OR \\
+    \begin{align*}
+      (unknown \textrm{ or } true) &= true, \\ 
+      (unknown \textrm{ or } false) &= unknown \\ 
+      (unknown \textrm{ or } unknown) &= unknown
+    \end{align*}
+  \item AND 
+    \begin{align*}
+      (true \textrm{ and } unknown) &= unknown, \\ 
+      (false \textrm{ and } unknown) &= false \\ 
+      (unknown \textrm{ and } unknown) &= unknown 
+    \end{align*}
+  \item (\bold{not} $unknown$) = $unknown$
+\end{itemize}
+
+\begin{definition}[Deletion]
+  A delete request is expressed similarly to a query, except instead of displaying tuples to the user, the selected tuples are removed from the data base. Can only delete whole tuples; cannot delete values on only particular values. A deletion is expressed in relational algebra by: $$r \leftarrow r - E$$ where $r$ is a relation and $E$ is a relational algebra query. 
+\end{definition}
+
+\begin{definition}[Insertion]
+  To insert data into a relation, we either: 
+  \begin{itemize}
+    \item specify a tuple to be inserted 
+    \item write a query whose result is a set of tuples to be inserted 
+  \end{itemize}
+  In relational algebra, an insertion is expressed by: $$r \leftarrow r \cup E$$ where $r$ is a relation and $E$ is a relational algebra expression. The insertion of a single tuple is expressed by letting $E$ be a constant relation containing one tuple. 
+\end{definition}
+
+\begin{definition}[Updating]
+  A mechanism to change a value in a tuple without charting all values in the tuple. Use the generalized projection operator to do this task $$r \leftarrow \prod_{F_1, F_2, \dots , F_l}(r)$$ Each $F_i$ is either 
+  \begin{itemize}
+    \item The $l^{\textrm{th}}$ attribute of $r$, if the $l^{\textrm{th}}$ attribute is not updated, or, 
+    \item if the attribute to be updated $F_i$ is an expression, involving only constants and the attributes of $r$, which gives the new value for the attribute
+  \end{itemize}
+\end{definition}
+
+\section{SQL}
+
+An SQL relation si defined using the \define{create table} command: 
+\begin{align*}
+  \textrm{create table } r &(A_1 D_1 , A_2 , D_2 , \dots A_n D_n , \\
+  &(\textrm{integrity-constraint}_1), \\ 
+  &\dots , \\ 
+  &(\textrm{integrity-constraint}_k))
+\end{align*}
+\begin{itemize}
+  \item $r$ is the name of the relation 
+  \item each $A_i$ is an attribute name in the schema of relation $r$ 
+  \item $D_i$ is the data type of values in the domain of attribute $A_i$
+\end{itemize}
+
+The \define{drop table} command deletes all information about the dropped relation from the database. The \define{alter table} command is used to add attributes to an existing relation $$\textrm{alter table } r \textrm{ add } A \, D$$ where $A$ is the name of the attribute to be added to relation $r$ and $D$ is the domain of $A$. All tuples in the relation are assigned $null$ as the value for the new attribute. The \define{alter table} command can also be used to drop attributes of a relation $$\textrm{alter table } r \textrm{ drop } A$$ where $A$ is the name of an attribute of relation $r$. Dropping of attributes is not supported by many databases. \\ 
+
+SQL is based on a set and relational operations with certain modifications and enhancements. A typical SQL query has the form: 
+\begin{align*}
+  &\textrm{select } A_1 , A_2 , \dots A_n \\ 
+  &\textrm{from } r_1 , r_2 , \dots , r_m \\ 
+  &\textrm{where } P 
+\end{align*}
+\begin{itemize}
+  \item $A$ represents an attribute 
+  \item $R_i$ represents a relation 
+  \item $P$ is a predicate 
+\end{itemize}
+This query is equivalent to the relation algebra expression $$\prod_{A_1 , A_2 , \dots , A_n}(\sigma_p (r_1 \times r_2 \times \dots \times r_m))$$ The result of an SQL query is a relation. \\ 
+
+The \define{select} clause lists the attributes desired in the result of a query, and this corresponds to the projection operation of the relational algebra. SQL allows duplicaties in relations as wlel as in query results; to force the elimination of duplicates, insert he keyword \bold{distinct} after select. The keyword \bold{all} specifies that duplicates not be removed. An asterisk in the select clause denotes \emph{all attributes}. The \bold{select} clause can contain arithmetic expressions involvin the operation +,-,*, and /, and operating on constants or attributes of tuples. \\ 
+
+The \bold{where} clause specifies conditions that the result must satisfy; this corresponds to the selection predicate of the relational algebra. Compraison results can be combined using the logical connectives \bold{and}, \bold{or}, and \bold{not}. Comparisons can be applied to results of arithmetic expressions. SQL includes a between comparison operator. 
+\begin{example}[Between operator] 
+  Find the loan number of those loans with loan amounts bewtween \$90,000 and \$100,000. \\ 
+  \begin{lstlisting}[language=SQL]
+  select loan_number 
+  from loan 
+  where amount between 90000 and 100000
+  \end{lstlisting}
+\end{example}
+
+The \define{from} clause lists the relations involved in the query; this corresponds to the Cartesian product operation of the relational algebra. \\ 
+
+SQL allows renaming relations and attributes using the \bold{as} clause: $$old-name \textrm{ as } new-name$$
+
+SQL includes a string-matching oeprator for comparisons on character strings. The operator \emph{like} uses patterns that are described using two special characters: 
+\begin{itemize}
+  \item percent (\%). The \% character matches any substring 
+  \item underscore (\_). The \_ character matches any character
+\end{itemize}
+SQL supports a variety of string operations such as 
+\begin{itemize}
+  \item concatentation (using "||")
+  \item concerting from upper to lower case (and vice versa) 
+  \item finding string length, extracting substrings, etc.
+\end{itemize}
+
+We may specify \define{desc} for descending order or \define{asc} for ascending order, for each attribute; ascending order is the default 
+\begin{lstlisting}[language=SQL]
+  order by customer_name desc
+\end{lstlisting}
+
+The set operations \bold{union}, \bold{intersect}, and \bold{except} operate on relations and correspond to the rleational algebra operations $\cup$, $\cap$, $-$. Each of the operations automatically eliminates duplicates; to retain all duplicates use the corresponding multiset versions \bold{union all}, \bold{intersect all}, and \bold{except all}. 
+
+\begin{remark}
+  Predicates in the \bold{having} clause are applied after the formation of groups whereas predicates in the \bold{where} clause are applied before forming groups. 
+\end{remark}
+
+\code{FROM} clause creates a single table by taking the cartesian product of all the specified table. \code{WHERE} clause creates a smaller table that is a subset of the table created with \code{FROM}. Then \code{GROUP BY} creates a new smaller table with the desired attributes. Finally, \code{HAVING} accesses the small table that is created by the \code{GROUP BY} clause. \code{HAVING} only has access to the output of \code{GROUP BY}. \\ 
+
+SQL provides a mechanism for the nesting of subqueries. A \define{subquery} is a \bold{select-from-where} expression that is nested within another query. A common use of subqueries is to perform tests for set membershup, set comparisons, and set cardinality. 
+
+\begin{example}[Nested Subqueries] . \\
+  \begin{itemize}
+    \item Find all customers who have both an account and a loan at the bank
+      \begin{lstlisting}[language=SQL]
+  select distinct customer_name 
+    from borrower 
+    where customer_name in (select customer_name
+                            from depositor)
+      \end{lstlisting}
+      Without using nested subqueries, you could use intersection or natural join such as seen here. 
+      \begin{lstlisting}[language=SQL]
+  -- intersection
+  select customer_name from borrower 
+  intersect 
+  select customer_name from depositor
+
+
+  -- natural join 
+  select distinct customer_name 
+  from borrower natural join depositor
+      \end{lstlisting}
+
+    \item Find all customers who have a loan at the bank who do not have an account at the bank
+      \begin{lstlisting}[language=SQL]
+  select distinct customer_name 
+    from borrower 
+    where customer_name not in (select customer_name 
+                                from depositor)
+      \end{lstlisting}
+  \end{itemize}
+\end{example}
+
+\begin{definition}[Some Clause]
+  F $\langle$comp$\rangle$ \bold{some} $r \Leftrightarrow \exists t \in r$ such that (F $\langle$comp$\rangle$ $t$). Where $\langle$comp$\rangle$ can be: $<,\leq,>,=,\neq$. 
+\end{definition}
+
+\begin{definition}[All Clause]
+  F $\langle$comp$\rangle$ \bold{all} $r \Leftrightarrow \forall t \in r$ (F $\langle$comp$\rangle$ $t$)
+\end{definition}
+
+The \bold{exists} construct returns the value \bold{true} if the argument subquery is nonmepty. 
+\begin{center}
+  \bold{exists} $r \Leftrightarrow r \neq \phi$ \\ 
+  \bold{not exists} $r \Leftrightarrow r = \phi$
+\end{center}
+
+\begin{remark}
+  Nested subqueries are computed once and the output is used as reference. 
+\end{remark}
+
+\define{Correlated} nested sub-queries expect a parameter from the outside query. When you can take a nested sub query out of the query and still run it, then we know that this is a \define{non-correlated} nested subquery. 
+
+\begin{remark}
+  Succinct expressions lead to efficient evaluation. 
+\end{remark}
+
+The \define{unique} construct tests whether a subquery has any duplicate tuples in its result. SQL allows a subquery expression to be used in the \bold{from} clause. 
+
+\begin{definition}[With Clause]
+  provides a way of defining a temporary view whose definition is available only to the query in which the with clause occurs. 
+\end{definition}
+
+In some cases, it is not desirable for all users to see the entire logical model. A \define{view} provides a mechanism to hide certain data from the view of certain users. Any relation that is not of the conceptual model but is made visible to a user as a \emph{virtual relation} is called a view. A view is defined using the \bold{create view} statement which has the form 
+\begin{center}
+  \bold{create view} $v$ \bold{as} $\langle$query expression $\rangle$
+\end{center}
+where $\langle$query expression$\rangle$ is any legal SQL expression. The view name is represented by $v$. Once a view is defined, the view name can be used to refer to the virtual relation that the view generates. When a view is created, the query expression is stored in the database; the expression is substituted into queries using the view. 
+
+\begin{remark}
+  When we create a view, a system table is created that maps the view name to the SQL code behind that view. It is when we access the view, that the SQL code is executed. This is to ensure \define{data recency} in the view. 
+\end{remark}
+
+One view may be used in the expression defining another view. A view relation $v_1$ is said to \define{depend directly} on a view relation $v_2$ if $v_2$ is used in the expression defining $v_1$. A view relation $v_1$ is said to \define{depend on} view relation $v_2$ if either $v_1$ depends directly to $v_2$ or there is a path of dependencies from $v_1$ to $v_2$. A view relation $v$ is said to be \define{recursive} if it depends on itself. \\
+
+\define{Join operations} take two relations and return as a result another relation. These additional operations are typically used as subquery expressiosn in the \bold{from} clause. \define{Join condition} defines which tuples in the two relations match, and what attributes are present in the result of the join. \define{Join type} defines how tuples in each relation that do not match any tuple in the other relation are treated. \emph{Join types} include inner join, left outer join, right outer join, and full outer jion. \emph{Join conditions} include natural, on $\langle$predicate$\rangle$, and using$(A_1 , A_2 , \dots , A_n)$. 
+
+\section{Advanced SQL}
+
+\begin{definition}[Built-in Data Types in SQL]
+  Some of the following are built-in SQL data types: 
+  \begin{itemize}
+    \item \define{date}: Dates, containing a (4 digit) year, month, and day 
+    \item \define{time}: Time of data, in hours, minutes, and seconds 
+    \item \define{timestamp}: date plus time of day 
+    \item \define{interval}: period of time 
+  \end{itemize}
+\end{definition}
+
+We can extract values from individual fields from date/time/timestamp using \bold{extract}. Users can define types using the \bold{create type} construct which creates user-defined type. \bold{create domain} creates user-defined domain types. 
+ 
+\begin{definition}[Domain constraints]
+  the most elementary form of integrity constraint. They test values inserted in the database, and test queries to ensure that the comparisons make sense. 
+\end{definition}
+
+Large objects are stored as \emph{large object}: 
+\begin{itemize}
+  \item \bold{blob}: binary large object---object is a large collection of uninterpreted binary data 
+  \item \bold{clob}: character large object---object is a large collection of character data
+\end{itemize}
+
+An \define{assertion} is a prediacte expressing a condition that we wish the database to always satisfy. When an assertion is made, the system tests it for validity, and tests it again on every update that may violate the assertion. \\ 
+
+Some forms of \define{authorization} on parts of the database are: 
+\begin{itemize}
+  \item \define{Read} allows reading, but not modification of data 
+  \item \define{Insert} allows insertion of new data, but notmodification of existing data 
+  \item \define{Update} allows modification, but no deletion of data 
+  \item \define{Delete} allows deletion of data
+\end{itemize}
+
+\section{Relational Database Design}
+
+A \emph{good table} in OLTP should$\dots$ 
+\begin{itemize}
+  \item Be about one \emph{thing} 
+  \item Should have one primary key where all the other attributes serve to describe that primary key. Key depends on rest of the columns 
+  \item Table is in \bold{BCNF} format or $3^{rd}$ normal form
+\end{itemize}
+
+\begin{remark}
+  The primary key in a relationship table is made up of foreign keys.
+\end{remark}
+
+\begin{remark}
+  Two symptoms of a bad table are repetition or a lot of null values. 
+\end{remark}
+
+The process of splitting a bad table into smaller, more simple, tables is called \define{decomposition}. If a decomposition is done well, then you will be able to natural join the new tables back together and get the original table back. Should a decomposition not meet these requirements, then it is called a \define{Lossy Decomposition} because there is a loss of integrity through this process. The goal is to perform a \define{Loss Less Join Decomposition} where a natural join of the new tables \emph{will} return the original table. \\
+
+In the case that a relation $R$ is not in \emph{good} form, we decompose it into a set of relations $\{R_1 , R_2 , \dots , R_n\}$ such that 
+\begin{itemize}
+  \item each relation is in good form 
+  \item the decomposition is a lossless-join decomposition
+\end{itemize}
+
+The domain is \define{atomic} if its elements are considered to be indivisiable units. A relation schema $R$ is in \define{first normal form} if the domains of all attributes of $R$ are atomic. Non-atomic values complicate storage and encourage redundant (repeated) storage of data. Atomicity is actually a property of how the elements of the domain are used. \\ 
+
+\define{Functional dependencies} require that the value for a certain set of attributes determines uniquely the value for another set of attributes. A functional dependency is a generalization of the notion of a \emph{key}.\\ 
+
+\begin{definition}[Functional Dependencies]
+  Let $R$ be a relation schema $$\alpha \subseteq R \textrm{ and } \beta \subseteq R$$ The functional dependency $$\alpha \rightarrow \beta$$ holds on $R$ if and only if for any legal relations $r(R)$, whenever any two tuples $t_1$ and $t_2$ of $r$ agree on the attributes $\alpha$, they also agree on the attributes $\beta$. That is, $$t_1 [\alpha] = t_2 [\alpha] \Rightarrow t_1 [\beta] = t_2 [\beta]$$
+\end{definition}
+
+We use functional dependencies to: 
+\begin{itemize}
+  \item Test relations to see if they are legal under a given set of functional dependencies: if a relation $r$ is legal under a set $F$ of functional dependencies, we say that $r$ satisfies $F$. 
+  \item Specify constraints on the set of legal relations: we say that $F$ holds on $R$ if all legal relations on $R$ satisfy the set of functional dependencies $F$. 
+\end{itemize}
+A functional dependency is \emph{trivial} if it is satisfied by all instances of a relation. In general, $\alpha \rightarrow \beta$ is trivial if $\beta \subseteq \alpha$. Given a set $F$ of functional dependencies, there are certain other functional dependencies that are logically implied by $F$. For example, if $A \rightarrow B$ and $B \rightarrow C$, then we can infer that $A \rightarrow C$. The set of all functional dependencies logically implies by $F$ is the \define{closure} of $F$. We denote the closure of $F$ by $F^{+}$. \\ 
+
+$K$ is a \define{superkey} for relation schema $R$ if and only if $K \rightarrow R$. $K$ is a \define{candidate key} for $R$ if and only if $K \rightarrow R$ and for no $\alpha \subseteq K, \alpha \rightarrow R$. \\
+
+\begin{definition}[Boyce-Codd Normal Form]
+  A relation schema $R$ is in BCNF with respect to a set $F$ of functinal dependencies if for all functional dependencies in $F^{+}$ of the form $$\alpha \rightarrow \beta$$ where $\alpha \subseteq R$ and $\beta \subseteq R$, at least once of the following holds: 
+  \begin{itemize}
+    \item $\alpha \rightarrow \beta$ is trivial (i.e. $\beta \subseteq \alpha$) 
+    \item $\alpha$ is a superkey for $R$
+  \end{itemize}
+  Suppose we have a schema $R$ and a non-trivial dependency $\alpha \rightarrow \beta$ causes a violation of BCNF. We decompose $R$ into: 
+  \begin{itemize}
+    \item $(\alpha \cup \beta)$ 
+    \item $(R - (\beta - \alpha))$
+  \end{itemize}
+\end{definition}
+
+If it is sufficient to test only those dependencies on each individual relation of a decomposition in order to ensure that \emph{all} functional dependencies hold, then that decomposition is \define{dependency preserving}. Because it is not always possible to achieve both BCNF and dependency preservation, we consider a weaker normal form, known as \emph{third normal form}. 
+
+\begin{definition}[Third Normal Form]
+  A relation schema $R$ is in third normal form (3NF) if for all: $$\alpha \rightarrow \beta \textrm{ in } F^{+}$$ at least one of the following holds: 
+  \begin{itemize}
+    \item $\alpha \rightarrow \beta$ is trivial (i.e. $\beta \in \alpha$) 
+    \item $\alpha$ is a superkey for $R$ 
+    \item Each attribute $A$ in $\beta - \alpha$ is contained in a candidate key for $R$
+  \end{itemize}
+  If a relation is in BCNF, then it is in 3NF. The third condition is a minimal relaxation of BCNF to ensure dependency preservation. 
+\end{definition}
+
+\subsection{Functional Dependencies and Closures}
+
+Given a set $F$ of functional dependencies, there are certain other functional dependencies that are logically implied by $F$. For example, if $A \rightarrow B$ and $B \rightarrow C$, then we can infer that $A \rightarrow C$. The set of all functional dependencies logically implied by $F$ is the \define{closure} of $F$. We denote the closure of $F$ by $F^{+}$. We can find all of $F^{+}$ by applying Armstrong's Axioms: 
+\begin{itemize}
+  \item If $\beta \subseteq \alpha$, then $\alpha \rightarrow \beta$ \hfill \define{reflexivity}
+  \item If $\alpha \rightarrow \beta$, then $\gamma \alpha \rightarrow \gamma \beta$ \hfill \define{augmentation}
+  \item If $\alpha \rightarrow \beta$, then $\beta \rightarrow \gamma$, then $\alpha \rightarrow \gamma$ \hfill \define{transitivity}
+\end{itemize}
+These rules are \define{sound} (generate only functional dependencies that actually hold) and \define{complete} (generate all functional dependencies that hold). \\
+
+We can further simplify manual computationa of $F^{+}$ by using the following additional rules. 
+\begin{itemize}
+  \item If $\alpha \rightarrow \beta$ holds and $\alpha \rightarrow \gamma$ holds, then $\alpha \rightarrow \beta\gamma$ holds \hfill \define{union}
+  \item If $\alpha \rightarrow \beta\gamma$ holds, then $\alpha \rightarrow \beta$ holds and $\alpha \rightarrow \gamma$ holds \hfill \define{decomposition}  
+  \item If $\alpha \rightarrow \beta$ holds and $\gamma\beta \rightarrow \delta$ holds, then $\alpha \gamma \rightarrow \delta$ holds \hfill \define{pseudotransitivity}
+\end{itemize}
+These rules can all by inferred from Armstrong's Axioms. \\ 
+
+There are several uses of the attribute closure algorithm:
+\begin{itemize} 
+  \item To test if $\alpha$ is a superkey, we compute $\alpha^{+}$ and check if $\alpha^{+}$ contains all attributes of $R$. 
+  \item To check if a functional dependency $\alpha \rightarrow \beta$ holds, just check if $\beta \subseteq \alpha^{+}$. That is, we compute $\alpha^{+}$ by using attribute closure, and then check if contains $\beta$. 
+  \item For each $\gamma \subseteq R$, we find the cosure $\gamma^{+}$, and for each $S \subseteq \gamma^{+}$, we output a functional dependency $\gamma \rightarrow S$
+\end{itemize}
+
+\begin{definition}[Lossless-join Decomposition]
+  A decomposition of $R$ into $R_1$ and $R_2$ is lossless join if and only if at least one of the following dependencies is in $F^{+}$: 
+  \begin{itemize}
+    \item $R_1 \cap R_2 \rightarrow R_1$ 
+    \item $R_1 \cap R_2 \rightarrow R_2$
+  \end{itemize}
+\end{definition}
+
+Given a set of attributes, $\alpha$, the \define{closure} of $\alpha$ under F (denoted by $\alpha^{+}$) as the set of attributes that are functionally determined by $\alpha$ under $F$. The algorithm to compute $\alpha^{+}$, the closure of $\alpha$ under $F$ is as follows: 
+\begin{lstlisting}[mathescape=true]
+  result := $\alpha$;
+  while (changes to result) do 
+    for each $\beta \rightarrow \gamma$ in F do 
+      begin 
+        if $B \subseteq result$ then $result := result \cup \gamma$ 
+      end 
+\end{lstlisting}
+
+Given some column (attribute) $a$, this algorithm will find all the columns that depend $a$. In other words, given the left side of some functional dependency, find all the attributes on the right hand side. 
+
+\begin{remark}
+  To determine the superkeys of a schema given a schema, first run the attribute closure algorithm on every possible superkey (A, B, C, AB, AC, BC, ABC). Whichever closure returns the schema itself is a superkey. Essentially, the closure of the superkey must generate the entire schema. A candidate key will have no subsets whithin itself which also determine the schema
+\end{remark}
+
+It is always possible to decompose a relation into a set of relations that are in 3NF such that: 
+\begin{itemize}
+  \item the decomposition is lossless 
+  \item the dependencies are preserved
+\end{itemize}
+It is alwasy possible to decompose a relation into a set of relations that are in BCNF such that: 
+\begin{itemize}
+  \item the decomposition is lossless 
+  \item it may not be possible to preserve dependencies
+\end{itemize}
+
+\end{document}

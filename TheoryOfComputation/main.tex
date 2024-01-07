@@ -1,0 +1,1171 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+% import note styles
+\usepackage{../styles}
+
+% Heading information
+\title{CS334: Theory of Computation Notes}
+\author{Steven DeFalco}
+\date{Fall 2023}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+% Notes start here
+
+\section{Introduction}
+
+\subsection{Automata, Computability, and Complexity}
+
+The central question of \define{complexity theory} is \emph{what makes some problems computationally hard and others easy?}; the answer is unknown. Cryptography is unique in that is specifically requires computational problems that are hard, rather than easy. 
+In \define{complexity theory}, the objective is to classify problems as easy ones and hard ones; whereas in \define{computability} theory, the classification of probelms is by those that are solvable and those that are not. 
+
+\define{Automata theory} deals with the definitions and properties of mathematical models of computations. 
+
+\subsection{Mathematical Notions and Terminology}
+
+\subsubsection{Sets} 
+
+A \define{set} is a group of objects represented as a unit. Sets may contain any type of object, including numbers, symbols, and even othber sets. The objects in a set are called its \emph{elements} or \emph{members}. One way to describe a set is to list the set's elements inside braces. Thus the set  $$S = \{7,21,57\}$$ contains the elements 7, 21, and 59. The symbols $\in$ and $\notin$ denote set membership and nonmembership. We say that $A$ is a \define{subset} of $B$, written $A \subseteq B$, if every member of $A$ is also a member of $B$. We say that $A$ is a \define{proper subset} of $B$, written $A \subset B$, if $A$ is a subset of $B$ and not equal to $B$. \\ 
+
+The order of describing a set doesn't matter, nor does repetition of its members. If we do want to take the number of occurrences of members into account, we call the group a \define{multiset} instead of a set. An \define{infinite set} contains infinitely many elements. \\ 
+
+We write the set of \define{natural numbers} $N$ as $$\{1,2,3,\dots\}$$. The set of \define{integers} $Z$ is written as $$\{\dots,-2,-1,0,1,2,\dots\}$$ The set with zero members is called the \define{empty set} and is written $\emptyset$. A set with one member is sometimes called a \define{singleton set} and a set with two members is called an \define{unordered pair}. \\ 
+
+When we want to describe a set containing elements according to some rule, we write $\{n \vert \textrm{rule about} n\}$. \\ 
+
+If we have two sets $A$ and $B$, the \define{union} of $A$ and $B$, written $A \cup B$, is the set we get by combining all the leements in $A$ and $B$ into a single set. The \define{intersection} of $A$ and $B$, written $A \cap B$, is the set of elements that are both $A$ and $B$. The \define{complement} of $A$, written $\overline{A}$, is the set of elelements under consideration that are $not$ in $A$. \\ 
+
+\subsubsection{Sequences and Tuples}
+
+A \define{sequence} of objects is a list of these objects in some order. We usually designate a sequence by writing the list within parentheses. For example, the sequence 7,21,57 would be written $$(7,21,57)$$. The order does matter in a set. \\ 
+
+Finite sequences often are called \define{tuples}. A sequence with $k$ elements is a \define{k-tuple}. A 2-tuple is also called an \define{ordered pair}. \\ 
+
+Sets and sequences may appear as elements of other sets and sequences. For example, the \define{power set} of $A$ is the set of all subsets of $A$. If $A$ is the set {0,1}, the power set of $A$ is the set $\{\emptyset, \{0\}, \{1\}, \{0,1\}\}$. \\ 
+
+If $A$ and $B$ are two sets, the \define{Cartesian product} or def{cross product} of $A$ and $B$, written $A \times B$, is the set of all ordered pairs wherein the first element is a member of $A$ and the second elemetn is a member of $B$. 
+
+\subsubsection{Functions and Relations} 
+
+A \define{function} is an object that sets up an input-output relationship. A function takes an input and produces and output. In every function, the same input always produces the same output. \\ 
+
+A function is also called a \define{mapping}, and, if $f(a) = b$, we say that $f$ maps $a$ to $b$. \\ 
+
+The set of possible inputs to the function is called its \define{domain}. The outputs of a function come from a set called the \define{range}. The notation for saying that $f$ is a function with domain $D$ and range $R$ is $$f: D \rightarrow R$$ \\ 
+
+When the domain of a function $f$ is $A_{1} \times \cdots \times A_{k}$ for some sets $A_{1}, \dots, A_{k}$, the input to $f$ is a k-tuple and we call the $a_i$ the \define{arguments} to $f$. A function with $k$ arguments is called a \define{k-ary function}, and $k$ is called the \define{arity} of the function. If $k$ is 1, $f$ has a single argument and $f$ called a \define{unary function}. If $k$ is 2, $f$ is a \define{binaryh function}. Certain familiar binary functions are written in a special \define{infix notation}, with the symbol for the function placed between its two arguments, rather than in \define{prefix notation}, with the symbol preceding. \\ 
+
+A \define{predicate} or \define{property} is a function whose range is $\{\textrm{TRUE}, \textrm{FALSE}\}$. For example, let $even$ be a property that is TRUE if its input is an even number and FALSE if its input is an odd number. \\ 
+
+A property whose domain is a set of k-tuples $A \times \cdots \times A$ is called a \define{relation}, a \define{k-ary relation}, or a \define{k-ary relation on A}. \\
+
+A special type of binaryh relation, called an \define{equivalence relation}, captures the notion of two objects being equal in some feature. A binary relation $R$ is an equivalence relation if $R$ satisfies three conditions:
+
+\begin{enumerate}
+  \item $R$ is \define{reflexive} if for every $x$, $xRx$;
+  \item $R$ is \define{symmetric} if for every $x$ and $y$, $xRy$ implies $yRx$; and 
+  \item $R$ is \define{transitive} if for every $x$,$y$, and $z$, $xRy$ and $yRz$ implies $xRz$. 
+\end{enumerate}
+
+\subsubsection{Graphs}
+
+An \define{undirected graph}, or simply a \define{graph}, is a set of points with lines connecting some of the points. The points are called \define{nodes} or \define{vertices}, and the lines are called \define{edges}. \\ 
+
+The number of edges at a particular node is the \define{degree} of that node. No more thatn one edge is allowed between any two nodes. We may allow an edge from a node to itself, called a \define{self-loop}. \\ 
+
+We say that graph $G$ is a \define{subgraph} of graph $H$ is the nodes of $G$ are a subset of the nodes of $H$, and the edges of $G$ are the edges of $H$ on the corresponding nodes. \\ 
+
+A \define{path} in a graph is a seqeunce of nodes connected by edges. A \define{simple path} is a path that doesn't repeat any nodes. A graph is \define{connected} if every two nodes have a path between them. A path is a \define{cycle} if it starts and ends in the same node. A \define{simple cycle} is one that contains at least three nodes and repeates only the first and last nodes. A graph is a \define{tree} if it is connected and has no simple cycles. A tree may contain a specially designated node called the \define{root}. The nodes of degree 1 in a tree, other than the root, are called the \define{leaves} of the tree. \\ 
+
+A \define{directed graph} has arrows instead of lines. The number of arrows pointing from a particular node is the \define{outdegree} of that node, and the number of arrows pointing to a particular node is the \define{indegree}. \\ 
+
+A path in which all the arrows point in the same direction as its steps is called a \define{directed graph}. A directed graph is \define{strongly connected} if a directed path connects every two nodes. 
+
+\subsubsection{Strings and Languages}
+
+Strings of characters are fundamental building blocks in computer science. The alphabet over which the strings are defined may vary with the application. For our purposes, we define an \define{alphabet} to be any nonemtpy finite set. The members of the alphabet are \define{symbols} of the alphabet. We generally use capital Greek letter $\Sigma$ and $\Gamma$ to dersignate alphabets. \\ 
+
+A \textbf{string over an alphabet} is a finite sequence of syumbols from that alphabet, usually written next to one another and not separated by commas. If $w$ is a string over $\Sigma$, the \define{length} of $w$, written $\vert w \vert$ is the number of symbols that it contains. The string of length zero is called the \define{empty string} and is written $\epsilon$. The \define{reverse} of $w$, written $w^{R}$, is the string obtained by writing $w$ in the opposite order. String $z$ is a \define{substring} of $w$ if $z$ appears consecutively within $w$. \\ 
+
+If we have a string $x$ of length $m$ and string $y$ of length $n$, the \define{concatenation} of $x$ and $y$, written $xy$, is the string obtained by appending $y$ to the end of $x$, as in $x_1 \cdots x_{m}y_1 \cdots y_n$. \\ 
+
+The \define{lexicographic order} of strings is the same as the familiar dictionary order. We'll occasionally use a modified lexicographic order, called \define{shortlex order} or simply \define{string order}, that is identical to lexicographic order, except that shorter strings precede longer strings. Thus the string ordering of all strings over the alphabet $\{0,1\}$ is $$(\epsilon,0,1,00,01,10,11,000,\dots)$$ Say that string $x$ is a \define{prefix} of string $y$ if a string $z$ exists where $xz = y$, and that $x$ is a \define{proper prefix} of $y$ if in addition $x \neq y$. A \define{language} is a set of strings. A language is a \define{prefix-free} if no member is a proper prefix of another member. 
+
+\subsubsection{Boolean Logic}
+
+\define{Boolean logic} is a mathematical system built around the two values TRUE and FALSE. The values TRUE and FALSE are called the \define{Boolean values} and are often represented by the values 1 and 0. \\ 
+
+  We can manipulate Boolean values with the \define{boolean operations}. The simplest boolean operation is the \define{negation} or \define{NOT} operation, designated with the symbol $\neg$. The negation of a Boolean value is the opposite value. We designate the \define{conjunction} or \define{AND} operation with the symbol $\land$. The conjunction of two Boolean values is 1 if both of those values are 1. The \define{disjunction} or \define{OR} operation is designated with the symbol $\lor$. The disjunction of two Boolean values is 1 if either of those values is 1. \\ 
+
+  The \define{exclusive or} or \define{XOR} operation is designated by the $\oplus$ symbol and is 1 if either but not both of its two operands is 1. The \define{equality} operation, written $\leftrightarrow$, is 1 if both if its operandws have the same value. Finally, the \define{implication} operation is designated by the symbol $\rightarrow$ and is 0 if its first operand is 1 and its second operand is 0; otherwise, $\rightarrow$ is 1. \\ 
+
+The \define{distributive law} for AND and OR comes in handy when we manipulate Boolean expression; it comes in two forms: 
+
+\begin{itemize}
+  \item $P \land (Q \lor R) \textrm{ equals } (P \land Q) \lor (P \land R) \textrm{, and its dual}$
+  \item $P \lor (Q \land R) \textrm{ equals } (P \lor Q) \land (P \lor R)$
+\end{itemize}
+
+\subsection{Definitions, Theorems, and Proofs}
+
+\define{Definitions} describe the objects and notions that we use. When defining some object, we must make clear what constitutes that object and what does not. \\
+
+After we have defined various objects and notions, we usually make \define{mathematical statements} about them. Typically, a statement expresses that some object has a certain property. \\
+
+A \define{proof} is a convincing logical argument that a statement is true. \\ 
+
+A \define{theorem} is a mathematical statement proved true. Occasionally, we prove statements that are interesting only because they assist in the proof of another, more significant statement. Such statements are called \define{lemmas}. Occasionally a theorem or its proof may allow us to conclude easily that other, related statements are true. These statements are called \define{corollaries} of the theorem. 
+
+\subsubsection{Finding Proofs}
+
+The only way to determine the truth or falsity of a mathematical statement is with a mathematical proof. Experimenting with examples is especially helpful. Thus if the statement says that all objects of a certain type have a particular property, pick a few objects of that type and observe that they actually do have that property. After doing so, try to find an object that fails to have the property, called a \define{counterexample}. If the statement actually is true, you will not be able to find a counterexample. 
+
+\subsection{Types of Proofs}
+Several types of arguments arise frequently in mathematical proofs. Here, we describe a few that often occur in the theory of computation. 
+
+\subsubsection{Proof by Construction}
+
+Many theorems state that a particular type of object exists. One way to prove such a theorem is by demonstrating how to construct the object. This technique is a \define{proof by construction}. 
+
+\subsubsection{Proof by Contradiction}
+
+In one common form of argument for proving a theorem, we assume that the theorem is false and then show that this assumption leads to an obviously false consequence, called a contradiction. 
+
+\subsubsection{Proof by Induction}
+
+Proof by induction is an advanced method used to show that all elements of an infinite set have a specified property. For example we may use a proof by induction to show that an arithmetic expression computes a desired quantity for every assignment to its variables, or that a program works correctly at all steps or for all inputs. \\ 
+
+Every proof by induction consists of two parts, the \define{basis} and the \define{induction step}. Each part is an individual proof on its own. In the induction step, the assumption that $P(i)$ is true is called the \define{induction hypothesis}. \\
+
+\bold{Basis:} Prove that $P(i)$ is true. 
+\bold{Induction step:} For each $i \geq 1$, assume that $P(i)$ is true and use this assumption to show that $P(i+1)$ is true. \\ 
+
+\section{Regular Languages}
+
+Real computers are quite complicated: too much so to allow us to set up a manageable mathematical theory of them directly. Instead, we use an idealized computer called a \define{computational model}. As with any model in science, a computational model may be accurate in some ways but perhaps not in others. Thus we will use several different computation models, depending on the features we want to focus on. We begin with the simplest model, called the \define{finite state machine} or \define{finite automaton}. 
+
+\subsection{Finite Automatata}
+
+Finite automata are good models for computers with an extremely limited amount of memory. Finite automatat and their probabilistic counterpart \define{Markov chains} are useful tools when we are attempting to recognize patterns in data. \\ 
+
+Finite automata can be represented by a \define{state diagram}. The \define{start state} is indicated by the arrow point at it from nowhere. The \define{accept state} is the one with a double circle. The arrows going from one state to another are called \define{transitions}. When this such automation receives an input, it processes that and produces an output; the output is either \define{accept} or \define{reject}. 
+
+\subsubsection{Formal Definition of Finite Automaton}
+
+A finite automaton has several parts. It has a set of states and rules for going from one state to another, depending on the input symbol. It has an input alphabet that indicates the allowed input symbols. It has a tart state and a set of accept states. The formal definition says that a finite automaton is a list of those five objects: set of states, input alphabet, rules for moving, start state, and accept states. In mathematical language, a list of five elements is often called a 5-tuple. Hence we define a finite automaton to be a 5-tuple consisting of these five parts. \\
+
+We use something called a \define{transition function}, frequently denoted $\delta$, to define the rules for moving. If the finite automaton has an arrow from a state $x$ to a state $y$ labeled with the input symbol 1, that means that if the automaton is in state $x$ when it reads a 1, it then moves to state $y$. We can indicate the same thing with the transition function by saying that $\delta(x,1) = y$. This notation is a kind of mathematical shorthand. \\ 
+
+\begin{definition}[Finite automaton] A 5-tuple $(Q,\Sigma,\delta,q_{0},F)$, where 
+\begin{enumerate}
+  \item $Q$ is a finite set called the \define{states},
+  \item $\Sigma$ is a finite set called the \define{alphabet},
+  \item $\delta$: $Q \times \Sigma \rightarrow Q$ is the \define{transition function},
+  \item $q_{0} \in Q$ is the \define{start state}, and 
+  \item $F \subseteq Q$ is the \define{set of accept states} 
+\end{enumerate}
+\end{definition}
+
+If $A$ is the set of all strings that machine $M$ accepts, we say that $A$ is the \define{language of machine M} and write $L(M) = A$. We say that \define{M recognizes A} or that \define{M accepts A}. Because the term \emph{accept} has different meanings when we refer to machines accepting strings and machines accepting languages, we prefer the term \emph{recognize} for languages in order to avoid confusion. \\ 
+
+A machine may accept several strings, but it always recognizes only one language. If the machine accepts no strings, it still recognizes one language-namely, the empty language  $\emptyset$. 
+
+\subsubsection{Formal Definition of Computation}
+
+Let $M = (Q, \Sigma, \delta, q_{0}, F)$ be a finite automaton and let $w=w_{1}w_{2} \cdots w_{n}$ be a string where each $w_{i}$ is a member of the alphabet $\Sigma$. Then $M$ \define{accepts} $w$ if a sequence of states $r_{0}, r_{1}, \dots, r_{n}$ in $Q$ exists with three conditions:
+
+\begin{enumerate}
+  \item $r_0 = q_0$,
+  \item $\delta(r_{i},w_{i+1}) = r_{i+1}$, for $i=0, \dots, n-1$, and 
+  \item $r_{n} \in F$
+\end{enumerate}
+
+Condition 1 says that the machine starts in the start state. Condition 2 says that the machine goes from state to state according to the transition function. Condition 3 says that the machine accepts its input if it ends up in an accept state. We say that $M$ \define{recognizes language} $A$ if $A = \{w \vert M \textrm{ accepts } w \}$. 
+
+\begin{definition}
+  In state $q$, if the next input symbol is $a$, the next state is $\delta(q,a)$. \\ 
+  \define{Define:} $\Delta: Q \times \Sigma * \rightarrow Q$ recursively as follows: \\  \\ 
+    $\Delta(q,\epsilon) = q$ \\ 
+    $\Delta(q,ax) = \Delta(\delta(q,a)), a \in \Sigma, x \in \Sigma *$ \\ \\
+  $M = (Q,\Sigma,\delta, q_0, F)$ \define{accepts} a string $w = w_{1}w_{2} \cdots w_{n}$ iff $\Delta(q_{0},w) \in F$
+\end{definition}
+
+\begin{definition}[Regular Language] 
+  A language that is recognized by some finite automaton
+\end{definition}
+
+\subsubsection{Designing Finite Automata}
+
+Try putting yourself in the place of the machine you are trying to design and then see how you would go about performing the machine's task. Suppose that you are given some language and want to design a finite automaton that recognizes it. Pretending to be the automaton, you receive an inpuit string and must determine whether it is a member of the language the automaton is supposed to recognize. First, in order to make these decisions, you have to figure out what you need to remember about the string as you are reading it. For many languages, you don't need to remember the entire input. You need to remember only certain crucial information. Exactly which information is crucial depends on the particular language considered. \\ 
+
+Once you have determined the necessary information to remember about the string as it is being read, you represent this information as a finite lit of possibilities. Then you assign a state to each of the possibilities. Next, you assign the transitions by seeing how to go from one possibility to another upon reading a symbol. Next, you set the start state to be the stae corresponding to the possibility associated with having seen 0 symbols so far. Last, set the accept states to be those corresponding to the possibilities where you want to accept the input string. 
+
+\subsubsection{The Regular Operations}
+
+In the theory of computation, the objects are languages and the tools include operations specifically designed for manipulating them. We define three operatioons on languages, called the \define{regular operations}, and use them to study properties of the regular languages. 
+
+\begin{define}[Regular Operations]
+  Let $A$ and $B$ be languages. We define the regular operations \define{union}, \define{concatenation}, and \define{star} as follows:
+  \begin{itemize}
+    \item \define{Union}: $A \cup B = \{x  \vert x \in A \textrm{ or } x \in B \}$ 
+    \item \define{Concatenation}: $A \circ B = \{xy \vert x \in A \textrm{ and } y \in B \}$ 
+    \item \define{Star}: $A* = \{x_{1}x_{2} \dots x_{k} \vert k \geq 0 \textrm{ and each } x_{i} \in A \}$
+  \end{itemize}
+\end{define}
+
+The union operation takes all the strings in both $A$ and $B$ and lumps them together into one language. The concatenation operation attaches a string from $A$ in front of a string from $B$ in all possible ways to get the strings in the new language. The star operation is \define{unary operation} instead of a \define{binary operation}. It works by attaching any number of strings (including 0) in $A$ together to get a string in the new language. Even if $A$ doesn't contain the empty string, $A*$ \emph{does} contain the empty string. 
+
+\begin{example}
+  Let $A = \{oreo,ginger\} \textrm{ and } B = \{cookie,icecream\}$... \\ 
+  $A \cup B = \{oreo,ginger,cookie,icecream\}$ \\ 
+  $A \circ B = \{oreocookie,oreoicecream,gingercookie,gingericecream\}$ \\ 
+  $A* = \{\epsilon,oreo,ginger, \dots\}$ \\
+\end{example}
+
+\begin{proof}
+  \bold{Proof:} Let $A,B$ be regular languages recognized by DFAs $M_1$ and $M_2$. \\ 
+  Let $M_1 = (Q_1, \Sigma, \delta_1, q_1, F_1)$ and $M_2 = (Q_2, \Sigma, \delta_2, q_2, F_2)$ \\ 
+  Define a new DFA $M = (Q, \Sigma, \delta, q, F)$: \\ 
+  $Q = Q_1 \times Q_2$ \hfill each state of $M$ is a pair of states, one from $M_1$, and the other from $M_2$ \\ 
+  $\delta((r_1, r_2),a) = (\delta_1(r_1,a), \delta_2(r_2,a))$ \hfill a transition in $M$ tracks transitions in both $M_1 ,M_2$ \\
+  $q_0 = (q_1, q_2)$ \hfill start $M$ in the start states of $M_1, M_2$ \\ 
+  $F = (F_1 \times Q_2) \cup (Q_1 \times F_2)$ \hfill accept if one of the machines end in an accept state \\ 
+  $\cdots$A formal proof of correctness proceeds by induction on the length of the input string$\cdots$
+\end{proof}
+
+\subsection{Nondeterminism}
+
+When a machine is in a given state and reads the next input symbol, we know what the next state will be---it is determined. We call this \define{deterministic} computation. In a \define{nondeterministic} machine, several choices may exist for the next state at any point. Nondeterminism is a generalization of determinism, so every determinsitic finite automaton is atuomatically a nondeterministic finite automaton. \\ 
+
+Machine is initially in start state. From the start state, clones appear in all states reachable using only $\epsilon$ transitions. Each clone in its current state. 
+\begin{enumerate}
+  \item Reads the next input symbol $a$ 
+  \item If there is no outgoing transition labeeld $a$: the clone dies 
+  \item For each outoging transition labeled $a$: a clone appears at the next state 
+  \item ...
+\end{enumerate}
+
+Every state of a DFA always has exactly one exiting transition arrow for each symbol in the alphabet. NFAs may violate that rule. In an NFA, a state may have zero, one, or many exiting arrows for each alphabet symbol. Additionally, in a DFA, labels on the transition arrows are symbols from the alphabet. An NFA may have arrows labeled with members of the alphabet or $\epsilon$. Zero, one, or many arrows may exit from each state with the label $\epsilon$. \\ 
+
+So how does an NFA compute$\dots$ Suppose that we are running an NFA on an input string and come to a state with multiple ways to proceed. After reading said symbol, the machine splits into multiple copies of itself and follows \emph{all} the possibilities in parallel. Each copy of the machine takes one of the possible ways to proceed and continues as before. If there are subsequent choices, the machine splits again. If the next input symbol doesn't appear on any of the arrows exiting the state occupied by a copy of the machine, that copy of the machine dies, along with the branch of the computation associated with it. Finally, if \emph{any one} of these copies of the machine is in an accept state at the end of the input, the NFA accepts the input string. \\ 
+
+If a state with an $\epsilon$ symbol on an exiting arrow is encountered, something similar happens. Without reading any input, the machine splits into multiple copies, one following each of the exiting $\epsilon$-labeled arrows and one staying at the current state. Then the machine proceeds nondeterministically as before. \\ 
+
+\begin{definition}[Nondeterministic Finite State Automata (NFA)] 
+ a 5-tuple $(Q,\Sigma,\delta,q_0,F)$, where
+  \begin{enumerate}
+    \item $Q$ is a finite set of states 
+    \item $\Sigma$ is a finite alphabet 
+    \item $\delta: Q \times \Sigma_{\epsilon} \rightarrow P(Q)$ is the transition function 
+    \item $q_0 \in Q$ is the start state 
+    \item $F \subseteq Q$ is the set of accept states
+  \end{enumerate}
+  For any set $Q$ we write $P(Q)$ to be the collection of all subsets of $Q$. Here $P(Q)$ is called the \define{power set} of $Q$. For any alphabet $\Sigma$, we write $\Sigma_{\epsilon}$ to be $\Sigma \cup \{\epsilon\}$. Thus, we can write the formal description of the type of the transitioon function in an NFA as $\delta: Q \times \Sigma_{\epsilon} \rightarrow P(Q)$. 
+\end{definition}
+
+\begin{definition}[Compuitation for an NFA]
+  Let $N=(Q,\Sigma,\delta,q_0,F)$ be an NFA and $w$ a string over the alphabet $\Sigma$. Then we say that $N$ \emph{accepts} $w$ if we can write $w$ as $w = y_{1}y_{2}\cdots y_{m}$, where each $y_i$ is a member of $\Sigma_{\epsilon}$ and a sequence of states $r_0 , r_1 , \dots , r_{m}$ exists in $Q$ with three conditions.  \\ 
+  \begin{enumerate}
+    \item $r_0 = q_0$ 
+    \item $r_{i + 1} \in \delta(r_{i}, y_{i+1})$, for $i = 0, \dots , m-1$ 
+    \item $r_m \in F$
+  \end{enumerate}
+  Condition 1 says that the machine starts out in the start state. Condition 2 says that state $r_{i+1}$ is one of the allowable next states when $N$ is in the state $r_i$ and reading $y_{i+1}$. Observe that $\delta(r_{i},y_{i+1})$ is the \emph{set} of allowable next states and so we say that $r_{i+1}$ is a member of that set. Finally, condition 3 says that the machine accepts its input if the last state is an accept state. 
+\end{definition}
+
+\subsection{Equivalence of NFAs and DFAs}
+
+Deterministic and nondeterministic finite automato recognize the same class of languages. Say that two machines are \define{equivalent} if they recognize the same language. 
+
+\begin{theorem}
+  Every nondeterministic finite automaton has an equivalent deterministic finite automaton
+\end{theorem}
+
+\begin{lemma}
+  A language is regular if and only if some nondeterminstic finite automaton recognizes it. \\ 
+  One part of the conditioon states that a language is regular if some NFA recognizes it. Consequently, if an NFA recognizes some language, so does some DFA, and hence the language is regular. The condition also states that a language is regular only if some NFA recognizes it. That is, if a language is regular, some NFA must be recognizing it. 
+\end{lemma}
+
+For a NFA with $n$ states, the equivalent NFA will need to have $2^{n}$ states. 
+
+\subsection{Closure under the Regular Operations}
+
+\begin{theorem}
+  The class of regular languages is closed under the union operation. In other words, if $A,B$ are both regular langauges then $A \cup B$ is regular as well.  
+\end{theorem}
+
+\begin{theorem}
+  The class of regular languages is closed under the concatenation operation. 
+\end{theorem}
+
+\begin{theorem}
+  The class of regular languages is closed under the star operation. 
+\end{theorem}
+
+\subsection{Regular Expressions} 
+
+We can use the regular operations to build up expressions describing languages, which are called \define{regular expressions}. The value of a regular expression is a language. 
+
+\begin{definition}[Formal Definition of a Regular Expression]
+  Say that $R$ is a \define{regular expression} if $R$ is$\dots$ 
+  \begin{enumerate}
+    \item $a$ for some $a$ in the alphabet $\Sigma$ 
+    \item $\epsilon$ 
+    \item $\emptyset$ 
+    \item $(R_1 \cup R_2)$, where $R_1$ and $R_2$ are regular expressions 
+    \item $(R_1 \circ R_2)$, where $R_1$ and $R_2$ are regular expressions 
+    \item $(R_{1}^{*})$, where $R_1$ and $R_2$ are regular expressions 
+  \end{enumerate}
+  In items 1 and 2, the regular expressions $a$ and $\epsilon$ represent the languages $\{a\}$ and $\{\epsilon \}$, respectively. In item 3, the regular expression $\emptyset$ represents the empty language. In items 4, 5, and 6, the expressions represent the languages obtained by taking the union or concatenation of the languages $R_1$ and $R_2$, or the star of the language $R_1$, respectively.  
+\end{definition}
+
+\begin{remark}
+  The expression $\epsilon$ represents the language containing a single string---namely, the empty string---wheras $\emptyset$ represents the language that doesn't contain any strings. 
+\end{remark}
+
+\begin{remark}
+  If we let $R$ be any regular expression, we have the following identities. 
+  \begin{itemize}
+    \item $R \cup \emptyset = R$ \\ Adding the empty language to any other language will not change it 
+    \item $R \circ \epsilon = R$ \\ Joining the empty string to any string will not change it
+  \end{itemize}
+  However, exchanging $\emptyset$ and $\epsilon$ in the preceding identities may cause the equalities to fail. 
+  \begin{itemize}
+    \item $R \cup \epsilon$ may not equal $R$. \\ For example if $R = 0$, then $L(R) = \{0\} but L(R \cup \epsilon) = \{0,\epsilon \}$. 
+    \item $R \circ \emptyset$ may not equal $R$. \\ For example if $R = 0$, then $L(R) = \{0\}$ but $L(R \circ \emptyset) = \emptyset$ (i.e. $R \cup \epsilon = R iff \epsilon \in R$). 
+    \item $R \circ \emptyset = \emptyset$ 
+    \item $R \circ \epsilon = R$ 
+    \item $\emptyset^{*} = \{\epsilon\}$ 
+  \end{itemize}
+\end{remark}
+
+\begin{example}
+  \item Let $\Sigma = \{0,1\}$
+  \begin{itemize}
+    \item $L_1 = \{\textrm{3rd last bit is 1}\}$ \\ 
+      $(0 \cup 1)^{*} 1 (0 \cup 1) (0 \cup 1)$ or $\Sigma^{*}1\Sigma\Sigma$
+  \item $L_2 = \{\textrm{strings in which every 0 is followed by at least one 1}\}$ \\
+    $(0 1 \cup 1)^{*}$ or $1^{*}(011^{*})^{*}$
+  \item $L_3 = \{\textrm{strings starting with 0 and followed by any number of 1s OR strings with no 0}\}$ \\ 
+    $01^{*} \cup 1^{*}$ or $(0 \cup \epsilon)1^{*}$
+  \item $L_4 = \{\textrm{strings with lengths that are multiples of 3}\}$ \\ 
+    $((0 \cup 1) (0 \cup 1) (0 \cup 1))^{*}$ or $(\Sigma \Sigma \Sigma)^{*}$
+  \item $L_5 = \{\textrm{strings that end with 01}\}$ \\ 
+    $\Sigma^{*} 01$
+  \end{itemize}
+\end{example}
+
+Elemental objects in a programming language, called \define{tokens}, such as the variable names and constants, may be described with regular expressions. Once the syntax of a programming language has been described with a regular expression in terms of its toekns, automatic systems can generate the \define{lexical analyzer}, the part of a compiler that initially process the input program.  
+
+\subsection{Equivalence with Finite Automata}
+
+Regular expressions and finite automata are equivalent in their descriptive power. However, any regular expression can be converted into a finite automaton that recognizes the language it describes, and vice versa. 
+
+\begin{theorem}
+  A language is regular if and only if some regular expression describes it.
+\end{theorem}
+
+\begin{lemma}
+  If a language is described by a regular expression, then it is regular. 
+\end{lemma}
+
+\begin{lemma}
+  If a language is regular, then it is described by a regular expression
+\end{lemma}
+
+\begin{definition}[Generalized nondeterministic finite automaton]
+  are nondeterministic finite automata wherein the transition arrows may have any regular expressions as labels, instead of only memebers of the alphabet or $\epsilon$. The GFNA reads blocks of symbols from the input, not necessarily just one symbol at a time as in an ordinary NFA. The GFNA moves along a transition arrow connecting two states by reading a block of symbols from the input, which themselves constitute a string described by the regular expression on that arrow. \\ 
+
+  \bold{Like an NFA}, but the \emph{start state} has no incoming transition and has outoging transitions to every state. The \emph{accept state} has no outgoing transition, has incoming transitions from every state, and is distinct from the start state. All the \emph{other states} have outgoing transitions to every state. Transitions are labeled with regular expressions. 
+\end{definition}
+
+\begin{definition}[DFA to GFNA Conversion]
+  \begin{enumerate}
+    \item Convert the DFA into a generalized NFA (DFA $M$ $\rightarrow$ GNFA $G$)
+      \begin{itemize}
+        \item Create a new start state with outgoing $\epsilon$-transition to the start state of $M$ 
+        \item Create a new accept state with incoming $\epsilon$-transitions from every accept state of $M$ 
+        \item If there are multiple labels on any transition, replace it with the union of the labels
+      \end{itemize}
+    \item Derive the regular expression from the GNFA. \\ 
+      The idea is to manipulate labels so that the label on $(s,a)$ describes all strings accepted by the GNFA. Elimintae states one-at-a-time updating labels at each step. /
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}[Formal Definition of GFNA]
+  A \define{generalized nondeterministic finite automaton} is a 5-tuple, $(Q,\Sigma,\delta,q_{\textrm{start}},q_{\textrm{accept}})$, where 
+  \begin{enumerate}
+    \item $Q$ is the fintie set of states 
+    \item $\Sigma$ is the input alphabet 
+    \item $\delta : (Q - \{q_{\textrm{accept}}\}) \times (Q - \{q_{\textrm{start}}\}) \rightarrow R$ is transition function
+    \item $q_{\textrm{start}}$ is the start state 
+    \item $q_{\textrm{accept}}$ is the accept state
+  \end{enumerate}
+\end{definition}
+
+A GFNA accepts a string $w$ in $\Sigma^{*}$ if $w=w_1 w_2 \dots w_k$, where each $w_i$ is in $\Sigma^{*}$ and a sequence of states $q_0 , q_1 , \dots , q_k$ exists such that 
+\begin{enumerate}
+  \item $q_0 = q_{\textrm{start}}$ is the start state, 
+  \item $q_k = q_{\textrm{accept}}$ is the accept state 
+  \item for each $i$, we have $w_i \in L(R_i)$, where $R_i = \delta(q_i - 1, q_i)$; in other words, $R_i$ is the expression on the arrow from $q_{i-1}$ to $q_i$. 
+\end{enumerate}
+
+\begin{theorem}
+  For every regular language $L$, there exists a \emph{unique} minimal DFA $M$ such that $L=L(M)$. However, this is \emph{not true} for NFAs; there is not necessarily a unique minimal DFA.  
+\end{theorem}
+
+\begin{definition}[Indistinguishable States]
+  States $p$ and $q$ are indistinguishable: $p \sim q$ if for every string $w$, the computation starting in state $p$ reaches an accept state if and only if the computation from $q$ reaches an accept state. 
+\end{definition}
+
+\begin{lemma}
+  The indistinguishability relation, $\sim$, is an equivalence relation. \bold{Proof}$\dots$
+  \begin{itemize}
+    \item \bold{Reflexive}: $p \sim p$ 
+    \item \bold{Symmetric}: $p \sim q \leftrightarrow q \sim p$
+    \item \bold{Transitive}: $(p \sim q \cap q \sim r) \rightarrow p \sim r$
+  \end{itemize}
+\end{lemma}
+
+\begin{lemma}[The Distinguishability Lemma]
+  If for some symbol $\delta(p,a) \not\sim \delta(q,a)$ then $p \not\sim q$
+\end{lemma}
+
+\begin{definition}[Finding Distinguishable Pairs of States]. \\
+  \bold{Initialize}: Create an empty set $D$ which will store pairs of distnguishable states 
+  \bold{Step 0}: \\ 
+  Add all pairs $(p,a)$ where exactly one is an accept state to $D$. While True do: Scan over all pairs $(p,q)$ of states not yet distinguished. For each alphabet symbol $a$. If the pair $(\delta(p,a),\delta(q,a))$ is a distinguished, add $(p,q)$ to $D$. If no new pair of states is added to $D\dots$ break. Return D
+\end{definition}
+
+\subsection{Nonregular Languages}
+
+The \define{pumping lemma} states taht all regular languages have a special property. If we can show that a language does not have this property, we are guaranteed that it is not regular. The property states that all strings in the language can be "pumped" if they are at least as long as a certain special value called the \define{pumping length}. That means each such string contains a section that can be repeated any number of times with the resulting string remaining in the language. 
+\begin{theorem}[Pumping Lemma]
+  If $A$ is a regular language, then there is a number $p$ (the pumping length) where if $s$ is any string in $A$ of lenght at least $p$, then $s$ may be divided into three pieces, $s=xyz$, satisfying the following conditions: 
+  \begin{enumerate}
+    \item for each $i \geq 0$, $xy^{i}z \in A$, 
+    \item $|y| > 0$, 
+    \item $|xy| \leq p$
+  \end{enumerate}
+  Recall the notation where $|s|$ represents the length of the string $s$, $y^i$ means that $i$ copies of $y$ are concatenated together, and $y^0$ equals $\epsilon$. \\
+
+  When $s$ is divided into $xyz$, either $x$ or $z$ may be $\epsilon$, but condition 2 says that $y \neq \epsilon$. Observe that without condition 2 the theorem would be trivially true. Condition 3 states that the pieces $x$ and $y$ together have length at most $p$. It is an extract technical condition that we occasionally find useful when proving certain languagtes to be nonregular. 
+\end{theorem}
+
+\section{Context-Free Languages}
+
+In this chapter, we present \define{context-free grammers}, a more powerful method of describing languages. Suych grammars can describe features that have a recursive structure, which makes them useful in a variety of applications. \\ 
+
+The collection of languages associated with context-free grammars are called the \define{context-free languages}. They include all the regular languages of context-free grammars and study the properties of context-free lagnuages. We also introduce \define{pushdown automata}, a class of machines recognizing the context-gree languages. 
+
+\subsection{Context-Free Grammars}
+
+A grammar consists of a collection of \define{substitution rules}, also called \define{productions}. Each rule appears as a line in the grammar, comprising a symbol and a string separated by an arrow. The symbol is called a \define{variable}. The string consists of variables and other symbols called \define{terminals}. The variable symbols often are represented by capital letters. The terminals are analagous to the input alphabet and often are represented by lowercase letters, numbers, or special symbols. One variable is designated as the \define{start variabele}. It usually occurs on the left-hand side of the topmost rule. \\ 
+
+You use a grammar to describe a language by generating each string of that language in the following manner.  
+\begin{enumerate}
+  \item Write down the start variable. It is the variable on the left-hand side of the top rule, unless specified otherwise. 
+  \item Find a variable that is written down and a rule that starts with that variable. Replace the written down variable with the right-hand side of that rule. 
+  \item Repeat step 2 until no variables remain. 
+\end{enumerate}
+
+\begin{definition}[LL(1) Grammar]
+  a language where you process the input left-to-right with the leftmost derivation first and lookahead 1 symbol at a time.
+\end{definition}
+
+For example, grammar $G_1$ generates the string $000\#111$. The sequence of substitutions to obtain a string is called a \define{derivation}. A derivation of string $000\#111$ in grammar $G_1$ is $$A \rightarrow 0A1 \rightarrow 00A11 \rightarrow 000A111 \rightarrow 000B111 \rightarrow 000\#111$$ You may also represent the same information pictorially with a \define{parse tree}.  
+
+\begin{remark}
+  To get the derived string when given a parse tree, take the pre-order traversal of leaves in the parse tree. 
+\end{remark}
+
+\begin{definition}[Formal Definition of a Context-Free Grammar]
+  A \define{context-free grammar} is a 4-tuple $(V, \Sigma, R, S)$, where 
+  \begin{enumerate}
+    \item $V$ is a finite set called the \define{variables}
+    \item $\Sigma$ is a finite set, disjoint from $V$, called the \define{terminals}
+    \item $R$ is a finite set of \define{rules}, with each rule being a variable and a string of variables and terminals 
+    \item $S \in V$ is the start variable.
+  \end{enumerate}
+\end{definition}
+
+If $u$, $v$, and $w$ are strings of variables and terminals, and $A \rightarrow w$ is a rule of the grammar, we say that $uAv$ \define{yields} $uwv$, written $uAv \rightarrow uwv$. Say that $u$ \define{derives} $v$, written $u \rightarrow v$, if $u = v$ or if a sequence $u_1 , u_2 , \dots , u_k$ exists for $k \geq 0$ and $$u \rightarrow u_1 \rightarrow u_2 \rightarrow \cdots \rightarrow u_k \rightarrow v$$ The \define{language of the grammar} is $\{w \in \Sigma^{*} \vert S \rightarrow w \}$.
+
+\subsubsection{Designing Context-Free Grammars}
+
+First, many CFLs are the union of simple CFLs. If you must construct a CFG for a CFL that you can break into simpler pieces, do so and then construct indivdual grammars for each piece. These individual grammars can be easily merged into a grammar for the original language by combining their rules and then adding the new rule $S \rightarrow S_1 \vert S_2 \vert \cdots \vert S_k$, where the variables $S_i$ are the start variables for the individual grammars. \\ 
+
+Second, constructing a CFG for a language that happens to be regular is easy if you can first construct a DFA for that language. You can convert any DFA into an equivalence CFG as follows. Make a variable $R_i$ for each state $q_i$ of the DFA. Add the rule $R_i \rightarrow \epsilon$ if $q_i$ is an accept state of the DFA. Make $R_0$ the start variable of the grammar where $q_0$ is the start state of the machine. Verify on your own that the resulting CFG generates the same langauge that the DFA recognizes. \\ 
+
+Third, certain context-free languages contain strings with two substrings that are "linked" in the sense that a machine for such a language would need to remember an unbounded amount of information about one of the substrings to verify that it corresponds properly to the other substring. This situation occurs in the language $\{0^n 1^n \vert n \geq 0\}$ because a machine would need to rememeber the number of 0s in order to verify that it equals the number of 1s. You can construct a CFG to handle this situation by using a rule of the form $R \rightarrow uRv$, which generates strings wherein the portion containing the $u$'s corresponds to the poertion containing the $v$'s. \\ 
+
+Finally, in more complex languages, the strings may contain certain structures that appear recursively as part of other (or the same) structures. Any time the symbol $a$ appears, an entire parenthesized expressin might appear recursively instead. To achieve this effect, place the variable symbol generating the structure in the location of the rules corresponding to where that structure may recursively appear. 
+
+\subsubsection{Ambiguity}
+
+Sometimes a grammar can generate the same string in several different ways. Such a string will have several different parse trees and thus several different meanings. This result may be undesirable for certain applications, such as programming languages, where a program should have a unique interpretation. If a grammar generates the same string in several different ways, we say that the string is derived \emph{ambiguously} in that grammar. If a grammar generates some string ambiguously, we say that the grammar is \emph{ambiguous}. \\ 
+
+\begin{definition}
+  A string $w$ is derived \define{ambiguously} in context-free grammar $G$ if it has two or more different leftmost derivations. Grammar $G$ is \define{ambiguous} if it generates some string ambiguously. 
+\end{definition}
+
+Sometimes when we have an ambiguous grammar we can find an unambigous grammar that generates the same language. Some context-free languages, however, can be generated only by ambiguous grammars. Such languages are called \define{inherently ambiguous}. 
+
+\begin{example}
+  $\{0^i 1^j 2^k : i=j \textrm{ or } j=k\}$ is inherently ambiguous
+\end{example}
+
+\subsubsection{Chomsky Normal Form}
+
+When working with context-free grammars, it is often convenient to have them in simplified form. One of the simplest and most useful forms is called the Chomsky normal form. Chomsky normal form is useful in giving algorithms for working with context-free grammars. This form of a grammar is preferred because the parse tree will be a \bold{binary tree}. 
+
+\begin{definition}[Chomsky Normal Form]
+  A context-free grammar is in \define{Chomsky normal form} if every rule is of the form $$A \rightarrow BC$$ $$A \rightarrow a$$ where $a$ is any terminal and $A$, $B$, and $C$ are any variables---except that $B$ and $C$ may not be the start variable. In addition, we permit the rule $S \rightarrow \epsilon$, where $S$ is the start variable. 
+\end{definition}
+
+\begin{theorem}
+  Any context-free language is generated by a context-free grammar in Chomsky normal form.
+\end{theorem}
+
+\begin{definition}[Pumping Lemma for Context-Free Languages]. \\
+  $\forall \textrm{ context-free language } A$ \\ 
+  $\exists p$ (the pumping length) \\ 
+  $\forall s \in A, |s| \geq p \rightarrow \exists u,v,x,y,z:s = uvxyz$ where 
+  \begin{enumerate}
+    \item $\forall i \geq 0, uv^i xy^i z \in A$ 
+    \item $|vy| > 0$ 
+    \item $|vxy| \leq p$
+  \end{enumerate}
+
+  \bold{Proof:} Since $A$ is a CFL, there is a grammar $G = (V, \Sigma, R, S)$ that generates $A$. Let $b \geq 2$ be the maximum length of the RHS of a rule in $G$. Then, each node in the parse tree has at most $b$ children. Thus, the maximum length of any string generted by a parse tree of height $h$ is $b^h$. \\ 
+
+If we choose $h = |V| + 1$ one of the $|V|$ non-terminals must repeat. Select $p=b^h = b^{|V|+1}$ so that every string $s, |s| \geq p$, has a repeated non-terminal along a root to-leaf path. We've chosen $p= b^{|V| +1}$ so that condition 1 will be satisfied. Now we show that the string $s(|s| \geq p)$ can be divided into 5 pieces to satisfy 2 and 3. \\ 
+
+  Consider the smallest parse tree of $s$ (fewest number of nodes) with the repeated non-terminal. To satisfy condition 3, choose $R$ which occurs twice within the bottom $|V| + 1$ non-terminals along any path. Then $|vxy \leq b^{|v|+1} = p$.
+\end{definition}
+
+\subsection{Pushdown Automata}
+
+We will introduce a new type of computational model called \define{pushdown automata}. These automata are like nondeterministic finite automata but have an extra component called \define{stack}. The stack provides additional memory beyond the finite amount available in the control. The stack allows pushdown automata to recognize some nonregular languages. \\ 
+
+Pushdown automata are equivalent in power to context-free grammar. This means that we can prove a language is context free by giving either a context-free grammar generating it or a pushdown automata recognizing it. \\ 
+
+A pushdown automaton (PDA) can write symbols on the stack and read them back later. Writing a symbol \emph{pushes down} all the other symnbols on the stack. At any time the symbol on the top of the stack can be read and removed. THe remaining symbols then move back up. Writing a symbol on the stack is referred to as \define{pushing} the symbol, and removing a symbol is referred to as \define{popping} it. Note that all access to the stack, for both reading and writing, may be done only at the top. \\ 
+
+\subsubsection{Formal Definition of a Pushdown Automaton}
+
+\begin{definition}[Formal Definition of a Pushdown Automaton]
+  A \define{pushdown automaton} is a 6-tuple $(Q, \Sigma, \Gamma, \delta, q_0 , F)$, where $Q, \Sigma, \Gamma, and F$ are all finite sets, and 
+  \begin{enumerate}
+    \item $Q$ is the set of states 
+    \item $\Sigma$ is the input alphabet 
+    \item $\Gamma$ is the stack alphabet 
+    \item $\delta: Q \times \Sigma_{\epsilon} \times \Gamma_{\epsilon} \rightarrow P(Q \times \Gamma_{\epsilon})$ is the transition function 
+    \item $q_0 \in Q$ is the start state 
+    \item $F \subseteq Q$ is the set of accept states
+  \end{enumerate}
+\end{definition}
+
+A pushdown automaton $M = (Q, \Sigma, \Gamma, \delta, q_0 , F)$ computes as follows. It accepts input $w$ if $w$ can be written as $w = w_1 w_2 \cdots w_m$, where each $w_i \in \Sigma_{\epsilon}$ and sequences of states $r_0 , r_1 , \dots , r_m \in Q$ and strings $s_0 , s_1 , \dots , s_m \in \Gamma^{*}$ exist that satisfy the following three conditions. The strings $s_i$ represent the sequence of stack contents that $M$ has on the accepting branch of the computation. 
+\begin{enumerate}
+  \item $r_0 = q_0$ and $s_0 = \epsilon$. This condition signifies that $M$ starts out properly, in the start state and with an empty stack. 
+  \item For $i = 0, \dots , m-1$, we have $(r_{i+1},b) \in \delta(r_i , w_{i+1}, a)$, where $s_i = at$ and $s_{i+1} = bt$ for some $a,b \in \Gamma_{\epsilon}$ and $t \in \Gamma^{*}$. This condition states that $M$ moves properly according to the state, stack, and next input symbol. 
+  \item $r_m \in F$. This condition states that an accept state occurs at the input end. 
+\end{enumerate}
+
+\begin{remark}
+  The formal definition of a PDA contains no explicit mechanism to allow the PDA to test for an empty stack.
+\end{remark}
+
+\begin{remark}[At each step of reading a PDA]$\dots$
+  \begin{enumerate}
+    \item Choose whether or not to read an input symbol. 
+      \begin{itemize}
+        \item Input head advances if input symbol is read 
+      \end{itemize}
+    \item Choose whether or not to pop the stack 
+    \item Choose whether or not to push symbol on stack 
+    \item Choose next state, pushed symbol depending on 
+      \begin{itemize}
+        \item Current state 
+        \item Input symbol (if one was read) 
+        \item Stack symbol (if one was popped)
+      \end{itemize}
+  \end{enumerate}
+\end{remark}
+
+The PDA \bold{accepts the input} when:
+\begin{itemize}
+  \item One or more computation paths end in an accept state 
+  \item All the input is consumed 
+  \item (no requirement for the stack)
+\end{itemize}
+The PDA \bold{rejects} when every computation path: 
+\begin{itemize}
+  \item Ends in a non-accepting state, or
+  \item is incomplete (the transition function is undefined at some point during computation)
+\end{itemize}
+
+\begin{remark}[Language for transition function]
+  Some PDA transition function $a,b \rightarrow c$ says that in the current state$\dots$ if we read symbol $a$ as input, and can pop symbol $b$ from the top of the stack, then we take this transition and push symbol $c$ to the top of the stack. If we do not read symbol $a$ or symbol $b$ is not at the top of the stack, then we cannot take this transition. We may also use $\epsilon$ in place of any symbol to describe the lack of a requirement to accept/do anything with that symbol.
+\end{remark}
+
+\begin{example}[Transition function]
+  For example some transition function $\epsilon , \epsilon \rightarrow S$ allows us to start in the current state and push a $S$ symbol to the stack without transitioning state or requiring any pops from the stack
+\end{example}
+
+\begin{definition}[Deterministic Pushdown Automata]
+  A deterministic-PDA has the same properties as a normal (non-deterministic) PDA except for the transition function. Each state must have exactly one transition defined for every possible input symbol. That is the transition function $\delta: Q \times (\Sigma \cup \{\epsilon\}) \times (\Gamma \cup \{\epsilon\}) \cup \{\epsilon\}$ for every $q \in Q, a \in \Sigma, x \in \Gamma$ exactly one of $\delta(q,a,x), \delta(q,\epsilon,x), \delta(q,a,\epsilon), \delta(q,\epsilon,\epsilon)$
+\end{definition}
+
+\subsubsection{Equivalence with Context-Free Grammars}
+
+We will show that contexdt-free grammars and pushdown automata are equivalent in power. Both are capable of describing the class of context-free languages. 
+
+\begin{theorem}
+  A language is context free if and only if some pushdown automaton recognizes it. 
+\end{theorem}
+
+\begin{lemma}
+  If a language is context free, then some pushdown automaton recognizes it.
+\end{lemma}
+
+\begin{lemma}
+  If a pushdown automaton recognizes some language, then it is context free. 
+\end{lemma}
+
+\subsection{Non-Context-Free Languages}
+
+Here we present a similar pumping lemma for context-free languages. It states that every context-free language has a special value called the \define{pumping length} such that all longer strings in the language can be \emph{pumped}. \emph{Pumped} means that the string can be divided into five parts so that the second and the fourth parts may be repreated together any number of times and the resulting string still remains in the language. 
+
+\begin{theorem}[Pumping lemma for context-free languages]
+  If $A$ is a context-free language, then there is a number $p$ (the pumping length) where, if $s$ is any string in $A$ of length at least $p$, then $s$ may be divided into five pieces $s=uvxyz$ satisfying the conditions
+  \begin{enumerate}
+    \item for each $i \geq 0, uv^i xy^i z \in A$, 
+    \item $|vy| > 0$, 
+    \item $|vxy| \leq p$
+  \end{enumerate}
+  When $s$ is being divided into $uvxyz$, condition 2 says that either $v$ or $y$ is not the empty string. Otherwise the theorem would be trivially true. Condition 3 states that the pieces $v$,$x$, and $y$ together have length at most $p$. This technical condition sometimes is useful in proving that certain languages are not context free. 
+\end{theorem}
+
+\section{The Church-Turing Thesis}
+
+\subsection{Turing Machines}
+
+\define{Turing machines} are fimilar to finite automaton but with an unlimited and unrestricted memory; they are much more accurate models of a general purpose computer. The \define{turing machine} uses an infinite tapes as its unlimited memory. It has a tape head that can read and write symbols and move around on the tape. Initially the tape contains only the input string and is blank everywhere else. If the machine needs to store information, it may write this information on the tape. To read the information that it has written, the macnine can move its head back over it. The machine continues computing until it decides to produce an output. The outputs \emph{accept} and \emph{reject} are obtained by entering designated accepting and rejecting states. If it doesn't enter an accepting or a rejecting state, it will go on forever, never halting. \\ 
+
+The following list summarizes the differences between finite automata and turing machines. 
+\begin{enumerate}
+  \item A turing machine can both write on the tape and read from it 
+  \item The read-write head can move both to the left and to the right  
+  \item The tape is infinite 
+  \item The special states for rejecting and accepting take effect immediately
+\end{enumerate}
+
+The heart of the definition of a Turing machine is the transition function $\delta$ because it tells us how the machine gets from one step to the next. For a Turing machine, $\delta$ takes the form $Q \times \Gamma \rightarrow Q \times \Gamma \times \{L,R\}$. That is, when the machine is in a certain state $q$ and the head is over a tape square containing a symbol $a$, and if $\delta(q,a) = (r,b,L)$, the machine writes the symbol $b$ replacing the $a$, and goes to state $r$. The third component is either L or R and indicates whether the head moves to the left or right after writing. In this case, the L indicates a move to the left. 
+
+\begin{definition}[Formal Definition of a Turing Machine]
+  A \define{Turing machine} is a 7-tuple, $(Q, \Sigma , \Gamma, \delta, q_0 , q_{\textrm{accept}} , q_{\textrm{reject}})$, where $Q, \Sigma, \Gamma$ are all finite sets and 
+  \begin{enumerate}
+    \item $Q$ is the set of states 
+    \item $\Sigma$ is the input alphabet not containing the \define{blank symbol} \textvisiblespace
+    \item $\Gamma$ is the tape alphabet, where $\textvisiblespace \in \Gamma$ and $\Sigma \subseteq \Gamma$ 
+    \item $\delta: Q \times \Gamma \rightarrow Q \times \Gamma \times \{L,R\}$ is the transition function 
+    \item $q_0 \in Q$ is the start state 
+    \item $q_{\textrm{accept}} \in Q$ is the accept state 
+    \item $q_{\textrm{reject}} \in Q$ is the reject state, where $q_{\textrm{reject}} \neq q_{\textrm{accept}}$ 
+  \end{enumerate}
+\end{definition}
+
+A Turing machine $M=(Q, \Sigma, \Gamma , \delta , q_0 , q_{\textrm{accept}} , q_{\textrm{reject}})$ computes as follows. Initially, $M$ receives its input $w = w_1 w_2 \dots w_n \in \Sigma^{*}$ on the leftmost $n$ squares of the tape, and the rest of the tape is blank. The head starts on the leftmost square of the tape. Note that $\Sigma$ does not contain the blank symbol, so the first blank appearing on the tape marks the end of the input. Once $M$ has started, the computation proceeds according to the rules described by the transition function. If $M$ ever tries to move its head to the left off the left-hand end of the tape, the head stays in the same place for that move, even though the transition function indicates L. The computation continues until it enters either the accept or reject states, at which points it halts. If neither occurs, $M$ goes on forever.  \\ 
+
+As a Turing machine computes, changes occur in the current state, the current tape contents, and the current head location. A setting of these three items is called a \define{configuration} of the Turing machine. Configurations often are represented in a special way. For a state $q$ and two strings $u$ and $v$ over the tape alphabet $\Gamma$, we write $u q v$ for the configuration where the current state is $q$, the current tape contents is $uv$, and the current head location is the first symbol of $v$. The tape contains only blanks following the last symbol of $v$. \\ 
+
+Say that configuration $C_1$ \define{yields} configuration $C_2$ if the Turing machine can legally go from $C_1$ to $C_2$ in a single step. We define this notion formally as follows. \\ 
+Suppose that we have $a$, $b$, and $c$ in $\Gamma$, as well as $u$ and $v$ in $\Gamma^{*}$ and states $q_i$ and $q_j$. In that case, $uaq_i bv$ and $uq_j acv$ are two configurations. Say that $$uaq_i bv \textrm{  yields  } uq_j acv$$ if in the transition function $\delta(q_i,b) = (q_j , c , L)$. That handles the case where teh Turing machine moves leftward. For a rigthward move, say that $$uaq_i bv \textrm{  yields  } uacq_j v$$ if $\delta(q_i,b) = (q_j , c, R)$. \\ 
+
+Special cases occur when the head is at one of the ends of the configuratino. For the left-hand end, the configuration $q_i bv$ yeilds $q_j cv$ if the transition is left-moving (because we prevent the machine from going off the left-hand end of the tape), and it yields $c q_j v$ for the right-moving transition. FOr the right-hand end, the configuration $uaq_i$ is equivalent to $uaq_i \textvisiblespace$ because we assume that blanks follow the part of the tape represented in the configuration. Thus we can handle this case as before, with the head no longer at the right-hand end. \\ 
+
+The \define{start configuration} of $M$ on input $w$ is the configuration $q_0 w$, which indicates that the machine is in the start state $q_0$ with its head at the leftmost position on the tape. In an \define{accepting configuration}, the state of the configuration is $q_{\textrm{accept}}$. In a \define{rejecting configuration}, the state of the configuration is $q_{\textrm{reject}}$. Accepting and rejecting configurations are \define{halting conditions} and do not yield further configurations. Because the machine is defined to halt when in the states $q_{\textrm{accept}}$ and $q_{\textrm{reject}}$, we equivalently could have defined the transition function to have the more complicated form $\delta: Q' \times \Gamma \rightarrow Q \times \Gamma \times \{L,R\}$, where $Q'$ is $Q$ without $q_{\textrm{accept}}$ and $q_{\textrm{reject}}$. A Turing machine $M$ \define{accepts} input $w$ if a sequence of configurations $C_1 , C_2 , \dots , C_k$ exists, where 
+\begin{enumerate}
+  \item $C_1$ is the start configuration of $M$ on input $w$ 
+  \item each $C_i$ yields $C_{i+1}$ 
+  \item $C_k$ is an accepting configuration
+\end{enumerate}
+The collection of strings that $M$ accepts is \define{the language of M}, or \define{the language recognized by M}, denoted $L(M)$. 
+
+\begin{definition}
+  We call a language \define{Turing-recognizable} if some Turing machine recognizes it. 
+\end{definition}
+
+When we start a Turing machine on an input, three outcomes are possible. The machine may \emph{accept}, \emph{reject}, or \emph{loop}. By \define{loop} we mean that the machine simply does not halt. Looping may entail any simply or complex behavior that never leads to a halting state. \\ 
+
+A Turing machine $M$ can fail to accept an input by entering the $q_{\textrm{reject}}$ state and rejecting, or by looping. Sometimes distinguishing a machine that is looping from one that is merely taking a long time is difficult. For this reason, we prefer Turing machines that halt on all inputs; such machines never loop. These machines are called \define{deciders} because they always make a decision to accept or reject. A decider that recognizes some language also is said to \define{decide} that language. 
+
+\begin{definition}
+  Call a language \define{Turing-decidable} or simply \define{decidable} if some machine decides it.
+\end{definition}
+
+\section{Decidability}
+
+\subsection{Decidable Languages}
+
+\subsubsection{Decidable Problems Concerning Regular Languages}
+
+This language contains the encodings of all DFAs together with strings that the DFAs accept. Let $$A_{\textrm{DFA}} = \{\langle B, w \rangle | B \textrm{ is a DFA that accepts input string } w\}$$ The problem of testing whether a DFA $B$ accepts an input $w$ is the same as the problem of testing whether $\langle B , w \rangle$ is a member of the language $A_{\textrm{DFA}}$. Showing that the language is decidable is the same as showing that the computational problem is decidable. 
+
+\begin{theorem}
+  $A_{\textrm{DFA}}$ is a decidable language. \\ 
+
+  We simply need to present a TM $M$ that decides $A_{\textrm{DFA}}$. \\ 
+  $M$ = On input $\langle B,w \rangle$, where $B$ is a DFA and $w$ is a string:
+  \begin{enumerate}
+    \item Simulate $B$ on input $w$. 
+    \item If the simulation ends in an accept state, \emph{accept}. If it ends in a nonaccepting state, \emph{reject}.
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $A_{\textrm{NFA}}$ is a decidable language. \\ 
+
+  We present a TM $N$ that decides $A_{\textrm{NFA}}$. We could design $N$ to operate like $M$, simulating an NFA instead of a DFA. Instead, we'll do it differently to illustrate a new idea: Have $N$ use $M$ as a subroutine. Because $M$ is designed to work with DFAs, $N$ first converts the NFA it receives as input to a DFA before basing it to $M$. \\ 
+  $N$ = On input $\langle B , w \rangle$, where $B$ is an NFA and $w$ is a string: 
+  \begin{enumerate}
+    \item Convert NFA $B$ to an equivalent DFA $C$, using the standard procedure. 
+    \item Run TM $M$ from the previous theorem on input $\langle C,w \rangle$. 
+    \item If $M$ accepts, \emph{accept}; otherwise, \emph{reject}. 
+  \end{enumerate}
+  Running TM $M$ in stage 2 means incorporating $M$ into the design of $N$ as a subprocedure. 
+\end{theorem}
+
+\begin{theorem}
+  $A_{\textrm{REX}}$ is a decidable language. \\ 
+
+  The following TM $P$ decides $A_{\textrm{REX}}$. \\ 
+  $P$ = On input $\langle R,w \rangle$, where $R$ is a regular expression and $w$ is a string: 
+  \begin{enumerate}
+    \item Convert regular expression $R$ to an equivalent NFA $A$ by using the procedure for this conversion. 
+    \item Run TM $N$ on input $\langle A,w \rangle$. 
+    \item If $N$ accepts, \emph{accept}; if $N$ rejects, \emph{reject}. 
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $E_{\textrm{DFA}}$ is a decidable language. \\ 
+  
+  A DFA accepts some string iff reaching an accept state from the start state by traveling along the arrows of the DFA is possible. To test this condition, we can design a TM $T$ that uses a marking algorithm. \\ 
+  $T$ = On input $\langle A \rangle$, where $A$ is a DFA: 
+  \begin{enumerate}
+    \item Mark the start state of $A$. 
+    \item Repeat until no new states get marked: 
+    \item \indent Mark any state that has a transition coming into it from any state that is already marked 
+    \item If no accept state is marked, \emph{accept}; otherwise, \emph{reject}. 
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $EQ_{\textrm{DFA}}$ is a decidable language. 
+\end{theorem}
+
+\subsubsection{Decidable Problems Concerning Context-Free Languages}
+
+Here, we begin to describe algorithms to determine wheter a CFG generates a particular string and to determine wheter the language of a CFG is empty. Let $$A_{\textrm{CFG}} = \{\langle G,w \rangle | G \textrm{ is a CFG that generates } w\}$$. 
+
+\begin{theorem}
+  $A_{\textrm{CFG}}$ is a decidable language. \\ 
+
+  The TM $S$ for a $A_{\textrm{CFG}}$ follows: \\ 
+  $S$ = On input $\langle G,w \rangle$, where $G$ is a CFG and $w$ is a string.  
+  \begin{enumerate}
+    \item Convert $G$ to an equivalent grammar in Chomsky Normal Form. 
+    \item List all derivations with $2n-1$ steps, where $n$ is the lenght of $w$; except if $n=0$, then instead list all derivations with one step. 
+    \item If any of these derivations generate $w$, \emph{accept}; if not, \emph{reject}. 
+  \end{enumerate}
+\end{theorem}
+
+\begin{theorem}
+  $E_{\textrm{CFG}}$ is a decidable langauge. 
+\end{theorem}
+
+\begin{theorem}
+  Every context-free language is decidable. 
+\end{theorem}
+
+\begin{definition}[Language Enumerators]
+  An enumerator $\epsilon$ for a language $A$ is TM that, starting witha  blank input tape, prints all and only strings in $A$. $\epsilon$ never halts when $A$ is infinite. $\epsilon$ may print a string multiple times but must print every string in $A$ eventually (in finite time). So, if $A$ is finite, all its strings will be printed within a finite amount of time---just wait long enough!
+\end{definition}
+
+\begin{theorem}
+  A language $A$ is TM-recognizable if and only if there is an enumerator $\epsilon$ for it. $$\textrm{L is enumerable } \Leftrightarrow \textrm{ L is TM-recognizable}$$
+\end{theorem}
+
+\subsection{Undecidability}
+
+One theorem that establishes the undecidability of a specific language: the problem of determining whether a Turing machine accets a given input string. We call it $A_{TM}$ by analogy with $A_{DFA}$ and $A_{CFG}$. But, whereas $A_{DFA}$ and $A_{CFG}$ were decidable, $A_{TM}$ is not. Let $$A_{TM} = \{ \langle M,w \rangle | M \textrm{ is a TM and } M \textrm{ accepts } w\}$$. 
+
+\begin{theorem}
+  $A_{TM}$ is undecidable. We can show, however, that $A_{TM}$ is Turing-recognizable. The following Turing machine $U$ recognizes $A_{TM}$. \\ 
+  $U$  = On input $\langle M,w \rangle$, where $M$ is a TM and $w$ is a string: 
+  \begin{enumerate}
+    \item Simulate $M$ on input $w$ 
+    \item If $M$ ever enters its accept state, \emph{accept}; if $M$ ever enters its reject state, \emph{reject}. 
+  \end{enumerate}
+  Note that this machine loops on input $\langle M,w \rangle$ if $M$ loops on $w$, which is why this machine does not decide $A_{TM}$. If the algorithm had some way to determine that $M$ was no halting on $w$, it could \emph{reject} in this case. However, an algorithm has no way to make this determination. 
+\end{theorem}
+
+\subsubsection{The Diagonalization Method}
+
+If we have two infinite sets, how can we tell whether one is larger than the other or whether they are the same size? Cantor observed that two finite sets have the same size if the elements of one set can be paired with the elements of the other set. This method compares the sizes without resorting to counting. 
+
+\begin{definition}[Diagonalization]
+  Assume that we have sets $A$ and $B$ and a function $f$ from $A$ to $B$. Say that $f$ is \define{one-to-one} if it never maps two different elementts to the same place---that is, if $f(a) \neq f(b)$ whenever $a \neq b$. Say that $f$ is \define{onto} if it hits every element of $B$---that is, for every $b \in B$ there is an $a \in A$ such that $f(a) =b$. Say that $A$ and $B$ are the \define{same size} if there is a one-to-one; into function $f:A \rightarrow B$. A function that is both one-to-one and onto is called a \define{correspondence}. In a correspondence, every element of $A$ maps to a unique element of $B$ and each element of $B$ has a unique element of $A$ mapping to it. $A$ correspondence is simply a way of pairing the elements of $A$ with the elements of $B$. 
+\end{definition}
+
+Alternative common terminology for these types of functions is \define{injective} for one-to-one, \define{surjective} for onto, and \define{bijective} for one-to-one and onto. 
+
+\begin{definition}[Countability]
+  A set $A$ is \define{countable} if either it is finite or it has the same size as $N$
+\end{definition}
+
+\begin{theorem}
+  The set of real numbers, $R$, is uncountable. 
+\end{theorem}
+
+\begin{theorem}
+  Some languages are not Turing-recognizable
+\end{theorem}
+
+\subsubsection{A Turing-Unrecognizable Language}
+
+If both a language and its complement are Turing-recognizable, the language is decidable. Hence for any undecidable language, either it or its complement is not Turing-recognizable. Recall that the complement of a language is the language consisting of all strings that are not in the language. We say that a language is \define{co-Turing-recognizable} if it is the complement of a Turing-recognizable language. 
+
+\begin{theorem}
+  A language is decidable if and only if it is Turing-recognizable and co-Turing-recognizable. In other words, a language is decidable exactly when both it and its complement are Turing-recognizable. 
+\end{theorem}
+
+\section{Reducibility}
+
+A \define{reduction} is a way of converting one problem to another problem in such a way that a solution to the second problem can be used to solve the first problem. Reducibility always involves two problems, which we call $A$ and $B$. If $A$ reduces to $B$, we can use a solution to $B$ to solve $A$. 
+
+\subsection{Undecidable Problems from Language Theory}
+
+Let's consider $HALT_{TM}$, the problem of determining whether a Turing machine halts (by accepting or rejecting) on a given input. THis problem is widely known as the \define{halting problem}. We use the undecidability of $A_{TM}$ to prove the undecidability of the halting problem by reducing $A_{TM}$ to $HALT_{TM}$. Let $$HALT_{TM} = \{ \langle M,w \rangle | M \textrm{ is a  TM and } M \textrm{ ahlts on input } w$$ 
+
+\begin{theorem}
+  $HALT_{TM}$ is undecidable. \\ 
+  \bold{Proof}: Let's assume for the purpose of obtaining a contradiction that TM $R$ decides $HALT_{TM}$. We construct TM $S$ to decide $A_{TM}$, with $S$ operating as follows. \\ 
+  $S$ = On input $\langle M,w \rangle$, an encoding of a TM $M$ and a string $w$:
+  \begin{enumerate}
+    \item Run TM $R$ on input $\langle M,w \rangle$. 
+    \item If $R$ rejects, \emph{reject}. 
+    \item If $R$ accepts, simulate $M$ on $w$ until it halts. 
+    \item If $M$ has accepted, \emph{accept}; if $M$ has rejected, \emph{reject}. 
+  \end{enumerate}
+  Clearly, if $R$ decides $HALT_{TM}$, then $S$ decides $A_{TM}$. Because $A_{TM}$ is undecidable, $HALT_{TM}$ also must be undecidable. 
+\end{theorem}
+
+\begin{theorem}
+  $E_{TM}$ is undecidable where $$E_{TM} = \{ \langle M \rangle | M \textrm{ is a TM and } L(M) = \emptyset$$ 
+  \bold{Proof}: Let's write the modified machine described in the proof idea using our standard notation. We call it $M_1$. \\ 
+  $M_1$ = On input $x$: 
+  \begin{enumerate}
+    \item If $x \neq w$, \emph{reject}. 
+    \item If $x = w$, run $M$ on input $w$ and \emph{accept} if $M$ does. 
+  \end{enumerate}
+  This machine has the string $w$ as part of its description. It conducts the test of whether $x=w$ in the obvious way, by scanning the input and comparing it character by character with $w$ to determine whether they are the same. Putting all this together, we assume that TM $R$ decides $E_{TM}$ and construct TM $S$ that decides $A_{TM}$ as follows. \\
+  $S$ = On input $\langle M,w \rangle$, and encoding of a TM $M$ and a string $w$: 
+  \begin{enumerate}
+    \item Use the description of $M$ and $w$ to construct the TM $M_1$ just described. 
+    \item Run $R$ on input $\langle M_1 \rangle$. 
+    \item If $R$ accepts, \emph{reject}; if $R$ rejects, \emph{accept}. 
+  \end{enumerate}
+  Note that $S$ must actually be able to compute a description of $M_1$ from a description of $M$ and $w$. It is able to do so because it only needs to add extra states to $M$ that perform the $x=w$ test. If $R$ were a decider for $E_{TM}$, $S$ would be a decider for $A_{TM}$. A decider for $A_{TM}$ cannot exist, so we know that $E_{TM}$ must be undecidable. 
+\end{theorem}
+
+\begin{theorem}
+  $REGULAR_{TM}$ is undecidable where $$REGULAR_{TM} = \{ \langle M \rangle | M \textrm{ is a TM and } L(M) \textrm{ is a regular language}$$ 
+\end{theorem}
+
+\subsubsection{Reductions via Computation Histories}
+
+The computation history for a Turing machine on an input is simply the sequence of configurations that the machine goes through as it processes the input. It is a complete record of the machine. 
+
+\begin{definition}
+  Let $M$ be a Turing machine and $w$ an input string. An \define{accepting computation history} for $M$ on $w$ is a sequence of configurations, $C_1 , C_2 , \dots , C_{l}$, where $C_1$ is the start configuration of $M$ on $w$, $C_l$ is an accepting configuration of $M$, and each $C_i$ legally follows from $C_{i-1}$ acording to the rules of $M$. A \define{rejecting computation history} for $M$ on $w$ is defined similarly, except that $C_l$ is a rejecting configuration.
+\end{definition}
+
+Computation histories are finite sequences. If $M$ doesn't halt on $w$, no accepting or rejecting computation history exists for $M$ on $w$. Deterministic machines have at most one computation history on any given input. Nondeterministic machines may have many computation histories on a single input, corresponding to the various computation branches. 
+
+\begin{definition}
+  A \define{linear bounded automaton} is a restricted type of Turing machine wherein the tape head isn't permitted to move off the portion of the tape containing the input. If the machine tries to mofve its head off either end of the input, the head stays where it is---in the same way that the head will not move off the left-hand end of an ordinary Turing machine's type. 
+\end{definition}
+
+\begin{lemma}
+  Let $M$ be an LBA with $q$ states and $g$ symbols in the tape alphabet. There are exactly $qng^{n}$ distinct configurations of $M$ for a tape length of $n$. 
+\end{lemma}
+
+\begin{theorem}
+  $A_{LBA}$ is decidable. \\ 
+  \bold{Proof}: The algorithm that decides $A_{LBA}$ is as follows. \\ 
+  $L$ = On input $\langle M,w \rangle$, where $M$ is an LBA and $w$ is a string. 
+  \begin{enumerate}
+    \item Simulate $M$ on $w$ for $qng^{n}$ steps or until it halts. 
+    \item If $M$ has halted, \emph{accept} if it has accepted and \emph{reject} if it has rejected. If it has not halted, \emph{reject}. 
+  \end{enumerate}
+  If $M$ on $w$ has not halted within $qng^{n}$ steps it must be repeating a configuration and therefore looping. That is why our algorithm rejects in this instance. 
+\end{theorem}
+
+\subsection{Mapping Reducibility}
+
+\subsubsection{Computable Functions}
+
+A Turing machine computes a fucntion by starting with the input to the function on the tape and halting with the output of the function on the tape. 
+
+\begin{definition}
+  A function $f: \Sigma^{*} \rightarrow \Sigma^{*}$ is a \define{computable function} if some Turing machine $M$, on every input $w$, halts with just $f(w)$ on its tape. 
+\end{definition}
+
+\subsubsection{Formal Definition of Mapping Reducibility}
+
+\begin{definition}
+  Language $A$ is \define{mapping reducible} to language $B$, written $A \leq_{m} B$, if there is s a computable function $f: \Sigma^{*} \rightarrow \Sigma^{*}$, where for every $w$, $$w \in A \Leftrightarrow f(w) \in B$$ The function $f$ is called the \define{reduction} from $A$ to $B$.
+\end{definition}
+
+A mapping reduction of $A$ to $B$ provides a way to convert questions about membership testing in $A$ to membership testing in $B$. To test whether $w \in A$, we use the reduction $f$ to map $w$ to $f(w)$ and test whether $f(w) \in B$. If one problem is mapping reducible to a second, previously solved problem, we can thereby obtain a solution to the original problem. 
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $B$ is decidable, then $A$ is decidable. \\ 
+  \bold{Proof}: We let $M$ be the decider for $B$ and $f$ be the reduction from $A$ to $B$. We describe a decider $N$ for $A$ as follows: \\ 
+  $N$ = On input $w$: 
+  \begin{enumerate}
+    \item Compute $f(w)$. 
+    \item Run $M$ on input $f(2)$ and output whatever $M$ outputs. 
+  \end{enumerate}
+  Clearly, if $w \in A$, then $f(w) \in B$ because $f$ is a reduction from $A$ to $B$. Thus, $M$ accepts $f(w)$ whenever $w \in A$. Therefore, $N$ works as desired. 
+\end{theorem}
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $A$ is undecidable, then $B$ is undecidable.
+\end{theorem}
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $B$ is Turing-recognizable, then $A$ is Turing-recognizable. 
+\end{theorem}
+
+\begin{theorem}
+  If $A \leq_{m} B$ and $B$ is not Turing-recognizable, then $A$ is not Turing-recognizable. 
+\end{theorem}
+
+\begin{theorem}
+  $EQ_{TM}$ is neither Turing-recognizable nor co-Turing-recognizable. 
+\end{theorem}
+
+\section{Advanced Topics in Computability Theory}
+
+\subsection{The Recursion Theorem}
+
+The recursion theorem is a mathematical result that plays an important role in advanced work in the theory of computability. It has connnections to mathetmatical logic, the theory of self-reproducing systems, and even computer viruses. \\ 
+
+ \begin{lemma}
+   There is a computable function $q: \Sigma^{*} \rightarrow \Sigma^{*}$ where if $w$ is any string, $q(w)$ is the description of a Turing machine $P_w$ that prints out $w$ and then halts. 
+ \end{lemma}
+
+ \begin{theorem}[Recursion Theorem]
+   Let $T$ be a Turing machine that computes a function $t:\Sigma^{*} \times \Sigma^{*} \rightarrow \Sigma^{*}$. There is a Turing machine $R$ that computes a function $r: \Sigma^{*} \rightarrow \Sigma^{*}$, where for every $w$, $$r(w) = t(\langle R \rangle, w)$$ The statement of this theorem seems a bit technical, but it actually represents something quite simple. To make a Turing machine that can obtain its own description and then compute with it, we need only make a machine, called $T$ in the statement, that receives the description of the machine as an extra input. Then the recursion theorem produces a new machine $R$, which operates exactly as $T$ does but with $R$'s description filled in automatically.
+ \end{theorem}
+
+ \begin{theorem}
+   $A_{TM}$ is undecidable. 
+ \end{theorem}
+
+\begin{definition}
+  If $M$ is a Turing machine, then we say that the length of the description $\langle M \rangle$ of $M$ is the number of symbols in the string describing $M$. Say that $M$ is \define{minimal} if there is no Turing machine equivalent to $M$ that has a shorter description. Let $$MIN_{TM} = \{\langle M \rangle \vert M \textrm{ is a minimal TM}\}$$
+\end{definition}
+
+\begin{theorem}
+  $MIN_{TM}$ is not Turing-recognizable. 
+\end{theorem}
+
+\begin{theorem}
+  Let $t: \Sigma^{*} \rightarrow \Sigma^{*}$ be a computable function. Then there is a Turing machine $F$ for which $t(\langle F \rangle)$ describes a Turing machine equivalent to $F$. Here we'll assume that if a string isn't a proper Turing machine encoding, it describes a Turing machine that always rejects immediately. \\ 
+  In this theorem, $t$ plays the role of the transformation, and $F$ is the fixed point.\\ 
+
+  \bold{Proof}: Let $F$ be the following Turing machine. \\ 
+  $F$ = On input $w$: 
+  \begin{enumerate}
+    \item Obtain, via the recursion theorem, own description $\langle F \rangle$. 
+    \item Compute $t(\langle F \rangle)$ to obtain the description of a TM $G$. 
+    \item Simulate $G$ on $w$
+  \end{enumerate}
+  Clearly $\langle F \rangle$ and $t(\langle F \rangle) = \langle G \rangle$ describe equivalent Turing machines because $F$ simulates $G$. 
+\end{theorem}
+
+\section{Time Complexity}
+
+\subsection{Measuring Complexity}
+
+The number of steps that an algorithm uses on a particular input may depend on several parameters. For instance, fi the input is a graph, the number of steps may depend on the number of nodes, the number of edges, and the maximum degree of teh graph, or some combination of these and/or other factors. For simplicity, we compute the running time of an algorithm purely as a function of the length of the string representing the input and don't consider any other parameters. In \define{worst-case analysis}, the form we consider here, we consider the longest running time of all inputs of a particular length. In \define{average-case analysis}, we consider the average of all the running time of inputs of a particular length. 
+
+\begin{definition}
+  Let $M$ be a deterministic Turing machine that halts on all inputs. The \define{running time} or \define{time complexity} of $M$ is the function $f: N \rightarrow N$, where $f(n)$ is the maximum number of steps that $M$ uses on any input of length $n$. If $f(n)$ is the running time of $M$, we say that $M$ runs in time $f(N)$ and that $M$ is an $f(n)$ time Turing machine. Customarily we use $n$ to represent the length of the input. 
+\end{definition}
+
+\subsubsection{Big-O and Small-O Notation}
+
+Because the exact running time of an algorithm often is a complex expression, we usually just estimate it. In one convenient form of estimation, called \define{asymptotic analysis}, we seek to understand the running time of the algorithm when it is run on large inputs. We do so by considering only the highest order term of the expression for the running time of the algorith, disregarding both the coefficient of that term and any lower order terms, because the highest order term dominates the other terms on large inputs. 
+
+\begin{definition}
+  Let $f$ and $g$ be functions $f,g: N \rightarrow R^{+}$. Say that $f(n) = O(g(n))$ if postive integers $c$ and $n_0$ exist such that for every integer $n \geq g_0$, $$f(n) \leq c g(n)$$ When $f(n) = O(g(n))$, we say that $g(n)$ is an \define{upper bound} for $f(n)$, or more precisely, that $g(n)$ is an \define{asymptotic upper bound} for $f(n)$, to emphasize that we are suppressing constant factors. 
+\end{definition}
+
+Frequently, we derive bounds of the form $n^c$ for $c$ greater than 0. Such bounds are called \define{polynomial bounds}. Bounds of the form $2^{n^{\delta}}$ are called \define{exponential bounds} when $\delta$ is a real number greater than 0. \\ 
+
+Big-$O$ notation has a companion called \define{small-o notation}. Big-O notation says that one function is asymptotically \emph{no more than} another. To say that one function is asymptotically \emph{less than} another, we use small-o notation. 
+
+\begin{definition}
+  Let $f$ and $g$ be functions $f,g: N \rightarrow R^{+}$. Say that $f(n) = o(g(n))$ if $$\lim_{n\to\infty} \frac{f(n)}{g(n} = 0$$ In other words, $f(n) = o(g(n))$ means that for any real number $c>0$, a number $n_0$ exists, where $f(n) < c g(n)$ for all $n \geq n_0$. 
+\end{definition}
+
+\begin{definition}
+  Let $t: N \rightarrow R^{+}$ be a function. Define the \define{time complexity class}, TIME$(t(n))$, to be the collection of all languages that are decidable by an $O(t(n))$ time Turing Machine. 
+\end{definition}
+
+\subsubsection{Complexity Relationships Among Models}
+
+\begin{theorem}
+  Let $t(n)$ be a function, where $t(n) \geq n$. Then every $t(n)$ time multitape Turing machine has an equivalent $O(t^{2}(n))$ time single-tape Turing machine. 
+\end{theorem}
+
+\begin{definition}
+  Let $N$ be a nondeterministic Turing machine that is a decider. The \define{running time} of $N$ is the function $f: N \rightarrow N$, where $f(n)$ is the maximum number of steps that $N$ uses on any branch of its computation on any lenght $n$. 
+\end{definition}
+
+\begin{theorem}
+  Let $t(n)$ be a function, where $t(n) \geq n$. Then every $t(n)$ time nondeterministic single-tape Turing machine has an equivalent $2^{O(t(n))}$ time deterministic single-tape Turing Machine. 
+\end{theorem}
+
+\subsection{The Class P}
+
+\subsubsection{Polynomial Time}
+
+Exponential time algorithms typically arise when we solve problems by exhaustively searching through a space of solutions, called \define{brute-force search}. Sometimes brute-force search may be avoided through a deeper understanding of a problem, which may reveal a polynomial time algorithm of greater utility. \\ 
+
+All reasonable deterministic computational models are \define{polynomially equivalent}. That is, any one of them can simulate another with only a polynomial increase in running time. When we say that all reasonable deterministic models are polynomially equivalent, we do not attempt to define \emph{reasonable}. However, we have in mind a notion broad enough to include models that closely approximate running times on actual computers. 
+
+\begin{definition}
+  \bold{P} is the class of languages that are decidable in polynomial time on a deterministic single-tape Turing machine. In other words, $$P \bigcup_{k} \textrm{TIME}(n^k)$$
+\end{definition}
+
+The class P plays a central role in our theory and is important because. 
+\begin{enumerate}
+  \item P is invariant for all models of computation that are polynomially equivalent to the deterministic single-tape Turing machine. 
+  \item P roughly corresponds to the class of problems that are realistically solvable on a computer. 
+\end{enumerate}
+
+Item 1 indicates that P is a mathematically robust class. It isn't affected by the particulars of the model of computation that we are using. Item 2 indicates that P is relevant from a practical standpoint. When a problem is in P, we have a method of solving it that runs in time $n^k$ for some constant $k$. 
+
+\begin{theorem}
+  Every context-free language is a member of P.
+\end{theorem}
+
+% 7.3
+\subsection{The Class NP}
+
+One remarkable discovery shows that the complexities of many problems are linked. A polynomial time algorithm for one such problem can be used to solve an entire class of problems. \\ 
+
+The $HAMPATH$ problem has a feature called \define{polynomial verifiability} that is important for understanding its complexity. Even though we don't know of a fast (i.e. polynomial time) way to determine whether a graph contains a Hamiltonian path, if such a path were discovered somehow, we could easily convince someone else of its existence simply by presenting it. In other words, \emph{verifying} the existence of a Hamiltonian path may be much easier than \emph{determining} its existence. 
+
+\begin{definition}[Verifier]
+  A \define{verifier} for a language $A$ is an algorithm $V$, where $$A = \{w | V \textrm{ accept } \langle w,c \rangle \textrm{ for some string } c\}$$ We measure the time of a verifier only in terms of the length of $w$, so a \define{polynomial time verifier} runs in polynomial time in the length of $w$. A language $A$ is \define{polynomially verifiable} if it has a polynomial time verifier. 
+\end{definition}
+
+A verifier uses additional information, represented by the symbol $c$ to verify that a string $w$ is a member of $A$. This information is called a \define{certificate} or \define {proof} of membership in $A$. Observe that for polynomial verifiers, the certificate has polynomial length (in the length of $w$) because that is all the verifier can access in its time bound.  
+
+\begin{definition}
+  \define{NP} is the class of languages that have polynomial time verifiers. 
+\end{definition}
+
+The term NP comes from \define{nondeterministic polynomial time} and is derived from an alternative characterization by using nondeterministic polynomial time Turing machines. 
+
+\begin{theorem}
+  A language is in NP if and only if it is decided by some nondeterministic polynomial time Turing machine. 
+\end{theorem}
+
+We define the nondeterministic time complexity class $NTIM(t(n))$ as analagous to the deterministic time complexity class $TIME(t(n))$. 
+
+\begin{definition}
+  $NTIME(t(n)) = \{L|L$ is a language decided by an $O(t(n))$ time nondeterministic Turing machine. 
+\end{definition}
+
+The class NP is insensitive to the choice of reasonable nondeterministic computational model because all such models are polynomially equivalent. When describing and analyzing nondeterministic polynomial time algorithms. Each stage of a nondeterministic polynomial time algorithm must have an obvious implementation in nondeterministic polynomial time on a reasonable nondeterministic computational model. We analyze the algorithm to show that every branch uses at most polynomially many stages. 
+
+\subsubsection{The P versus NP Question}
+
+NP is the class of languages that are solvable in polynomial time on a nondeterministic Turing machine; or, equivalently, it is the class of languages whereby membership in the language can be verified in polynomial time. P is the class of languages where membership can be tested in polynomial time. 
+\begin{center}
+  P = the class of languages for which membership can be \emph{decided} quickly \\ 
+  NP = the class of languages for which membership can be \emph{verified} quickly
+\end{center}
+There are examples of languages that are members of NP but that are not known to be in P. The power of polynomial verifiability seems to be much greater than that of polynomial decidability. But, hard as it may be to image, P and NP could be equal. We are unable to \emph{prove} the existence of a single language in NP that is not in P. 
+
+\subsection{NP-Completeness}
+
+There are certain problems in NP whose individual complexity is related to that of the entire class. If a polynomial time algorithm exists for any of these problems, all problems in NP would be polynomial time solvable. These problems are called \define{NP-Complete}. 
+
+\begin{theorem}
+  $SAT \in P$ iff $P = NP$
+\end{theorem}
+
+\subsubsection{Polynomial Time Reducibility}
+
+When problem $A$ is \emph{efficienty} reducible to problem $B$, an efficient solution can be used to solve $A$ efficiently. 
+
+\begin{definition}
+  A function $f: \Sigma^{*} \rightarrow \Sigma^{*}$ is a \define{polynomial time computable function} if some polynomial time Turing Machine $M$ exists that halts with just $f(w)$ on its tape, when started on any input $w$. 
+\end{definition}
+
+\begin{definition}
+  Language $A$ is \define{polynomial time mapping reducible}, or simply \define{polynomial time reducible}, to language $B$, written $A \leq_{P} B$, if a polynomial time computable function $f: \Sigma^{*} \rightarrow \Sigma^{*}$ exists, where for every $w$, $$w \in A \Leftrightarrow f(w) \in B.$$ The function $f$ is called the \define{polynomial time reduction} of $A$ to $B$. 
+\end{definition}
+
+If one language is polynomial time reducible to a language already known to have a polynomial time solution, we obtain a polynomial time solution to the original language, as in the following theorem. 
+
+\begin{theorem}
+  If $A \leq_{P} B$ and $B \in P$, then $A \in P$. \\ 
+  \bold{Proof} Let $M$ be the polynomial time algorithm deciding $B$ and $f$ be the polynomial time reduction from $A$ to $B$. We describe a polynomial time algorithm $N$ deciding $A$ as follows. \\ 
+  $N$ = On inputs $w$: 
+  \begin{enumerate}
+    \item Compute $f(w)$. 
+    \item Run $M$ on input $f(w)$ and output whatever $M$ outputs
+  \end{enumerate}
+  We have $w \in A$ whenever $f(w) \in B$ because $f$ is a reduction from $A$ to $B$. Thus, $M$ accepts $f(w)$ whenever $w \in A$. Moreover, $N$ runs in polynomial time because each of its two stages runs in polynomial time.
+\end{theorem}
+
+\begin{definition}[NP-Completeness]
+  A language $B$ is \define{NP-complete} if it satisfies two conditions: 
+  \begin{enumerate}
+    \item $B$ is in NP 
+    \item every $A$ in NP is polynomial time reducible to $B$. 
+  \end{enumerate}
+\end{definition}
+
+\begin{theorem}
+  If $B$ is NP-complete and $B \in P$, then $P = NP$
+\end{theorem}
+
+\begin{theorem}
+  If $B$ is NP-complete and $B \leq_{P} C$ for $C$ in NP, then $C$ is NP-complete. \\ 
+  \bold{Proof} We already know that $C$ is in NP, so we must show that every $A$ in NP is polynomial time reducible to $C$. Because $B$ is NP-complete, every language is NP is polynomial time reducible to $B$, and $B$ in turn is polynomial time reducible to $C$. Polynomial time reductions compose; that is, if $A$ is polynomial time reducible to $B$ and $B$ is polynomial time reducible to $C$, then $A$ is polynomial time reducible to $C$. Hence, every language in NP is polynomial time reducible to $C$. 
+\end{theorem}
+
+\end{document}
