@@ -1,0 +1,823 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+% import note styles
+\usepackage{../styles}
+
+% Heading information
+\title{CS558: Computer Vision Notes}
+\author{Steven DeFalco}
+\date{\today}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+% Notes start here
+
+\section{Introduction (Lecture 1)}
+
+\subsection{Why is vision hard?}
+
+\begin{itemize}
+  \item There is a loss of information due to projection from 3D to 2D 
+  \item Image colors depend on surface properties, illumination, camera response function, and interactions such as shadows 
+  \item Noise (e.g. sensor noise)
+  \item Conflicts that exists among local and global clues (e.g. illusions)
+\end{itemize}
+
+\subsection{Cameras}
+
+Cameras use a barrier to block of most of the light rays. This reduces blurring. The opening is known as the \define{aperture}. \\ 
+
+Lens and viewpoint determine perspective. Aperture and shutter speed determine exposure. Aperture and other effects determine depth of field. Film or sensor record image. \\
+
+The \define{pinhole model} captures \emph{pencil of rays} - all rays through a single point. The point is called the \define{center of projection (COP)}. The image is formed on the \define{image plane}. \define{Effective focal length f} is the distance from the COP to the image plane. The main idea with a painhold camera is to add a barrier to block off most of the rays: this reduces blurring. \\ 
+
+Can't just make the aperture as small as possible because this causes less light to get through and the image will experience diffraction effects. When light changes medium, the directioon changes: diffraction. \\ 
+
+A lens focuses light onto the film. There is a specific distance at which objects are \emph{in focus}; other points project a \emph{circle of confusion} in the image. Changing the shape of the lens changes this distance. \\ 
+
+\define{Thin lens optics} is a simplifications of geometrical optics for well-behaved lenses. All parallel rays converge to one points on a plane located at the focal length $f$. All rays going through the center are not deviated; hence have the same perspective as the pinhole.
+
+\section{Image Formation (Lecture 2)}
+
+\define{Field of view} is how much volume is observed by a camera. As you increase the \define{focal length}, we observe a narrower and narrower view of the scene; the field of view (FOV) decreases. Wheras at 17mm we may see $104^\circ$, at 1000mm we may see $2.5^\circ$. \\ 
+
+The field of view is govered by the size of the camera retina. $$\phi = \textrm{tan}^{-1}(\frac{d}{2f})$$ Telephoto makes it easier to select background (a small change in viewwpoint is a big change in background). Changing the focal length lets us move back from a subject, while mainting its size on the image, but moving back changes perspective relationships. 
+
+\begin{definition}[Aperture]
+  is the diamter of the lens opening (controlled by diaphragm). Expressed as a fraction of coal length, in \define{f-number} N. For example, $f/2.0$ on a 50mm lens means that the aperture is 25mm. $f/2.0$ on a 100mm lens means that the aperture is 50mm. A small f-number corresponds to a big aperture. 
+\end{definition}
+ 
+\begin{remark}
+  Aperture controls depth of field. A smaller aperture increases the range in which the object is approximately in focus. But a small aperture reduces amount of light. \\ 
+\end{remark}
+
+The \define{Circle of Confusion} (C) is an optical spot caused by a cone of light rays from a lens not coming to a perfect focus when imaging a point source and it depends on sensing medium, reproduction medium, viewing distance, human vision, etc. 
+
+\begin{remark}
+  Telephoto makes it easier to select background (a small change in viewpoint is a big chagne in background). Changing the focal length lets us move back from a subject, while maintaining its size on the image, but moving back changes perspective relationships. 
+\end{remark}
+
+\define{Shutter speed} controls how long the film/sensor is exposed. It has a pretty much linear effect on exposure. It is usually in a fraction of a second: 1/30, 1/60, 1/125, 1/250, 1/500. On a normal lens, normal humans can hand-hold goes down to 1/60. The main effect of shutter speed is motion blur. Halving the shutter speed doubles the motion blur. 
+
+\define{Exposure} has two main parameters$\dots$
+\begin{itemize}
+  \item aperture (in $f$ number)
+  \item shutter speed (in fractionm of a second)
+\end{itemize}
+Exposure = irradiance $\times$ time. $$ H = E \times T$$ 
+
+\begin{remark}
+  Iradiance (E) is controlled be aperture. Exposure time (T) is controlled by shutter. 
+\end{remark}
+
+\begin{definition}[Reciprocity]
+  The same exposure is obtained with an exposure twice as long and an aperture are half as big. \\ 
+  Assume we know how much light we need, then we have the choice of an infinite number of shutter speed/aperture pairs. 
+\end{definition}
+
+\begin{remark}
+  What will guide our choice of a shutter speed? 
+  \begin{itemize}
+    \item Freeze motion vs. motion blue, camera shake
+  \end{itemize}
+  What will guide our choice of an aperture? 
+  \begin{itemize}
+    \item Depth of field, distortion reduction, diffracion limit
+  \end{itemize}
+  Often we must compromise and open more to enable faster speed (but shallow depth of field). 
+\end{remark}
+
+\begin{definition}[Metering]
+  Photsensitive sensor measure scene luminance (usually through the lens). A simple version of this would be a center-weighted average. It usually assumes that a scene is 18\% gray which causes a probelm with light and dark scenes. 
+\end{definition}
+
+The camera metering system measures how bright the scene is. In \define{aperture priority mode}, the photgrapher sets the aperture, the camera sets the shutter speed. In \define{shutter-speed priority mode}, the photographer sets the shutter speed and the camer deduces the aperture. In both cases, reciprocity is exploited. In \define{program mode} the camera has almost complete control of the setttings. In \define{manual mode}, the photographer has complete control of the settings. 
+
+\begin{remark}
+  In \define{aperture priority} mode, there is direct depth of field control, but this can require impossible shutters speeds for a bright scene. In \define{shutter speed priority} mode, there is direct motion blur control, but this can require impossible aperture for a dark scene. 
+\end{remark}
+
+\define{Sensitivity} (ISO) is the gain applied to the sensor. It has a linear effect on the image. \\ 
+
+A pixel in an image gets its value from some factors which include illumination strength and direction, surface geometry, surface material, nearby surfaces, and camera gain/exposure. \\
+
+There are two basic models of reflection: 
+\begin{itemize}
+  \item \define{Specular}: light bounces off at the incident angle (e.g. mirror)
+  \item \define{Diffuse}: light scatters in all directions (e.g. brick, cloth, rough wood)
+\end{itemize}
+
+In the \define{Lambertian reflectance model}, some light is absorbed and the remaining light is scattered. Examples include soft cloth, concrete, matte paints. Most surfaces have both specular and diffuse components. \define{Specularity} is the spot where specular reflection dominates (typically reflects light source). \\ 
+
+\begin{definition}[Lambert's Cosine Law]
+  Intensity \emph{does not} depend on viewer angle. 
+  \begin{itemize}
+    \item Amount of reflected light proportional to cos($\theta$)
+    \item Visible solid angle also proportional to cost($\theta$)
+  \end{itemize}
+\end{definition}
+
+Most surfaces have both specular and diffuse components. \define{Specularity} is a spot where specular reflection dominates (typically reflects light source). \define{Intensity} depends on illumination of angle because less light comes in at oblique angles. \\ $\rho$ = albedo, $S$ = directional source, $N$ = surface normality, $I$ = reflected intensity $$I(X) = \rho(x)(S \dot N(x))$$
+
+\begin{remark}
+  When light hits a typical surface$\dots$ 
+  \begin{itemize}
+    \item Some light is absorbed ($1-p$): more absorbed for low albedos 
+    \item Some light is reflected diffusely: independent of viewing direction 
+    \item Some light is refelcted specularly: light bounces off (like a mirror), depends on viewing direction
+  \end{itemize}
+\end{remark}
+
+\define{Bidrectional reflectance distribution function} is a model of local reflection that tells how bright a surface appears when viewed from one direction when light falls on it from another. It is a ration of measured outgoing radiance in direction $\theta_e , \Phi_e)$ to irradiance from direction $\theta_i , \Phi_i)$. 
+$$\rho(\theta_i , \phi_i , \theta_e ; \lambda) = \frac{L_e (\theta_e , \phi_e)}{E_i (\theta_i , \phi_i)} = \frac{L_e (\theta_e , \phi_e)}{L_i (\theta_i , \phi_i)\textrm{cos}\theta_i \textrm{d}\omega}$$\\ 
+
+Light is composed of a spectrum of wavelengths. Humans see in RGB. There are red, green, and blue cones in the eyes. RGB is represented a 3D value represented in each direction between 0 and 255. For example, red is R=255, G=0, and B=0. 
+
+Observed intensity depends on light sources, geometry/material of reflecting surface, surrounding objects, camera settings, etc. Objects cast light and shadows on each other. Differences in intensity are primary cues for shape. 
+
+\subsection{Pixels and Linear Filters}
+
+\begin{definition}[Image filtering]
+  for each pixel, compute function of local neighborhood and output a new value. Same function is applied at each position. The output and input images are typically the same size. In linear filtering the function is a weighted sum/difference of pixel values. This idea can be used to enhance images, extract information from images, and detect patterns. $$h[m,n] = \sum_{k,l}g[k,l]f[m+k,n+l]$$
+\end{definition}
+
+A \define{box filter} replaces each pixel with an average of its neighborhood. This achieves a smooth effect (removes sharp features). 
+
+\begin{remark}
+  The sobel filters are $[[1,0,-1],[2,0,2],[1,0,-1]]$ and $[[1,2,1],[0,0,0],[-1,-2,-1]]$. 
+\end{remark}
+
+Convolution is like filtering, but the function definition varies slightly. $$h[m,n] = \sum_{k,l}g[k,l]f[m-k,n-l]$$ \\ Some key properties of linear filters include the following: 
+\begin{itemize}
+  \item \bold{Linearity}: filter($f_1 + f_2$) = filter($f_1$) + filter($f_2$)
+  \item \bold{Shift invariance} (same behavior regardless of pixel location): filter(shift($f$)) = shift(filter($f$))
+\end{itemize}
+Additionally, linear filters are commutative, associative, distribute over addition, scalars factor out, and possess hthe identity property. 
+
+\begin{definition}[Gaussian Filter]
+  \define{Gaussian filters} remove "high-frequency" components from the image (images become more smooth). Convolution with self is another gaussian, so can smooth with small-width kernel, repeat, and get same result as larger-width kernel would have. Convolving two times with Gaussian kernel of width $\sigma$ is same as convolving once with kernel of width $\sigma \sqrt{2}$ $$G_{\sigma}(x,y) = \frac{1}{2 \pi \sigma^{2}}\textrm{exp}^{- \frac{x^2 + y^2}{2 \sigma^2}}$$ By separability of the Gaussian filter, we can also say that $$G_{\sigma}(x,y) = (\frac{1}{2 \pi \sigma^{2}}\textrm{exp}^{- \frac{x^2}{2 \sigma^2}}) (\frac{1}{2 \pi \sigma^{2}}\textrm{exp}^{- \frac{y^2}{2 \sigma^2}})$$ The 2D Gaussian can be expressed as the product of two functions, one a function of $x$ and the other a function of $y$. In this case, the two functions are (identical) 1D Gaussian. To choose a filter size, ensure that the values at the edges are near zero. 
+\end{definition}
+
+\section{Filters and Edge Detection (Lecture 3)}
+
+\subsection{Pixels and Linear Filters} 
+
+An image is a \define{matrix} of values. There are low-values for dark pixels and high-values for light pixels. 
+
+\begin{remark}
+  A basic \define{horizontal gradient} filter is $[[0,0,0],[-1,0,1],[0,0,0]]$ or simply $[-1,0,1]$. A basic \define {vertical gradient} filter is $[[0,-1,0],[0,0,0],[0,1,0]]$ or simply $[[-1],[0],[1]]$. 
+\end{remark}
+
+To remove noise in an image, we can replace each pixel with a \emph{weighted} average of its neighborhood. The weigths are called the \emph{filter kernel}. The types of \define{noise} are$\dots$ 
+\begin{itemize}
+  \item \define{Salt and pepper nosie}: contains random occurrences of black and white pixels 
+  \item \define{Impulse noise}: contains random occurrences of white pixels 
+  \item \define{Gaussian noise}: variations in intensity drawn from a Gaussian normal distribution. It is the sum of many independent factors. This is good for small standard deviations but assumes independence and zero-mean noise. 
+\end{itemize}
+
+\begin{definition}[Median Filtering]
+  A \define{median filter} operates over a window by selecting the median intensity in the window. This is an \emph{excellent} method for combating salt-and-pepper noise (i.e. random black and white pixels). This method also does a good job \bold{retaining edges}. 
+\end{definition}
+
+\begin{remark}
+  A basic \define{sharpening filter} is $\frac{1}{9}[[1,1,1],[1,1,1],[1,1,1]]$. This filter accentuates differences with local average. 
+\end{remark}
+
+The \emph{goal} of \define{edge detection} is to identify sudden changes in an image. Intuitively, most semantic and shape information from the image can be encoded in the edges. Edges are caused by a variety of factors: 
+\begin{itemize}
+  \item surface normal discontitnuity 
+  \item depth discontinuity 
+  \item surface color discontinuity 
+  \item illumination discontinuity
+\end{itemize}
+
+An \define{edge} is a place of rapid change in the image intensity function. 
+
+\begin{remark}
+  For a 2D function $f(x,y)$, the partial derivative is: 
+  $$\frac{\partial f(x,y)}{\partial x} \approx \frac{f(x+1,y)-f(x,y)}{1}$$
+\end{remark}
+
+\begin{definition}[Image Gradient]
+  The gradient of an image $f = [\frac{\partial f}{partial x}, \frac{\partial f}{\partial y}]$. The gradient points in the direction of most rapid increase in intensity. The gradient direction is given by $\theta = \textrm{tan}^{-1} = (\frac{\partial f}{\partial y} / \frac{\partial f}{\partial x})$. The edge strength is given by $\sqrt{(\frac{\partial f}{\partial x})^2 + (\frac{\partial f}{\partial y})^2}$
+\end{definition}
+
+\begin{definition}[Derivative theorem of Convolution]
+  Differentiation is convolution, and convolution is associative: $$\frac{d}{dx}(f * g) = f * \frac{d}{dx}g$$
+\end{definition}
+
+\begin{definition}[The Canny edge detector]
+  \begin{enumerate}
+    \item Filter image with derivative of Gaussian 
+    \item Find magnitude and orientation of gradient 
+    \item Non-maximum suppression: thin wide "ridges" down to single pixel width 
+    \item Linking and thresholding (\bold{hysteresis}) 
+      \begin{itemize}
+        \item define two thresholds: low and high 
+        \item use the high threshold to start edge curves and low threshold to continue them
+      \end{itemize}
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}[Hysteresis thresholding]
+  use a high threshold to start edge curves, use a low threshold to continue them. The threshold at low/high levels is to get weak/strong edge pixels. Trace connected components, starting from strong edge pixels. 
+\end{definition}
+
+The choice of \define{Gaussian kernel spread/size} depends on desired behavior. A large $\sigma$ detects large scale edges. A small $\sigma$ detects fine features. \\ 
+
+The \define{characteristics of good features} are repeatability, saliency (each feature is distinct), compactness/efficiency, and locality \\ 
+
+The basic idea of \define{corner detection}$\dots$ We can easily recognize the point by looking through a small windows. Shifting a window in \emph{any direction} should give a \emph{large} change in intensity. In a "flat" region, there is no intensity change in any direction. On an "edge", there is no change in intensity along the edge direction. In a "corner", there is significant change in all directions. The change in appearance of window $W$ for the shift $[u,v]$: $$E(u,v) = \sum_{(x,y) \in W} [I + (x + u, y + v) - I(x,y)]^2$$ We also have the first-order Taylor approximation for small motions $[u,v]$: $$I(x + u, y + v) \approx I(x,y) + I_x u + I_y v$$ The quadratic approximation can be written as $$E(u,v) = [ u v ]M [ \frac{u}{v} ]$$ where $M$ is a \emph{second moment matrix} computed from the image derivatives. 
+
+\begin{definition}[The Harris Corner Detector]
+  \begin{enumerate}
+    \item Compute partial derivatives at each pixel 
+    \item Compute second moment matrix $M$ in a Gaussian window around each pixel 
+    \item Compute corner response function $R$ 
+    \item Threshold $R$ 
+    \item Find local maxima of response function (non-maximum suppression)
+  \end{enumerate}
+\end{definition}
+
+When interpreting the second moment matrix; first, consider the axis-aligned case (gradients are either horizontal or vertical) $$M = [[a,0,],[0,b]]$$ If either $a$ or $b$ is close to 0, then this is \bold{not} a corner, so look for locations where both are large. 
+
+We want corner locations to be \emph{invariant} photometric transformations and \emph{covariant} to geometric transformations 
+\begin{itemize}
+  \item \define{Invariance}: image is transofrmed and corner locations do not change 
+  \item \define{Covariance}: if we have two transformed versions of the same image, features should be detected in corresponding locations
+\end{itemize}
+
+\begin{theorem}[Nyquist-Shannon Sampling Theorem]
+  When sampling a signal at discrete intervals, the sampling frequency must be $\geq 2 \times f_{\textrm{max}}$. $f_{\textrm{max}}$ is the maximum frequency of the input signal. This will allow us to reconstruct the original perfectly from the sampled version. 
+\end{theorem}
+
+The solutions to \define{anti-aliasing} are to sample more often. Get rid of all frequencies that are greater than half the new sampling frequency; you will lose information, but it's still better than aliasing. A simpel algorithm for downsampling by a factor of 2 is as follows:
+\begin{enumerate}
+  \item Start with $\textrm{image}(h,w)$ 
+  \item Apply low-pass filter
+  \item Sample every other pixel
+\end{enumerate}
+
+\section{Corners and Matching (Lecture 4)}
+
+For the classification of image points using eigenvalues of $M\dots$ 
+\begin{itemize}
+  \item \bold{edge}: $\lambda_2 >> \lambda_1$ or $\lambda_1 >> \lambda_2$
+  \item \bold{corner}: $\lambda_1$ and $\lambda_2$ are large, $\lambda_1 \approx \lambda_2$, $E$ increases in all directions 
+  \item \bold{flat region}: $\lambda_2$ and $\lambda_1$ are small and $E$ is almost constant in all directions 
+\end{itemize}
+
+\define{Corner detection} is partially \emph{invariant} to \bold{affine intensity change}. \bold{Corner location} is \emph{covariant} with respect to \bold{translation}. \bold{Corner location} is \emph{covariant} with respect to \bold{rotation}. \bold{Corner location} is \emph{not covariant} to scaling. 
+
+\subsection{Keypoint Matching}
+
+The \bold{goal} of \bold{keypoints} is to detect points that are \emph{repeatable} and \emph{distinctive}. 
+
+\begin{enumerate}
+  \item Find a set of distinctive key-points 
+  \item Define a region around each keypoint 
+  \item Extract and normalize the region content 
+  \item Computate a local descriptor from the normalized region 
+  \item Match local descriptors 
+\end{enumerate}
+
+\define{Automatic scale selection} functions will find the ideal scale to include in the regions around each keypoint by testing different scales and measuring the responses/. \\ 
+
+We want to extract features with characteristic scale that is \emph{covariant} with the image transformation. To detect blobs, convolve the iamge with a "blob filter" at multiple scales and look for extrema of filter response in the resulting \emph{scale space}. Find maxima and minima of blob filter response in space and scale. We want to find the characteristic scale of thfe bob by convolving it with Laplacians at several scales and looking for the maximum response; however, Laplacian response decays as scale increases. \\ 
+
+The response of a derivative of Gaussian filter to a perfect step edge decreases as $\sigma$ increases. To keep the response the same (scale-invariant), must multiply Gaussian derivative by $\sigma$. Laplacian is the second Gaussian derivative, so it must be multiplied by $\sigma^2$. \\ 
+
+We define the \define{characteristic scale} of a blob as the scale that produces peak of Laplacian response in the blob center. To perform a \define{scale-space blob detector}$\dots$ 
+\begin{enumerate}
+  \item Convolve image with scale-normalized Laplacian at several scales 
+  \item Find maxima of squared Laplacian response on scale-space 
+\end{enumerate}
+
+\begin{remark}
+  We can approximate the Laplacian with a difference of Gaussians: 
+  \begin{itemize}
+    \item Laplacian: $L = \sigma^2 (G_{xx}(x,y,\sigma)+G_{yy}(x,y,\sigma)$
+    \item Difference of Gaussians: $DoG = G(x,y,k\sigma) - G(x,y,\sigma)$
+  \end{itemize}
+\end{remark}
+
+\define{Local descriptors} should be robust, distinctive, compact, efficient. Most available descriptors focus on edge/gradient information; they often capture texture information and color is rarely used. Scaled and rotated versions of the same neighborhood will give rise to blobs that are related by the same transformation. \\ 
+
+To eliminate rotation ambiguity we must assign a unique orientation to circular image windows. To do this we create a histogram of local gradient directions in the path and assign canonical orientation at peak of smoothed histogram. 
+\begin{definition}[SIFT]
+  detects features with characteristic scales and orientations. Very robust detection and description technique that can handle changes in viewpoint, significant changes in illumination. SIFT is fast and efficient and can run in real time. 
+  \begin{enumerate}
+    \item Run DoG detector. Find maxima in location/scale space and remove edge points 
+    \item Find all major orientations. Bin orientations into 36 bin histogram (weight by gradient magnitude, weight by distance to center). Return orientations within 0.8 of peak of histogram; use parabola for better orientation fit. 
+    \item For each (x,y,scale,orientation), create a descriptor: 
+      \begin{itemize}
+        \item Sample $16 \times 16$ gradient mag. and re. orientation 
+        \item Bin $4 \times 4$ samples into $4 \times 4$ histograms 
+        \item Threshold values to max of 0.2, divide by L2 norm 
+        \item Final descriptor: $4 \times 4 \times 8$ normalized histograms
+      \end{itemize}
+  \end{enumerate}
+\end{definition}
+
+\subsection{Fitting}
+
+We would like to form a higher-level, more compact representation of the features in the image by grouping multiple features according to a simple model. In \define{fitting}, we will choose a parametric model to represent a set of features. If we, for example, know which points belong to the line, we can find the "optimal" line parameters using something such as least squares line fitting or total least squares. \\ 
+
+\begin{definition}[Least Squares Line Fitting]
+  Let's say the data is $(x_1 , y_1), \dots , (x_n , y_n)$, the line equation is $y_i = m x_i + b$, and we want to find $(m,b)$ to minimize. $$E = \sum^{n}_{i=1} (y_i - mx_i - b)^{2}$$ $$B = (X^{T}X)^{-1}X^{T}Y$$
+\end{definition}
+
+\begin{definition}
+  The distance between point $(x_i , y_i)$ and line $ax + by = d$ ($a^2 + b^2 = 1$) is $|ax_i + by_i - d|$. Find $(a,b,d)$ to minimize the sum of squared perpendicular distances. $$E = \sum_{i=1}^{n} (ax_i + by_i -d)^{2}$$
+\end{definition}
+
+\define{RANSAC} (random sample consensus) is a very general framework for model fitting in the presence of outliers. Generally, it will$\dots$ 
+\begin{enumerate}
+  \item Randomly select minimal subset of points 
+  \item Hypothesize a model 
+  \item Compute error function 
+  \item Select points consistent with model 
+  \item Repeat \emph{hypothesize-and-verify} loop
+\end{enumerate}
+
+\section{RANSAC and Hough Transform (Lecture 5)}
+
+\subsection{RANSAC}
+
+\begin{remark}
+  Least squared line fitting works well for well-behaved similar data. However, a single outlier can signifcantly reduce the accuracy of least squared line fitting. 
+\end{remark}
+
+An alternative to this is \bold{RANSAC} (as defined above). 
+
+\begin{definition}[RANSAC for line fitting]
+  Repeat $N$ times$\dots$
+  \begin{enumerate}
+    \item Draw $s$ points uniformly at random 
+    \item Fit line to these $s$ points 
+    \item Find \emph{inliers} to thsi line among the remaining points (i.e. points whose distance from the line is less than $t$)
+    \item If there are $d$ or more inliers, accept the line and refit using all inliers. 
+  \end{enumerate}
+\end{definition}
+
+As far as choosing the parameters for \bold{RANSAC line fitting}: 
+\begin{enumerate}
+  \item The initial number of points $s$ is typically the minimum needed to fit the model 
+  \item Choose the distance threshold $t$ so probability for inliers is $p$ 
+  \item Choose the number of samples $N$ so that, with probability $p$, at least one random sample is free from outliers (outlier ratio: $e$)
+\end{enumerate}
+The parameters can all be defined by the following equivalence $$(1-(1-e)^{s})^{N} = 1 - p$$ $$N = \frac{\textrm{log}(1-p)}{\textrm{log}(1-(1-e)^{s}))}$$
+
+The outlier ratio $e$ is often unknown \emph{a priori}, so pick worst case (e.g. 50\%), and adapt if more inliers are found (e.g. 80\% would yield $e=0.2$). \\ 
+
+Some \bold{Pros of RANSAC}:
+\begin{itemize}
+  \item simple and general 
+  \item applicable to many different problems 
+  \item often works well in practice 
+\end{itemize}
+Some \bold{Cons of RANSAC}:
+\begin{itemize}
+  \item Computational time grows quickly with fraction of outliers and number of parameters 
+  \item Not as good for getting multiple fits (though one solution is to remove inliers after each fit and repeat)
+  \item sensitivity to threshold $t$
+\end{itemize}
+
+\subsection{Hough Transform}
+
+\define{Hough transform} relies on letting each feature vote for all the models that are compatibly with it, and hopefully the noise features will not vote consistently for any single model. The general outline of the \define{Hough Transform} is to:
+\begin{itemize}
+  \item discretize \emph{parameters space} into bins 
+  \item for each feature point in the image, put a vote in every bin in the parameter space that could have generated this points 
+  \item find bins that have the most votes
+\end{itemize}
+
+\begin{remark}
+  A line in the image corresponds to a point in Hough space. For example, the point $(x_0 , y_0)$ in the image space maps to $b=-x_0 m + y_0$ in the Hough space. 
+\end{remark}
+
+\begin{remark}
+  The probelms with the $(m,b)$ parameter spcae representation are that there are unbounded parameter domains and vertical lines require infinite $m$. An alternative representation, is the \define{polar coordinate system}: $x \textrm{cos}\theta + y \textrm{sin}\theta = \rho$. Thus, each point $(x,y)$ will add a sinusoid in the $(\theta, \rho)$ parameter space. 
+\end{remark}
+
+The general outline of the algorithm is as follows:
+\begin{itemize}
+  \item Initialize accumulator $H$ to all zeros
+  \item For each feature point $(x,y)$ in the image: \\ 
+    For $\theta = 0 \textrm{ to } 180$
+    \begin{itemize}
+      \item $\rho = x \textrm{cos}\theta + y \textrm{sin}\theta$
+      \item $H(\theta , \rho) = H(\theta , \rho) + 1$
+    \end{itemize}
+  \item Find the value(s) of $(\theta, \rho)$ where $H(\theta, \rho)$ is a local maximum. The detected line in the image is given by $\rho = x \textrm{cos}\theta + y \textrm{sin}\theta$
+\end{itemize}
+
+As the level of uniform noise increases, the maximum number of votes increases too. To \bold{deal with noise}$\dots$ 
+\begin{itemize}
+  \item Choose a good grid/discretization 
+    \begin{itemize}
+      \item \bold{Too coarse}: large vote counts obtained when too many different lines correspond to a single bucket 
+      \item \bold{Too fine}: miss lines because some points that are not exactly colinear cast votes for different buckets 
+    \end{itemize}
+  \item Increment neighboring bins (smoothing in accumulator array)
+  \item Try to get rid of irrelevant features 
+    \begin{itemize}
+      \item E.g. take only edge points with signficant gradient magnitude
+    \end{itemize}
+\end{itemize}
+
+\begin{definition}[Generalized Hough Transform]
+  We want to find a template defined by its reference point (center) and several distinct types of landmark points in stable spatial configuration. For each type of landmark point, store all possible displacement vectors towards the center. For each feature in the new image, look up that feature type in the model and vote for the possible center locations associated with that type in the model. 
+\end{definition}
+
+\begin{remark}[Practical tips for Voting]
+  When voting, minimize irrelevant tokens first. Choose a good grid / discretization. Vote for neighbors also (smoothing in accumulator array). Use direction of edge to reduce parameters by 1. To read back which points voted for \emph{winning} peaks, keep tags on the votes. 
+\end{remark}
+
+Some \bold{Pros of Hough Transform}:
+\begin{itemize}
+  \item All points processed independently 
+  \item Can deal with occlusion and gaps 
+  \item Can detect multiple instances of a model 
+  \item Some robustness to noise: noise points unlikely to contribute consistently to any single bin 
+\end{itemize}
+
+Some \bold{Cons of Hough Transform}:
+\begin{itemize}
+  \item Complexity of search time increases exponentially with the number of model parameters 
+  \item Non-target shapes can produce spurious peaks in parameter space 
+  \item It's hard to pick a good grid size
+\end{itemize}
+
+\subsection{Alignment}
+
+With \define{alignment}, we want to find parameters of model that maps one set of points to another. We are correcting for change in the observer's position relative to the observed. Typically, we want to solve for a global transformation that accounts for most true correspondences. Some difficulties include noise, outliers, and many-to-one matces/multiple objects. 
+
+\begin{definition}[Parametric Warping]
+  Transformation $T$ is a coordinate change. $$p' = T(p)$$ $T$ is the same for any point $p$ and can be described by just a few numbers (parameters). 
+\end{definition}
+
+\define{Scaling} a coordinate means multiplying each of its components by a scalar. \define{Uniform scaling} means that this scalar is the same for all components. \define{Non-uniform scaling} uses different scalars per component. The scaling operations are $$x' = ax$$ $$y' = by$$ The scalars for a 2-D rotation can be defined as $$x' = x \textrm{cos}(\theta) - y \textrm{sin}(\theta)$$ $$y' = x \textrm{sin}(\theta) + y \textrm{cos}(\theta)$$ Even through sin($\theta$) and cos($\theta$) are nonlinea functions of $\theta$, 
+\begin{itemize}
+  \item $x'$ is a linear combination of $x$ and $y$ 
+  \item $y'$ is a linear combination of $x$ and $y$
+\end{itemize}
+And it naturally follows that the inverse transformation is rotation by $- \theta$. For rotation matrices, we can say that $R^{-1} = R^T$. \\ 
+
+\define{Affine transformations} are combinations of linear transformations and translations. Properties of affine transformations include the following: 
+\begin{itemize}
+  \item Lines map to lines 
+  \item Parallel lines remain parallel 
+  \item Ratios are preserved 
+  \item Closed under composition 
+\end{itemize}
+
+\define{Projective transformations} are combinations of affine transformations and projective warps. Properties of projective transformations include the following: 
+\begin{itemize}
+  \item Lines map to lines 
+  \item Parallel lines do not necessarily remain parallel 
+  \item Ratios are not preserved 
+  \item Closed under composition 
+  \item Models change of basis 
+  \item Projective matrix is defined up to a scale (8 DOF)
+\end{itemize}
+
+Affine transformations follow a simple fitting procedure: linear least squares. They are used to approixmate viewpoint changes for roughly panar objects. We can use to initialize fitting for more complex models. Affine transofrmations are linear systems with six unknowns. Each match gives us two linearly independent equations: need at least three to solve for the transformation parameters. \\ 
+
+\begin{definition}[Homography]
+  a plane projective transformation (transformation taking a quad to another arbitrary quad). This can be used to stitch together a panorama. 
+\end{definition}
+
+In \define{robust feature-based alignment}, we extract features, compute \emph{putative} matches, and then enter a loop where we 
+\begin{itemize}
+  \item hypothesize transformation $T$ 
+  \item verify transformation (serach for other matches consistent with $T$)
+\end{itemize}
+When generating \define{putative correspondences}, we need to compare feature descriptors of local patches surrounding interest points. 
+
+\subsection{Template Matching}
+
+How can we use filtering to find a correspondence between some sample patch and an image in which we can presumably find that patch (or a similar one)? \\ 
+
+What is a good measure of similarity between two patches? 
+\begin{itemize}
+  \item Filtering 
+  \item Zero-mean filtering 
+  \item Sum of squares difference 
+  \item Normalized cross correlation
+\end{itemize}
+
+In template matcing with image pyramids we match the template at current scale and then downsample the image. These steps are repeated until the image is very small and we take responses above some threshold. 
+
+\section{Feature Tracking}
+
+Given a feature in one image, how can we find the best match in another image (assuming that the images are consecutive frames in video)? \\ 
+
+Given two subsequent frames, estimate the point translation. To achieve this we can use the Lucas-Kanade Tracker which makes assumptions such as:
+\begin{itemize}
+  \item \bold{brightness constancy}: projection of the same point looks the same in every frame 
+  \item \bold{small motion}: points do not move very far 
+  \item \bold{spatioal coherence}: points move like their neighbors
+\end{itemize}
+The \define{brightness constancy} equation says $I(x,y,t) = I(x+u,y+v,t+1)$ for some displacement $(u,v)$. \\ 
+
+To deal with larger motion we can perform \define{iterative refinement}. 
+\begin{enumerate}
+  \item Initialize $(x',y') = (x,y)$ 
+  \item Compute $(u,v)$ 
+  \item Shift window by $(u,v): x'=x'+u;y'=y'+v$
+  \item Recalculate $I_t$ 
+  \item Repeat steps 2-4 until change is small (use interpolation for subpixel values)
+\end{enumerate}
+
+\begin{definition}[Shi-Tomasi Feature Tracker]
+  Find good features using eigenvalues of the second-moment matrix; good features to track are the ones whose motion can be eastimated reliably. Track from frame to frame with the Lucas-Kanade tracker; this amounts to assuming a translation model for frame-to-frame movement. 
+\end{definition}
+
+In general with KLT tracking$\dots$ Find a good point to track (Harris corners). Use intensity second moment matrix and difference across frames to find displacement. Iterate and use coarse-to-fine search to deal with larger movements. When creating long tracks, check appearance of registered patch against appearance of initial patch to find points that have drifted. Some issues can include the window size: small windows are more sensitive to noies and may miss larger motins, while large windows are more liekly to cross an occlusion boundary. 
+
+% End midterm material
+
+\section{Grouping and Segmentation}
+
+The major processes for segmentation are bottom-up and top-down. In \define{bottom-up}, we group tokens with similar features (pixels belong together because they look similar). In \define{top-down}, group tokens that likely belong to the same object (pixels belong together because they are from the same object). \\ 
+
+The goal of \define{clustering} is to choose three \emph{centers} as the representative identities, and label every pixel according to which of these centers it is nearest to. Best cluster centers are those that minimize SSD between all points and their nearest cluster center. If we knew the \define{cluster centers}, we could allocate points to groups by assigning each to its closest center. If we knew the \define{group memberships}, we could get the centers by computing the mean per group.  
+
+\subsection{K-Means Clustering}
+
+\begin{definition}[K-means Clustering]
+  Randomly initialize the $k$ cluster centers, and iterate between the two steps we just saw. 
+  \begin{enumerate}
+    \item Randomly initialize the cluster centers, $c_1 , \dots , c_k$ 
+    \item Given cluster centers, determine points in each cluster. For each point $p$, find the closest $c_i$. Put $p$ into cluster $i$. 
+    \item Given points in each cluster, solve for $c_i$. Set $c_i$ to be the mean of points in cluster $i$ 
+    \item If $c_i$ have changed, repeat step 2 
+  \end{enumerate}
+  This will always converge to \emph{some} solution. This can be a \emph{local minimum}; does not always find the global minimum of objective function. 
+\end{definition}
+
+\bold{Pros of K-means}: 
+\begin{itemize}
+  \item Simple, fast to compute 
+  \item Convergest to local minium of within-cluster squared error
+\end{itemize}
+
+\bold{Cons/Issues of/with K-means}:
+\begin{itemize}
+  \item Setting K 
+  \item Sensitive to initial centers 
+  \item Sensitive to outliers 
+  \item Detects spherical clusters 
+  \item ASsumes means can be computed 
+\end{itemize}
+
+Depending on what we choose as the \emph{feature space}, we can group pixels in different ways. We can group pixels based on intensity similarity, color similarity, intensity+position similarity, texture similarity, etc. \\ 
+
+\subsection{Mean Shift Algorithm}
+
+The \define{mean shift algorithm} seeks \emph{modes} or local maxima of density in the feature space. The \define{cluster} is all data points in the attraction basin of a mode. The \define{attraction basin} is the region for which all trajectories lead to the same mode. 
+
+\bold{Pros} of mean shift: 
+\begin{itemize}
+  \item Does not assume shape on clusters 
+  \item One parameter choice (bandwidth/window size) 
+  \item Generic technique 
+  \item Finds multiple modes 
+\end{itemize}
+
+\bold{Cons} of mean shift: 
+\begin{itemize}
+  \item Selection of bandwidth 
+  \item Does not scale well with dimension of feature space
+\end{itemize}
+
+\subsection{Superpixel Algorithm}
+
+In \define{superpixel algorithms} the goal is to divide the image into a large number of regions, such that each regions lies within object boundaries. 
+
+\begin{definition}[Meyer's Watershed Segmentation]
+  .  
+  \begin{enumerate}
+    \item Choose local minima as region seeds 
+    \item Add neighbors to priority queue, sorted by value 
+    \item Take top priority pixel from queue 
+      \begin{enumerate}
+        \item If all labeled neighbors have same label, assign that label to pixel 
+        \item Add all non-marked neighbors to queue 
+      \end{enumerate}
+    \item Repeat step 3 until all finished (meaning pixels in queue are on the boundary)
+  \end{enumerate}
+\end{definition}
+
+\begin{remark}
+  You can use Gaussian or median filter to reduce the number of regions. 
+\end{remark}
+
+\bold{Pros} of watershed: 
+\begin{itemize}
+  \item Fast (< 1 second for 512x512 images)
+  \item Preserves boundaries 
+\end{itemize}
+
+\bold{Cons} of watershed: 
+\begin{itemize}
+  \item Only as good as the soft boundaries (which may be slow to compute) 
+  \item Not easy to get variety of regions for multiple segmentations
+\end{itemize}
+
+This is a good algorithm for superpixels and hierarchical segmentation. \\
+
+\begin{definition}[SLIC]
+  . 
+  \begin{enumerate}
+    \item Initialize cluster centers on pixel grid in steps $S$ 
+    \item Move centers to position on 3x3 window with smallest gradient 
+    \item Compare each pixel to cluster center within $2S$ pixel distance and assign to nearest 
+    \item Recompute cluster centers as mean color/position of pixels belonging to each cluster 
+    \item Stop when residual error is small 
+  \end{enumerate}
+\end{definition}
+
+\subsection{Bags of Features/Visual Words}
+
+Origin 1 is texture. \define{Texture} is characterized by the repetition of basic elements or \emph{textons}. For stochastic textures, it is the identity of the textons, not their spatial arrangement, that matters. \\ 
+
+Origin 2 is \define{bag-of-words models} which are the frequencies of words from a dictionary. The steps for bag-of-features are 
+\begin{enumerate}
+  \item Extract local features 
+  \item Learn \emph{visual vocabulary}
+  \item Quantize local features using visual vocabulary 
+  \item Represent images by frequencies or \emph{visual words}
+\end{enumerate}
+
+If the vocabulary size is too small, visual words are not representative of all patches. If it is too large, then quantization artifacts and there is overfitting. The correct size is application-dependent. \\
+
+The \bold{pros of bags of words} are
+\begin{itemize}
+  \item flexible to geometry/deformations/viewpoint 
+  \item compact summary of image content 
+  \item provides vector representation for sets 
+  \item very good results in practice
+\end{itemize}
+The \bold{cons of bags of words} are
+\begin{itemize}
+  \item basic model ignores geometry---must verify afterwards, or encode via features 
+  \item background and foreground mixed when bag covers whole image 
+  \item optimal vocabulary formation remains unclear
+\end{itemize}
+
+With \define{spatial pyramid}, we split the image into quadrants recursively and compute the bag of words for each feature within each of those quadrants. When we perform a level 1 spatial pyramid separation, we have $k$ bins for the full image (from level 0) and 4 sets of $k$ bins (one for each quadrant) which come from the level 1 representation. 
+
+\begin{remark}
+  \define{Bag of visual words} is only about counting the number of local descriptors assigned to each cluster
+\end{remark}
+
+Soft assignment called \define{kernel codebook encoding} involves casting a weighted vote into the most similar clusters (essentially distance-weighted visual words). A more complex option is to perform \bold{VLAD}. 
+
+\begin{definition}[Vector of Locally Aggregated Descriptors (VLAD)]
+  Given a codebook $\{\mu_i , i = 1 \dots N\}$, e.g. learned with K-means, and a set of local descriptors $X = \{x_t , t = 1 \dots T\}$: 
+  \begin{itemize}
+    \item Assign $NN (x_t) = \textrm{arg min}_{\mu_i} ||x_t - \mu_i ||$
+    \item Compute $v_i = \sum_{x_t : NN(x_t) = \mu_i} x_t - \mu_i$
+    \item Concatenate $v_i$'s + $l_2$ normalize
+  \end{itemize}
+\end{definition}
+
+The basic framework for \define{generic category regonition} is
+\begin{itemize}
+  \item Build/train an object model: choose representation then learn or fit parameters
+  \item Generates candidates in new image 
+  \item Score the candidates
+\end{itemize}
+
+With \define{supervised classification}, we are given a collection of \emph{labeled} examples and want to come up with a function that will predict the labels of new examples. The \define{risk} of a classifier is the probability of making some mistake multiplied by the cost of making that cost. We want to choose a classifier so as to minimize this total risk. The optimal classifier will minimize total risk. At the decision boundary, either choice of label yields the same expected loss. There are two general strategies to minimize the expected mislcassification 
+\begin{itemize}
+  \item Use the training data to build representative probability model; separately model class-conditional densities and priors (generative)
+  \item Directly construct a good decision boundary, model the posterior (discriminiative)
+\end{itemize}
+
+For \define{window-based object detection} \emph{training}: obtain training data, define features, and define the classifier. Then when \emph{given a new image}: slide the window and score by classifier. Recall, that a classifier maps from a sample to a label. Different types of classifiers include exemplar-based, linear classifier, non-linear classifier, and generative classifiers. 
+
+\begin{remark}
+  \bold{Training labels} dictate that two examples are the same or different, in some sense. \bold{Features and distance measures} define visual similarity. \bold{Goal of training} is to learn feature weights or distance measures so that visual similarity predicts label similarity. \emph{We want the simplest function that is confidently correct}. 
+\end{remark}
+
+Using $K$-NN ($K$ Nearest Neighbors) is simple and thus a good classifier to try first. There is no training time (unless you want to learn a distance function). 
+
+\begin{definition}[Boosting]
+  Initially, weight each training example equally. In each boosting round: 
+  \begin{itemize}
+    \item Find the weak learner that acheives the lowest \emph{weighted} training error 
+    \item Raise weights of training examples misclassified by current weak learner
+  \end{itemize}
+  Compute final classifier as linear combination of all weak learners. Boosting combines \emph{weak learners} into a more accurate \emph{ensemble classifier}. 
+\end{definition}
+
+\begin{definition}[Dalal-Triggs Pedestrian Detector]
+  Runs as follows: 
+  \begin{enumerate}
+    \item Extract fixed-size window at each position and scale 
+    \item Compute HOG (histogram of gradient) features within each window 
+    \item Score the window with a linear SVM classifier 
+    \item Perform non-maxima suppression to remove overlapping detections with lower scores
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}[Part-based Models]
+  Define object by collection of parts modeled by appearance and spacial configuration. 
+\end{definition}
+
+\section{Deep Learning for Computer Vision}
+
+\define{Binary perceptrons} take multiple binary inputs and use thresholds and weights (parameters) to output a threshold weighted linear combination. Layering these \define{neurons} (perceptrons) allows for more meaningful, complex models.  
+
+\begin{definition}[Sigmoid Neurons]
+  neurons that offer stability by ensuring that a small perturbation in the input leads to a small change in the ouput. This function takes continuous inputs and outputs continuous values instead of a step function with hard cutoffs. The thresholds are no longer rigid, but instead soft. $$\sigma(z) = \frac{1}{1_e^{-x}}$$
+\end{definition}
+
+A \define{cost function} encodes the difference between generated/predicted output and expected output. We attempt to find the combination of parameters/weights that minimizes the cost function. Gradient descent is this process of minimizing the cost function and follows this general form $$\delta C \approx \frac{\partial C}{\partial v_1} \delta v_1 + \frac{\partial C}{\partial v_2} v_2$$ Realistically, the cost function and optimization must be generalized to many variables. Note that a small change in a variable will then have a small change in cost. 
+
+\subsection{Neural Nets for Vision}
+
+To build an object recognition system, we will use data to optimize features for the given task. We want to use a parameterized function such that 
+\begin{itemize}
+  \item features are computed efficiently 
+  \item features can be trained efficiently
+\end{itemize}
+The goal is an \define{end-to-end recognition system} in which everything becomes adaptive and there is no distinction between feature extraction and classification. A big non-linear system will be trained from raw pixels to labels.\\ 
+
+Function composition is at the core of deep learning methods. Each \emph{simple function} will have parameters that are subject to training. Each black box (layer) can have trainable parameters; their composition makes a highly non-linear system. \\ 
+
+The \bold{key ideas} of \define{Neural Networks} are$\dots$ 
+\begin{itemize}
+  \item Learn features from data 
+  \item Use differentiable functions that produce features efficiently 
+  \item End-to-end learning: no distinction between feature extractor and classifier 
+  \item \emph{Deep} architectures: cascade of simpler non-linear modules. 
+\end{itemize}
+
+\subsection{Supervised Deep Learning}
+
+The goal is to predict the target label of unseen inputs. \\ 
+
+Different types of classification include: 
+\begin{itemize}
+  \item Classification: image $\rightarrow$ label 
+  \item Regressio: image $\rightarrow$ image 
+  \item Structured prediction: image $\rightarrow$ some structure
+\end{itemize}
+
+\define{Forward propagation} is the process of computing the output of the network given its input. The non-linearity $u=max(0,v)$ is called \define{ReLU} activation function. Each output hidden unit takes as input all the units at the previous layer: each such layer is called \define{fully connected}. 
+
+\begin{remark}
+  The mapping between layers cannot be linear because composition of linear functions is a linear function. In this case, the neural network would reduce to (1 layer) logisistic regression. 
+\end{remark}
+
+When input has hierarchical structure, the use of a hierarchical architecture is potentiall more efficient because intermediate computations can be re-used. Deep learning architectures are efficient also because they use \emph{distributed representations} which are shared across classes. \\ 
+
+Learning consists of minimizing the loss (plus some regularization term) with respect to parameters over the whole training set. $$\theta^{*} = arg min_{\theta} \sum^{P}_{n=1}L(x^{n}, y^n ; \theta)$$ \define{Backpropagation} is the procedure to compute graidents of the loss with respect to parameters in a multi-layer neural network. Let's say we want to decrease the loss by adjusting $W^{1}_{i,j}$. We could consider a very small $\epsilon = 1 \times 10^{-6}$ and compute, then update $W^{1}_{i,j}$, and check the effect on the cost function. \\ 
+
+The \define{stochastic gradient descent} optimization function works as follows $$\theta \leftarrow \theta - \eta \frac{\partial L}{\partial \theta}, \eta \in (0,1)$$
+
+\subsection{Loss Functions}
+
+\begin{itemize}
+  \item \define{Regression}: If our target values are continuous, a common approach is to use mean squared error (MSE)
+  \item \define{Two-class Classification}: Binary cross-entropy 
+  \item \define{Multi-class Classification}: Categorical cross-entropy
+\end{itemize}
+
+\subsection{Convolutional Neural Networks}
+
+In a \define{convolutional layer} the same parameters are shared across different locations (assuming the input is stationary), and then we perform convolutions with learned kernels. We will learn the weights for multiple filters throughout this process. $$h_{j}^{n} = max(0, \sum_{k=1}{K}h_{k}^{n-1} \times w_{kj}^{n}$$ This represents the output feature map at position $(k,j)$ using the input feature map and the learned kernel $w$ as inputs. \\ 
+
+\begin{remark}
+  If the input to a convolutional layer has the size $M \times D \times D$, then the output has size $N \times (D-K+1) \times (D-K+1)$. The kernels have $M \times N \times K \times K$ coefficients (which have to be learned). The cose is $M \times K \times K \times N \times (D-K+1) \times (D-K+1)$
+\end{remark}
+
+\begin{remark}
+  Usually, there are mo output feature maps than input feature maps. Convolutional layers can increase the number of hidden untits by big factors (and are expensive to compute). The size of the filters has to match the size/scale of the patterns we want to detect (task dependent)
+\end{remark}
+
+A standard neural net applied to images scales quadratically with the size of the input and does not leverage stationarity. The solution is to connect each hidden unit to a small patch of the input and share the weight across space: this is called convolutional layer. A network with convolutional layers is called \define{convolutional network}. \\ 
+
+By \define{pooling} (e.g. taking max) filter responses at different locations we, gain robustness to the exact spatial location of features. This is done in a \define{pooling layer}. \\ 
+
+\begin{remark}
+  Convolutional filters are trained in a supervised manner by back-propagating classification error.
+\end{remark}
+
+In \define{stochastic gradient descent}, only a single data-point is evaluated at a time. The training data is randomly ordered such that index $i(t)$ is given at descent iteration $t$. The goal of \define{dropout} is to increase sparsity. By randomly removing activations, neurons can then more quickly build up strong relationships with certain inputs. This results in increased neuron specialization and simulates averaging over a variety of models. 
+
+\end{document}
