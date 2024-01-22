@@ -1,0 +1,103 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+% import note styles
+\usepackage{../styles}
+
+% Heading information
+\title{FE535: Introduction to Financial Risk Management Notes}
+\author{Steven DeFalco}
+\date{Spring 2024}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+\section{Introduction to Financial Risk Management}
+
+\define{Risk}, in the most basic sense, is the possibility that bad things might happen. Risk can be calculated for a process that has some probability distribution of events. If there is a process for which no one knows a probability distribution, it is termed an \define{uncertainty}. \\ 
+
+\subsection{Market Risk}
+
+Market prices and rates continually change, driving the value of secuirites and other assets up and donw. These movements create the potential for loss, as price volatility is te engine of market risk. \define{General market risk} is the non-diversifiable risk inherently present in market and not in an asset class or a particular asset. \define{Specific market risk} is the risk that an individual asset will fall in value more than the general asset class. This type of risk is referred to an \define{idiosyncratic risk} or \define{unsystematic risk}. For risk managers, mismatching between price movements creates that is known as \define{basis risk}. 
+
+\subsection{Credit Risk}
+
+\define{Credit risk} arises from the failure of one party to fulfill its financial obligations to antother party. Risk managers use sophisticated credit portfolio models to uncover potential risk factors. 
+
+\subsection{Liquidity Risk}
+
+\define{Liquidity risk} is used to describe two quite separate kinds of risk: 
+\begin{itemize}
+  \item \define{Funding Liquidity Risk} is limited access to cash to meet obligations or investment 
+  \item \define{Market Liquidity Risk} (Trading Liquidity Risk) is the risk of a loss in asset value when markets temporarily seize up
+\end{itemize}
+
+\subsection{Operational Risk}
+
+\define{Operational Risk} can be defined as the risk of loss resulting from inadequate or failed internal processes, people, and systems or from external events. Operational risk includes anti-money laundering risk, cyber risk, corporate governance scandals, and model risk. 
+
+\subsection{Other Risks}
+
+\define{Business risk} includes the usual business concerns such as consumer demand, pricing decisions, managing product innovation. \define{Strategic risk} involves making large, long-term decisions about the firm's direction often accompanied by major investments of capital, human resources, and management reputation. \define{Reputation risk} is the danger that a firm will suffer a suddenf all in its market standing/brand with economic consequences. \\ 
+
+Viewing the financial-economic system as a vast system of interconnected components, with each component haveing its own sources of risks and in the presence of nonlinear interactions, \define{systemic risk} is defined as the probability that a trigger event will cause the demise of the entire system rendering it un-investible with total liquidity freeze. 
+
+\subsection{The Risk Management Process}
+
+The two key questions in risk management are:
+\begin{itemize}
+  \item is the risk commensurate with the reward?
+  \item could we lower the risk and still get the reward?
+\end{itemize}
+The \define{risk management process} is the process in which financial risks are \bold{identified}, \bold{measured}, \bold{assessed}, and \bold{managed} for the purpose of creating/enhancing economic value. 
+
+\section{Modern Portfolio Thoery}
+
+Risks that can be measured are easier to manage. Investors bear risk to earn reward. The balance between risk and reward requires risk management. It is common to think about return in terms of risk-adjusted terms. A common measure is the \define{Sharpe ratio (SR)} $$SR_i = \frac{\mu_i - R_F}{\sigma_i}$$ where $\mu_i$ and $\sigma_i$ denote asset's $i$ mean return and volatility, respectively where $R_F$ is the risk-free rate. \\ 
+
+\begin{remark}
+  It is common to report the SR in annualized terms, such that the SR is scaled by $\sqrt{252}$ which denotes the average number of trading days in a year. 
+\end{remark}
+
+By setting preference/objective, one can design by construction an optimal portfolio. Optimal implies taking the best outcome given certain constraints. For an \define{optimal portfolio}, you would like to either 
+\begin{itemize}
+  \item maximize your return for a given level of risk, or 
+  \item minimize your risk for a given return
+\end{itemize}
+Theoretically, the optimal portfolio weights are given by a solution to the optimization problem $$min_w \Sigma^{2}_{p}w' \Sigma w$$ subject to $$w'1 = 1$$ $$w' \mu = m$$ where \begin{itemize}
+  \item $w$ denotes a $d \times 1$ vector of portfolio weights 
+  \item $\Sigma$ is the covariance matrix of the asset returns 
+  \item $\mu$ is the vector of mean returns, and $m$ denotes the mean target
+\end{itemize}
+
+The solution to the optimal portfolio is given by $$w = w_0 + \frac{1}{A}B \mu$$ where $$B = \Sigma^{-1}[I -1w'_0]$$ and $$w_0 = \frac{\Sigma^{-1}1}{1'\Sigma^{-1}1}$$ with \begin{itemize}
+  \item $w_0$ is the global minimum variance (GMV) portfolio, $w'_0 1 = 1$, where 1 is a $d \times 1$ column vector and $I$ is an identity matrix 
+  \item $A$ is the risk aversion level of the investor, which can be written as a function of the target mean $m$
+\end{itemize}
+
+\subsection{Mean-Variance Efficient Frontier}
+
+If the investor knows $\mu$ and $\Sigma$, then for each $m$, there is a unique portfolio $w$ that returns the minimum variance for the mean target, $m$. The set of all optimal portfolios is known as the Mean-Variance Efficient Frontier (MVEF). To construct the MVEF, one can do the following steps: 
+\begin{itemize}
+  \item estimate $\mu$ and $\Sigma$ using historical returns 
+  \item for a given $A = 1, \dots, 100$, compute $w(A)$ 
+  \item for each $w(A)$, find the portfolio mean and variance 
+  \item plot $\mu_p(A)$ against $\sigma_p(A)$
+\end{itemize}
+
+Under certain conditions, the solution can be approximated as \define{Global Minimum Variance (GMV)} portfolio (weight is reciprocal to risk) or the \define{Sharpe-ratio Portfolio} (where weight is proportional to SR). \\ 
+
+\section{Capital Asset Pricing Model (CAPM)}
+
+
+
+
+\end{document}
