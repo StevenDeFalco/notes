@@ -70,7 +70,7 @@ If the deleted record was the only record in the file with its particular search
     \end{itemize}
 \end{itemize}
 
-\subsubsection{Insetion}
+\subsubsection{Insertion}
 
 In single-level index insertion: 
 \begin{itemize}
@@ -81,5 +81,140 @@ In single-level index insertion:
 In multilevel insertion, algorithms are simple extensiosn of the single-level algorithms. 
 
 Indices offer substantial benefits when searching for records, but updating indices imposes overhead on database modification---when a file is modified, every index on the file must be updated. Sequential scan using primary index is efficient, but a sequential scan using a second index is expensive. 
+
+\section{B+ Tree Index Files}
+
+B$^{+}$-tree indices are an alternative to indexed-sequential files. Some disadvantages of indexed-sequential files are that performance degrades as the file grows (since many overflow blocks get created) and that periodic reorganization of the entire file is required. Advantages of B$^{+}$-tree index files are: 
+\begin{itemize}
+  \item automatically reorganizes itself with small, local changes in the face of insertions and deletions 
+  \item Reorganization of entire file is not required to maintain performance
+\end{itemize}
+One minor disadvantage of B$^{+}$-trees is the extra insertion and deletion overhead (space overhead); however, the advantages outweigh the disadvantages and thus this structure is used extensively. \\ 
+
+A B$^{+}$-tree is a rooted tree satisfying the following properties: 
+\begin{itemize}
+  \item All paths from root to leaf are of the same length 
+  \item Each node that is not a root or a leaf has between $\ceil{n/2}$ and $n$ children 
+  \item A leaf node has between $\ceil{(n-1)/2}$ and $n-1$ values 
+  \item Special cases\dots 
+    \begin{itemize}
+      \item If the root is not a leaf, it has at least 2 children. 
+      \item If the root is a leaf (that is, there are no other nodes in the tree), it can have between $0$ and $(n-1)$ values. 
+    \end{itemize}
+\end{itemize}
+
+\subsection{Types of nodes in B$^{+}$-trees}
+
+The following are properties of a \bold{leaf node}: 
+\begin{itemize}
+  \item For $i=1,2, \dots , n-1$, pointer $P_i$ either points to a file record with search-key value $K_i$, or to a bucket of pointers to file records, each record having search-key value $K_i$. Only need bucket structure if search-key does not form a primary key. 
+  \item If $L_i , L_j$ are leaf nodes and $i < j$, $L_j$'s search-key values are less than $L_j$'s search-key values 
+  \item $P_n$ points to next leaf node in search-key order 
+\end{itemize}
+
+\bold{Nonleaf nodes} form a multi-level sparse index on the leaf nodes. For a non-leaf node with $m$ pointers: 
+\begin{itemize}
+  \item All the search-keys in the subtree to which $P_1$ points are less than $K_{1}$ 
+  \item For $2 \leq i \leq n - 1$, all the search-keys in the substree to which $P_i$ points have values greater than or equal to $K_{i-1}$ and less than $K_i$ 
+  \item All the search-keys in the subtree to which $P_n$ points have values greater than or equal to $K_{n-1}$
+\end{itemize}
+
+Since the inter-node connections are done by pointers, \emph{logically} close blocks need not be \emph{physically} close. The non-leaf levels of the B$^{+}$-tree form a hierarchy of sparse indices. The B$^{+}$-tree contains a relatively small number of levels; level below root has at least $2 \times \ceil{n/2}$ values. If there are $K$ search-key values in the file, the tree height is no more than $\ceil{\textrm{log}_{\ceil{n/2}}(K)}$. Insertions and deletions to the main file can be handled efficiently, as the index can be restructured in logarithmic time. 
+
+\subsection{Queries on a B$^{+}$-tree}
+
+Find all records of a search-key value of $k$. 
+\begin{enumerate}
+  \item $N=\textrm{root}$ 
+  \item Repeat 
+    \begin{enumerate}
+      \item Examine $N$ for the smallest search-key value $>k$. 
+      \item If such a value exists, assume it is $K_i$. THen set $N=P_i$ 
+      \item Otherwise $k \geq K_{n-1}$. Set $N=P_n$
+    \end{enumerate}
+    Until $N$ is a leaf node 
+  \item If for some $i$, key $K_i = k$ follow pointer $P_i$ to the desired record or bucket. 
+  \item Else no record with search-key value $k$ exists
+\end{enumerate}
+
+\subsection{Updates on B$^{+}$-trees}
+
+\subsubsection{Insertion}
+
+To perform insertion on a B$^{+}$-tree\dots 
+\begin{enumerate}
+  \item Find the leaf node in which the search-key value would appear 
+  \item If the search-key value is already present in the leaf node 
+    \begin{enumerate}
+      \item Add record to the file 
+      \item If necessary add a pointer to the bucket 
+    \end{enumerate}
+  \item If the search-key value is not present, then  
+    \begin{enumerate}
+      \item Add the record to the main file (and create a bucket if necessary) 
+      \item If there is room in the leaf node, insert (key-value, pointer) pair in the leaf node 
+      \item Otherwise, split the node (along with new (key-value, pointer) entry) 
+    \end{enumerate}
+\end{enumerate}
+To split a leaf node\dots 
+\begin{itemize}
+  \item Take the $n$ (search-key value, pointer) pairs (including the one being inserted) in sorted order. Place the first $\ceil{n/2}$ in the original node, and the rest in a new node. 
+  \item let the new node by $p$, and let $k$ be the least key value in $p$. Insert $(k,p)$ in the parent of the node being split. 
+  \item If the parent is full, split it and \bold{propagate} the split further up. 
+\end{itemize}
+Splitting of nodes proceeds upwards until a node that is not full is found. In the wrost case, the root node may be split increasing the height of the tree by 1. \\ 
+
+To split a non-leaf node: when inserting $(k,p)$ into an already full internal node $N$ 
+\begin{itemize}
+  \item Copy $N$ to an in-memory area $M$ with space for $n+1$ pointers and $n$ keys 
+  \item Insert $(k,p)$ into $M$ 
+  \item Copy from $M$ back into node $N$ 
+  \item Copy from $M$ into newly allocated node $N'$ 
+  \item Insert $(K_{\ceil{n/2}}, N')$ into parent $N$
+\end{itemize}
+
+\subsubsection{Deletion}
+
+To perform a deletion in a B$^{+}$-tree\dots 
+\begin{itemize}
+  \item Find the record to be deleted, and remove it from the main file and from the bucket (if present)
+  \item Remove (search-key value, pointer) from the leaf node if there is no bucket or if the bucket has become empty 
+  \item If the node has too few entries due to the removal, and the entries in the node and a sibling fit into a single node, then \emph{merge siblings}: 
+    \begin{itemize}
+      \item Insert all the search-key values in the two nodes into a single node (the one on the left), and delete the other node 
+      \item Delete the pair $(K_{i-1}, P_{i})$, where $P_i$ is the pointer to the deleted node, from its parent, recursively using the above procedure. 
+    \end{itemize}
+  \item Otherwise, if the node has too few entries due to the removal, but the entries in the node and a sibling do not fit into a single node, then \emph{redistribute pointers}: 
+    \begin{itemize}
+      \item Redistribute the pointers between the node and a sibling such that both have more than the minimum number of entries 
+      \item Update the corresponding search-key value in the parent of the node
+    \end{itemize}
+  \item The node deletions may cascade upwards until a node which has $\ceil{n/2|}$ or more pointers is found 
+  \item If the root node has only one pointer after deletion, it is deleted and the sole child becomes the root. 
+\end{itemize}
+
+\subsubsection{Indexing}
+
+Variable lenght strings are used as the keys: use space utilization as criterion for splitting, not number of pointers. \define{Prefix compression} is that key values at internal nodes can be prefixes of the full key. For this, must keep enough chraracters to distinguish entries in the subtrees separated by the key value. Keys in the leaf nodes can be compressed by sharing common prefixes. \\ 
+
+\subsubsection{B-Tree Index Files}
+
+B-Tree index files are similar to B$^{+}$-trees, but B-tree allows search-key values to appear only once; eliminates redundant storage of search keys. Search keys in nonleaf nodes appear nowhere else in the B-tree; an additional pointer field for each search key in a nonleaf node must be included. Some advantages of B-tree indices are: 
+\begin{itemize}
+  \item May use less tree nodes than a corresponding B$^{+}$-tree
+  \item Sometimes possible to find search-key value before reaching leaf node 
+\end{itemize}
+Some disadvantages of B-tree indices are: 
+\begin{itemize}
+  \item Only small fraction of all search-key values are found correctly
+  \item Non-leaf nodes are larger, so fan-out is reduced. Thus, B-trees typically have greater depth than corresponding B$^{+}$-tree 
+  \item Insertion and deletion are more complicated than in B$^{+}$-trees 
+  \item Implementation is harder than B$^{+}$-trees 
+\end{itemize}
+Typically, the advantages of B-Trees do not out weigh the disadvantages. 
+
+\subsection{Multiple-Key Access}
+
+Multiple-key access uses multiple indices for certain types of queries. 
 
 \end{document}
