@@ -1,0 +1,112 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+% import note styles
+\usepackage{../styles}
+
+% Heading information
+\title{FE530-WS: Introduction to Financial Engineering Notes}
+\author{Steven DeFalco}
+\date{Spring 2024}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+\section{Lecture 1}
+
+Financial engineering is a multidisciplinary field involving financial theory, methods of engineering, tools of mathematics, and the practice of programming. Serves a key role in the customer-driven derivatives business: modeling, programming, and risk managing financial products. Traditionally, financial engineering refers to the use of derivatives to manage risk and create customized financial instruments. 
+
+\subsection{Derivatives}
+
+Forwards, swaps, and options are the main building blocks of financial engineering. Such instruments can be used separatedly to hedge specific risks or be combined to form complex structures that meet client needs. Derivatives allow investors and institutions to break apart (segment) risks. Conversely, derivatives can be used to manage risks on a joint basis: having a top down approach where risks are managed altogether. \\
+
+A \define{forward} (long) means that you are agreeing to buy a stock at some future time for some decided price: there is an \bold{obligation} to make thus purchase. An \define{option} means that you have the right to purchase at some decided price at some specific time in the future. A \define{put option} is the right to sell at a given price at some point in the future. \\ 
+
+The financial engineers responsible for devising complex instruments do so to satisfy the risk-retrun appetites of their clients. The risk may come in the form of an unlikely but potentiall very severe future loss. The embedded risk is not fully understood by firms entering into complex derivative transactions, or it may be the case that these risks are not fully communicated to senior managers and other stakeholders. Factors such as adverse macroeconomic activity, increased competition, and evolving technologies can cause major losses for financial institutions. 
+
+
+\section{Lecture 2}
+
+A risk-free asset refers to a bank deposit or a bond issued by a government. A risky security will typically be some stock (or foreign exchange, commodity, or BTC). The price fo the risky asset at time $t$ is given by $S(t)$, 
+\begin{itemize}
+  \item $S(0)$ is known---check the last closing market price 
+  \item $S(1)$ who knows what tomorrow brings?
+\end{itemize}
+In this regard, the \emph{rate of return} on the risky asset is given by $$R_S = \frac{S(1) - S(0)}{S_0}$$ Later on we will work with continuous models, and log-returns $$R_S \approx \textrm{ln}(\frac{S(1)}{S(0)}) = ln(1 + R_S )$$ 
+
+\subsection{Risk-Free Asset}
+
+The risk-free position can be described as the amount held in a bank account. As an alternative to keeping money in a bank, investors may choose to invest in bonds, especially Treasury bonds; all bonds are subjected to interest rate risk. Regardless, we will make the assumption of risk-free asset that yields a fixed return over time. The price of the risk-free asset is given by $B(t)$ at time $t$, and its return is constant which is given by $$R_F = \frac{B(1) - B(0)}{B(0)}$$ Clearly, since $B(0)$ is fixed and the value of the payment at time $B(1)$ is known with certainty, then the risk-free is constant $R_F$.  
+\begin{itemize}
+  \item The future stock price $S(t)$ for $t>0$ is a random variable with at least two different values 
+  \item The future price $B(t)$ for $T \geq 0$ of the risk-free security is a known number. 
+\end{itemize}
+
+\begin{remark}
+  All stock and bond prices are strictly positive.
+\end{remark}
+
+Consider a representative investor who holds $x$ and $y$ shares of the risky and risk-free assets respectively. The investor's wealth at time $t$ is given by $$V(t) = xS(t) + yB(t)$$ We will consider the change in wealth over discrete time period using $$\Delta V(t) = V(t + \Delta t) - V(t)$$ Hence, the return on the portfolio is given by $$R_V = w_S R_S + w_B R_F$$ with $w_S$ and $w_B$ denote the weight of the total intial wealth allocated to risk and risk-free assets, respectively. \\ 
+
+The return on the portfolio is a linear combination of the return on each asset. The future value of the portfolio can be written as $R_V$ $$V(1) = V(0)(1+R_V)$$ This indicates to understand the behavior of the portfolio over the next period. 
+\begin{itemize}
+  \item \bold{Divisibility}---An investor may hold any number $x$ and $y$ of risky and risk-free shares whether integer or fractional, negative, positive or zero, such that $x,y \in R$; the same applies for weights such that $w_S , w_B \in R$ 
+  \item \bold{Liquidity} denotes no bounds on $x$ and $y$, and, hence, the weights $w_S$ and $w_B$. One can buy and sell assets in arbitrary quantities. Lack of liquidity implis less market participants are willing to buy/sell.  
+  \item \bold{Short selling}---if the position is positive (negative), then it is a long (short) position. Longing (shorting) the risk-fre asset is equivalent to lending (borrowing) money. 
+\end{itemize}
+Divisibility assumes that investors can purchase fractional shares. \\ 
+
+The price $S(t)$ of a share of stock is a random variable taking only finitely many values for $t > 0$. However, in the real world the number of possible different prices is finite. 
+
+\subsection{No-Arbitrage Principle}
+
+\begin{definition}[Arbitrage]
+  Theoretical definition denotes the situation in which one buys and sells an asset simulatneously to create a profit with 100\% probability. Practically, it denotes exploiting mispricing to create profit. 
+\end{definition}
+
+In an efficient market, we assume that there is no-arbitrage since market participants already arbitrage away any mis-pricing. The \define{no-arbitrage principle} indicates that there is no admissible portfolio with initial value $V(0) = 0$ suvh that $V(1) > 0$ with non-zero probability. 
+
+\subsection{One-Step Binomial Model}
+
+In general, the choice of stock and bond prices in a binomial model is constrained by the no-arbitrage principle. Suppose that the possible up and down stock prices at time 1 are $$S(1) = S^{u} \textrm{with probability} \pi$$ $$S(1) = S^{d} \textrm{with probability} 1 - \pi$$ where $S^d < S^u$ and $\pi \in (0,1)$ In the binomial tree price models, it followx that if $S(0) = B(0)$, then it must hold that $$S^d < A(1) < S^u$$ The above property denotes that if the prices of the two assets are equal today, then the risk-free rate should be somewhere between two levels $$d < R_F < u$$ Intuitively, there should be an upside for entering the risky asset. At the same time, there is a positive probability that the stock would underperform. \\ 
+
+Suppose that $R_F < d < u$, then the risk free asset is dominated by the risk asset. The net from the transaction leads to an arbitrage profit of $d- R_f > 0$ violating the no-arbitrage principle. 
+\begin{definition}[Risk-Neutral Probability]
+  Risk-neutral valuation denotes that there is a probability $\pi \in (0,1)$ for which the expected return on the risk asset equals the risk-free rate $$R_F = u \pi + d (1- \pi) \rightarrow \pi = \frac{R_F - d}{u -d}$$
+\end{definition}
+
+\subsection{Risk and Return}
+
+It is typical to value choices in terms of risk and reward. \define{Reward} denotes expected return. \define{Risk} denotes the possibility of not getting the return or simply something bad happens. \define{Risk aversion} is a preference or a sure outcome over a gamble with higher or equal expected value. Investing in risky assets induces risk into the portfolio. Hence, one expects a risk-premium to invest in the risky asset versus the risk-free asset. Given a choice between two portfolios with the same expected return, a risk-averse investor would prefer the one with a lower risk. If the risk levels were the same, the investor wouldopt for higher return. 
+
+\subsection{Forward Contracts}
+
+A \define{forward contract} is contractual agreement between two parties to buy/sell an asset in the future for a given price $F$ 
+\begin{itemize}
+  \item the seller is shorting (delivering) the asset 
+  \item The buyer is longing (acquiring) the asset
+\end{itemize}
+
+The existence of forward contract on an asset implies that one can acquire the asset in the forward market in the future. At the same time, one can acquire the asset in the future by purchasing it today. Th two transactions are economically equivalent in the future; hence, their prices should reflect that. \\ 
+
+To acquire the asset in forward market next period, it will cost us $F$ at $t=1$; however, we can invest in $F/(1 + R_F)$ in the risk-free asset at $t=0$ to accumulate $F$ capital by $F=1$. On the other hand, we can purchase the asset on the spot at $t=0$ for $S(0)$. Since both transactions are economically equivalent at $t=1$, their cost should be equal too, such that $$\frac{F}{1 + R_F} = S(0) \rightarrow F = S(0)(1 + R_F)$$
+
+\subsection{Call and Put Options}
+
+Unliek forward contracts, options give the right (not obligation) to purchase the asset in the future for a fixed price; such price is known as \define{strike/exercise} and denoted by $K$. Call (put) correspond to the right of purchasing (selling) the asset. 
+
+\begin{remark}
+  A major distinction between forward and options is the fact taht trading options requires paying a premium at $t=0$ to participate. The premium should reflect the \emph{fair} value of this options, which is $C(0)$
+\end{remark}
+
+We can price any derivative as long as we know its future cash flows and the risk-neutral measure of the risky-asset. 
+
+\end{document}
