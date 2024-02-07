@@ -20,7 +20,7 @@
 \newpage
 
 
-\section{Indexing and Hashing}
+\section{Indexing}
 
 Indexing methods are used to speed up access to desired data. A \define{search key} is an attribute used to look up records in a file. An \define{index file} consists of records (called \bold{index entries}) of the form. Index files are typically much smaller than the original file. There are two basic kinds of indices:
 \begin{itemize}
@@ -213,8 +213,68 @@ Some disadvantages of B-tree indices are:
 \end{itemize}
 Typically, the advantages of B-Trees do not out weigh the disadvantages. 
 
-\subsection{Multiple-Key Access}
+\define{Covering indices} refers to adding extra attributes to an index so (some) queries can avoid fetching the actual records. If a record moves, all secondary indices that store record pointers have to be updated. Node splits in B$^{+}$-tree file organizations become very expensive; the solution is to use primary-index search keys instead of record pointers in secondary index. 
 
-Multiple-key access uses multiple indices for certain types of queries. 
+\section{Hashing}
+
+A \define{bucket} is a unit of storage containing one or more records (a bucket is typically a disk block). In a \define{hash file organization} we obtain a bucket of a record directly from its search-key value using a \bold{hash function}. Hash function $h$ is a function from the set of all search-key values $K$ to the set of all bucket addresses $B$. Hash function is used to locate records for access, insertion as well as deletion. 
+
+\begin{remark}
+  Records with different search-key values may be mapped to the same bucket; thus entire bucket has to be searched sequentially to locate a record.
+\end{remark}
+
+An ideal hash function is \bold{uniform}, i.e., each bucket is assigned the same number of search-key values from the set of all possible values. Ideal hash function is \bold{random}, so each bucket will have the same number of records assigned to it irrespective of the actual distribution of search-key values in the file. \\ 
+
+Bucket overflow can occur because of\dots 
+\begin{itemize}
+  \item Insufficient buckets 
+  \item Skew in distribution of records 
+\end{itemize}
+Although the probability of bucket overflow can be reduced, it cannot be eliminated; it is handled by using \emph{overflow buckets}. In \define{closed hashing} (overflow chaining), the overflow buckets of a given bucket are chained together in a linked list (when bucket is full, just chain/link to a new bucket). An alternative, called \define{closed hashing}, which does not use overflow buckets, is not suitable for database applications.  
+
+\subsection{Bitmap Indices}
+
+Bitmap indices are a special type of index designed for efficient querying on multiple keys. Records in a relation are assumed to be numbered sequentially from say, 0. Given a number $n$ it must be easy to retrieve record $n$; particularly easy if records are of fixed size. This is applicable on attributes that take on a relatively small number of distinct values. A bitmap is simply an array of bits. \\
+
+In its simplest form, a bitmap index on an attribute has a bitmap for each value of th attribute. The bitmap has as many bits as records. In a bitmap for value $v$, the bit for a record is 1 if the record has the value $v$ for the attribute, and is 0 otherwise.  
+
+\begin{remark}
+  To find the number (and location) of records that have two specific attributes, then we \bold{and} together the two bitmaps for each attribute and the resulting bit map will have ones in the locations of every record that shares both those attributes. E.g. all zeroes in the resulting bitmap would indicate that there are no records which have both of those attributes. 
+\end{remark}
+
+\begin{remark}
+  Bitmaps work very well when the \bold{cardinality is low} (i.e. each attribute only has a few possible values that it can take on). If attributes include gender, country, or similar values that don't have many unique values; then a bitmap is an appropriate option. 
+\end{remark}
+
+\section{Query Processing}
+
+The basic stpes in query processing are \bold{parsing and translation}, \bold{optimization}, and \bold{evaluation}. 
+
+\subsection{Optimization}
+
+A relational algebra expression may have many equivalent expressions. Each relational algebra operation can be evaluated using one of several different algorithms. Correspondingly, a relational-algebra expression can be evaluated in many ways. Annotates expression specifying detailed evaluation strategy is called an \define{evaluation-plan}. \\ 
+
+Amongst all equivlaent evaluation plans, chosoe the one with the lowest cost. Cost is estimated using statistical information about the database. 
+
+\subsubsection{Measures of Cost}
+
+Cost is generally measured as total elapsed time for answering query. Typically disk access is the predominant cost, and is also relatively easy to estimate. This is measured by taking into account 
+\begin{itemize}
+  \item Number of seeks times average seek-cost
+  \item Number of blocks read times average block read cost 
+  \item Number of blocks written times average block write cost
+\end{itemize}
+
+\begin{remark}
+  The cost to write a block is greater than the cost to read a block. Data is read back after being written to ensure that the write was successful. 
+\end{remark}
+
+Consider that $t_T$ is the time to transfer one block and $t_S$ is the time for one seek. Thus, the cost for one $b$ block transfers plus $S$ seeks is $b \times t_T + S \times t_S$. 
+
+\subsection{Selection Operation}
+
+\define{File scan} are search algorithms that locate and retrieve records that fulfill a selection condition. Algorithm \bold{A1} (linear search) will scan each file block and test all records to see whether they satisfy the selection condition. The cost estimate for linear search is $b_r$ block transfers + 1 seek ($b_r$ denotes the number of blocks contianing records from relation $r$). If selection is on a key attribute, can stop on finding record. Linear search can be applied regadless of selection condition, ordering of records in the file, or availability of indices. \\ 
+
+\bold{A2} (binary search) is applicable if an equality comparison on the attribute on which file is ordered. Assume that the blocks of a relation are stored contiguously. The cost estimate (number of blocks to be scanned) is the $\ceil{\textrm{log}_2 (b_r)} \times (t_T + t_S)$. 
 
 \end{document}
