@@ -109,4 +109,30 @@ Unliek forward contracts, options give the right (not obligation) to purchase th
 
 We can price any derivative as long as we know its future cash flows and the risk-neutral measure of the risky-asset. 
 
+\section{Risk-Free Assets}
+
+There are two main questions regarding how money changes its value in time\dots
+\begin{itemize}
+  \item \bold{Prospective}: What is the present value of an amount fo be paid or received at a certain time in the future? 
+  \item \bold{Retrospective}: What is the value of an amount invested or borrowed in the past?
+\end{itemize}
+
+The return on the investment commencing at time $s$ and ending at time $t$ is denoted by $R_F (s,t)$ $$R_F (s,t) = \frac{V(t) - V(s)}{V(s)}$$ 
+\begin{remark}
+  As a general rule, interest rates will always refer to a period of one year
+\end{remark}
+
+Simple interst is not a realistic description of the value of money in the longer term. In the majority of cases, the interst already earned can be reinvested to attract even more interest, produxing a higher return than that implied in the previous discussion. \\ 
+
+If $m$ interest payments are made per annum, the time between two consecutive payments measured in years will be $1/m$. The first interest payment being due at time $1/m$. Each interest payment will increase the principal by a factor of $1 + r/m$. Given that the interest rate $r$ remains unchanges, after $t$ years the future value of an initial principal $P$ will become $$V(t) = (1 + \frac{r}{m})^{tm} P$$ where $(1 + \frac{r}{m})^{tm}$ denotes the growth factor. It is clear to see the relationship to continuous compounding. The result can be established by setting the limit of $m \rightarrow \infty$, such that $$\textrm{lim}_{m \rightarrow \infty}V(t) = P \times \textrm{lim}_{m \rightarrow \infty} [(1 + \frac{r}{m})^{m}]^{t} \rightarrow Pe^{rt}$$ An \define{annuity} is a sequence of finitely many payments of a fixed amount due at equal time interval. Suppose that payments of an amount $C$ are to be made once a year for $n$ years, the first one due a year hence. \define{Perpetuity} is an infinite sequence of payments of a fixed amount $C$ occurring at the end of each year. 
+
+\subsection{The Money Market}
+
+The \define{money market} refers to tradign in very short-term debt investments, involvest large-volume trades between institutions and traders (wholesale leve), includes money market mutual funds bought by individual investors and money market accounts opened by bank customers (retail level). An example is a \bold{bond} which is a financial security promising the holder a sequence of guaranteed future payments. \\ 
+
+\begin{definition}[Zero-Coupon Bonds]
+  The simples cast of a bond is a zero-coupon bond, which involves just a single payment. The issuing institution promises to exchange the bond for a certain amount of money $F$ (known face value). The face value is paid on a give time $T$, called the \emph{maturity} date. 
+\end{definition}
+Zero coupon bonds may be long or short-term investments. The bonds can be held until maturity or sold on secondary bond markets. Short-term zero coupon bonds generally have maturities of less than one year and are called \define{bills}. The price of abond is given by $$V(t) = 100[\frac{1}{1+r}]^{T-t}$$ Bonds promising a sequence of payments are called \define{coupon bonds}. These payments consist of the face value due at maturity, and coupons paid regularly. 
+
 \end{document}
