@@ -275,6 +275,51 @@ Consider that $t_T$ is the time to transfer one block and $t_S$ is the time for 
 
 \define{File scan} are search algorithms that locate and retrieve records that fulfill a selection condition. Algorithm \bold{A1} (linear search) will scan each file block and test all records to see whether they satisfy the selection condition. The cost estimate for linear search is $b_r$ block transfers + 1 seek ($b_r$ denotes the number of blocks contianing records from relation $r$). If selection is on a key attribute, can stop on finding record. Linear search can be applied regadless of selection condition, ordering of records in the file, or availability of indices. \\ 
 
-\bold{A2} (binary search) is applicable if an equality comparison on the attribute on which file is ordered. Assume that the blocks of a relation are stored contiguously. The cost estimate (number of blocks to be scanned) is the $\ceil{\textrm{log}_2 (b_r)} \times (t_T + t_S)$. 
+\bold{A2} (binary search) is applicable if an equality comparison on the attribute on which file is ordered. Assume that the blocks of a relation are stored contiguously. The cost estimate (number of blocks to be scanned) is the $\ceil{\textrm{log}_2 (b_r)} \times (t_T + t_S)$. \\ 
+
+\define{Index scan} are search algorithms that use an index. The selection condition must be on search-key of index.\\
+
+In \bold{A3} (primary index on candidate key, equality), retrieve a single record that satisfies the corresponding equality condition $$\textrm{Cost} = (h_i + 1) \times (t_T + t_S)$$ where $h_i$ is the height of the index. \\ 
+
+In \bold{A4} (primary index on nonkey, equality), retrieve multiple records. Records will be on consecutive blocks. Let $b$ = number of blocks containing matching records $$\textrm{Cost} = h_i \times (t_T + t_S) + t_S + t_T \times b$$ \\ 
+
+In \bold{A5} (equality on serach-key of secondary index), retrieve a single record if the sarch-key is a candidate key $$\textrm{Cost} = (h_i + 1) \times (t_T + t_S)$$ Retrieve multiple records if search-key is not a candidate key. Each of $n$ matching records may be on a different $$\textrm{Cost} = (h_i + n) \times (t_T + t_S)$$ \\ 
+
+In \bold{A6} (primary index, comparison) (Relation is sorted on A)\dots For $\sigma_{A \geq v}(r)$ use index to find first tuples $\geq v$ and scan relation sequentially from there. For $\sigma_{A \leq v}(r)$ just scan relation sequentially until the first tuple $> v$; do not use index. \\ 
+
+In \bold{A7} (secondary index, comparison)\dots For $\sigma_{A \geq v}(r)$ use index to find first index entry $geq v$ and scan index sequentially from there, to find pointers to records. For $\sigma_{A \leq  v}(r)$ just scan leaf pages of index finding pointers to records, until first entry $> v$. In either case, retrieve records that are pointed to 
+\begin{itemize}
+  \item requires an I/O for each record 
+  \item Linear file scan may be cheapter (use second index iff very few records are selected). 
+\end{itemize}
+
+\bold{Conjunction} is when there are multiple conditions to check for. In \bold{A8} (conjunctive selection using one index), select a combination of $\theta_i$ and algorithms A1 through A7 that results in the least cost for $\sigma_{\theta i}(r)$. Test other conditions on tuple after fetching it into memory buffer. \\
+
+In \bold{A9} (conjunctive selection using multiple-key index), use appropriate composite (multiple-key) index if available. \\ 
+
+\bold{A10} (conjunctive selection by intersection of identifiers) requires indices with record pointers. Use corresponding index for each condition and take intersection of all the obtained sets of record pointers. Then fetch records from file. If some conditions do not have appropriate indices, apply test in memory. \\ 
+
+\bold{Disjunction} is when there are multiple conditions \emph{or}ed together. \bold{A11} (disjunctive selection by union of identifiers) is applicable if all conditions have available indices, otherwise use linear scan. Use corresponding index for each condition, and take union of all the obtained sets of record pointers. Then fetch records from file. When \bold{negation} is present, use linear scan on file. 
+
+\subsection{Join Operations}
+
+There are several different algorithms that can be used to implement joins 
+\begin{itemize}
+  \item Nested-loop join 
+  \item Block nested-loop join 
+  \item Indexed nested-loop join 
+  \item Merge-join 
+  \item Hash-join
+\end{itemize}
+The choice should be made based on cost estimate. \\ 
+
+\subsubsection{Nested-Loop Join}
+
+In the worst case, if there is enough memory only to hold one block of each relation, the estimated cost is $$n_r \times b_s + b_r$$ block transfers, plus $$n_r + b_r$$ seeks. If the smaller relation fits entirely in memory, use that as the inner relation. This reduces the cost to $b_r + b_s$ block transfers and 2 seeks. \\ 
+
+\subsubsection{Block Nested-Loop Join}
+
+\define{Block Nested-Loop Join} is a variant of nest-loop join in which every block of inner relation is paired with every block of outer relation. The worst case estimate is $b_r \times b_s + b_r$ block transfers $+ 2 \times b_r$ seeks. Each block in the inner relation is read once for each block in the outer relation (instead of once for each tuples in the outer relation). The best case is $b_r + b_s$ block transfers $+ 2$ seeks. For each tupel $t_r$ in the outer relation $r$, use the index to look up tuples in $s$ that satisfy the join condition with tuple $t_r$. 
+
 
 \end{document}
