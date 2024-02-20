@@ -7,6 +7,7 @@
 \usepackage{xcolor}   % to define custom colors
 \usepackage{titlesec} % to make custom section formatting 
 \usepackage{amsthm}   % to customize theorems 
+\usepackage{amsfonts} % for \mathbb, etc...
 \usepackage{changepage}
 \usepackage{amsmath}  % to get align* environment
 
@@ -35,7 +36,7 @@
 
 % \bold{} to bold the following text
 % usage: \bold ==> \bold{bolded text}
-\newcommand{\bold}[1]{\textbf{#1}}
+\renewcommand{\bold}[1]{\textbf{#1}}
 
 % \define{} to bold and italicize text 
 % usage: \define{<insert-definition>}
