@@ -124,4 +124,89 @@ When initializing\dots
 
 \define{Dropout} provides a computationally inexpensive but powerful method of regularizing a broad family of models. Each neuron has some probability of being dropped out during each iteration. 
 
+\section{Deep Feedforward Networks}
+
+Deep feedforward networks have the goal of approximating some function (target function). They are typically represented by composing together many different functions; there are multiple hidden layers and one output layer. \\ 
+
+Nearly all deep learning algorithms can be described as particular instances of a farily simple recipe: combine 
+\begin{itemize}
+  \item a specification of a dataset 
+  \item a cost function 
+  \item an optimization procedure 
+  \item and a model
+\end{itemize}
+To optimize, for linear models, we could use normal equations, closed form optimization. For nonlinear models, it requires us to choose an iterative numerical optimization procedure. The largest difference between linear models and neural networks is the \bold{nonlinearity} of a neural network causes mos tinteresting loss functions to become \bold{nonconvex}. Thus, neural networks are usually trained by using iterative, gradient-based optimizers that merely drive the cost function to a very low value. \\ 
+
+Architecture refers to the overall structure of the netwrok: how many units it should have and how these units should be connected to each other. Most neural networks are organized into groups of units called layers. \\ 
+
+ A problem is convex if its objective is convex function, the inequality constraints $f_j$ are convex, and the equality constraints $h_j$ are affine. \\ 
+
+\define{Momentum} is designed to accelerate learning. It accumulates an exponentially decaying moving average of past gradients and continues to move in their direction. Adaptive learnng rates are a simple idea where the learning rate is reduced by some factor every few epochs. 
+
+\section{Vector Semantics}
+
+Words can be represented in multiply ways:
+\begin{itemize}
+  \item Knowledge-based representation 
+  \item One-hot representation 
+  \item Co-occurrence Matrix 
+  \item Low-dimensional dense word vector
+\end{itemize}
+
+We could represent words as one-hot vectors where the vector dimension is equal to the number of words in the vocabulary. However, this will lead to high dimensional representation and thus inefficiency in storage and computation. \\ 
+
+\define{TF-IDF} stands for term frequency - inverse document frequency. Where \bold{TF} is the frequency of word $v$ appearing in the current document and \bold{DF} is the number of documents where word $v$ appears. \\ 
+
+When representing with co-occurrence matrix there are two options: 
+\begin{itemize}
+  \item \define{Window}: use window around each word. Captures boith syntactic and semantic information 
+  \item \define{Word-document}: gives general topics 
+\end{itemize}
+
+The limitations with simple co-occurrence vectors are the increase in size with vocabulary, very high dimensional (requires a lost of storage), and models are less robust. A solution is to use low dimensional dense vectors. \\ 
+
+\subsection{Word Vectors}
+
+\define{Distributional semantics} is the idea that a word's meaning is given by the words that frequently appear close-by. When a word $w$ appears in a text, its \define{context} is the set of words that appear nearby. Use the many contexts of $w$ to bukld up a representation of $w$. \\ 
+
+We will build a dense vector for each word, chosen so that the vectors of words that appear in similar context will be similar. \\ 
+
+\define{Word2vec} is a framework for learning word vectors. The idea is that we have a large corpus of text and every word in a fixed vocabulary is represented by a vector. Go through each position $t$ in the text, which has a center word $c$ and context (outside) words $o$. Use the similarity of the word vectors for $c$ and $o$ to calculate the probability of $o$ given $c$ (or vice versa). Keep adjusting the word vectors to maximize this probability. \\ 
+
+For each position $t=1, \dots , T$, predict context words within a window of fixed size $m$, given center word $w_t$. The objective function $J$ is the (average) negative log likelihood: \emph{minimizing the objective function will result in maximizing the predictive accuracy}. To train a model, we adjust parameters to minimize a loss for a simple convex function over two parameters. \\ 
+
+When calculating gradients, find the gradient for each center vector $v$ in a window and also calculate the gradients for outside vectors $u$. Generally, in each window we will compute updates for all parameters that are being used in that window. \\ 
+
+\define{Skip-grams (SG)} predict context (outside) words given the center word. Skip-gram model with negative sampling is too computationally expensive. Hence, in standard word2vec you implement the skip-gram model with negative sampling. The main idea is to train a binary logistic regressions for a true/positive pair (center word and word in its context window) versus several noise/negative pairs (the center word paired with a random word). We take $k$ negative samples and maximize the probability that real outside word appears, minimize probability that random words appear around center word. \\ 
+
+There are two ways to evaluate word vectors. 
+\begin{itemize} 
+  \item \define{Intrinsic evaluation} is evaluation on a specific/intermediate subtask. This is fast to compute. Evaluate word vectors by how well their cosine distance after addition captures intuitive semantic and syntactic analogy. Identify the word vector which maximizes the cosine similarity. Using intrinsic evaluation techniques should be handeled with care. 
+  \item \define{Extrinsic evaluation} is evaluation on a real task. This can take a long time to compute accurately.
+\end{itemize}
+
+\begin{remark}
+  Most words have lots of meanings. One vector can not necessarily capture all these meanings. 
+\end{remark}
+
+Different senses of a word reside in a linear superposition (weighted sum) in standard word embeddings like word2vec. Because of ideas from sparse coding, you can actually separate out the senses (providing they are relatively common). 
+
+\section{Language Modeling} 
+
+Language modeling is the task of predicting what word comes next. Formally, given a sequence of words, compute the probability distribution of the next word. A system that does this is called a \define{language model}. Language modeling is a subcomponent of many NLP tasks. \\ 
+
+Pre-training first and then fine-tuning on a specific downstream task, allows to capture context-aware word representation. \bold{BERT} is pretraining with specially designed tasks on large scale unlabaled data, which is very effective to serve as a general-purpose semantic features and improves the performance of NLP taks. \\ 
+
+An \define{n-gram} is a large chunk of $n$ consecutive words. The idea of $n$-gram models is to collect statistics about how frequent different n-grams are, and use those to predict the next word. In general, this is an insufficient model of language because langauge has long-distance dependencies. 
+
+The \define{Maximum Likelihood Estimate} (MLE) of some parameter of a model $M$ from a training set $T$ maximizes the likelihood of the training set $T$ given the model $M$. \\ 
+
+\define{Perplexity} is the inverse probability of the test set, normalized by the number of words. Minimizing perplexity is the same as maximizing probability. N-grams only work well for word prediction if the test corpus looks like the training corpus. In real life, it often does and thus we must train robust models that generalize. With \define{laplace smoothing}, just pretend that we saw each word one more time than we did (just add one to all the counts). \define{Backoff} simply uses less context. \define{Interpolation} mixes the probability estimates from all classes. \\ 
+
+In \define{Good Turing estimation}, reallocate the probability mass of n-grams that occur c+1 times in the training data to the n-grams that occur c times. In particular, reallocate the probability mass of n-grams that were seen once to the n-grams that were never seen.  
+
+\subsection{Neural Language Modeling}
+
+The idea of \define{Recurrent Neural Network} (RNN) is to apply the same weights $W$ repeatedly. 
+
 \end{document}
