@@ -207,6 +207,35 @@ In \define{Good Turing estimation}, reallocate the probability mass of n-grams t
 
 \subsection{Neural Language Modeling}
 
-The idea of \define{Recurrent Neural Network} (RNN) is to apply the same weights $W$ repeatedly. 
+The idea of \define{Recurrent Neural Network} (RNN) is to apply the same weights $W$ repeatedly. RNN can process any length input and model size doesn't increase for longer input. Computation for step $t$ can use information from many steps back and the weights are shared across time stamps. However, recurrent computation is very slow. To \bold{train a RNN language model}\dots 
+\begin{enumerate}
+  \item Get a big corpus of text which is a sequence of words.
+  \item Feed into RNN-LM; compute output distribution for every step $t$.
+  \item Loss function on step $t$ is usual cross-entropy between out predicted probability and the true next word.
+  \item Average this to get the overall loss for entire training set. 
+\end{enumerate}
+Computing loss and gradients across entire corpus is \emph{too expensive}! Stochastic gradient descent allows us to compute loss and gradient for small set of data and update. In practice, consider the inputs as a sentnece and compute loss $J(\theta)$ for a sentence, update weights, and repeat. Must backpropagate over time steps $i=t, \dots , 0$, summing gradients as you go ("\define{backpropagation through time}"). Just like a n-gram LM, we can use a RNN LM to generate text by repeated sampling. Sampled output is the next step's input. \\ 
+
+The standard evaluation metric for language models is \bold{perplexity}. Perplexity is the inverse probability of corpus, according to LM normalized by the number of words. This is equal to the exponential of the cross entropy loss $J(\theta)$. 
+
+\section{More on RNNs}
+
+Vanishing gradient is a problem because gradient signals from far away are lost because it's much smaller than gradient signal from close-by. If the gradient becomes vanishingly small over long distances, then we can't tell whether there's no dependency between step $t$ and $t+n$ in the data and we have wrong parameters to capture the true dependency between $t$ and $t+n$. Due to vanshign gradient, RNN-LMs are better at learning from \bold{sequential recency} than syntactic recency. \\ 
+
+If the gradient becomes too big (\define{exploding gradient problem}), then the SGD update step becomes too big. This can cause bad updates: we take too large a step and reach a bad parameter configuration. A solution is \define{gradient clipping}: if the norm of the gradient is greater than some threshold, scale it down before applying SGD update (take a step in the same direction, but a smaller step). \\ 
+
+The main problem with the vanishing gradient problem is that it's too difficult for the RNN to learn to preserve information over many timesteps. In \define{Long Short-Term Memory (LSTM)}, on step $t$, there is a hidden state $h^{(t)}$ and a cell state $c^{(t)}$. Both are vectors of length $n$. The cell stores long-term information. The LSTM can erase, write, and read information from the cell. The selection of which information is erased/written/read is controlled by three corresponding gates. The gates are also vectors of length $n$. On each timestamp, each element of the gates can be open (1), closed (0), or somewhere in between. \\ 
+
+\define{Forget gate} controls what is kept vs forgotten, from previous cell state. \define{Input gate} controls what parts of the new cell content are written to cell. \define{Output gate} controls what parts of cell are output to hidden states. \define{New cell content} is the new content to be written to the cell. \define{Cell content} erases some content from the last cell state, and writes from new cell content. \define{Hidden state} reads some content from the cell. 
+
+\define{Gated Recurrent Units (GRUs)} have two gates. The \define{update gate} controls what part of hidden states are updated vs preserved. The \define{reset gate} controls what parts of previous hidden states are used to compute new content. Like LSTM, GRU makes is easier to retain long term information. \\ 
+
+The biggest difference between LSTM and GRU is that GRU is quicker to compute and has fewer parameters. LSTM is a good default choice, but switch to GRU if you want something more efficient. \\ 
+
+\begin{remark}
+  Bidirectional RNNs are only applicable if you have access to the entire input sentence. 
+\end{remark}
+
+RNNs are already \emph{deep} in on dimension, but we can also make them deep in another dimension by applying multiple RNNs---this is a multi-layer RNN. This allows the network to compute more complex representations. High performing RNNs are often multi-layer (but not as deep as convolutional networks). 
 
 \end{document}
