@@ -321,5 +321,75 @@ In the worst case, if there is enough memory only to hold one block of each rela
 
 \define{Block Nested-Loop Join} is a variant of nest-loop join in which every block of inner relation is paired with every block of outer relation. The worst case estimate is $b_r \times b_s + b_r$ block transfers $+ 2 \times b_r$ seeks. Each block in the inner relation is read once for each block in the outer relation (instead of once for each tuples in the outer relation). The best case is $b_r + b_s$ block transfers $+ 2$ seeks. For each tupel $t_r$ in the outer relation $r$, use the index to look up tuples in $s$ that satisfy the join condition with tuple $t_r$. 
 
+\subsubsection{Index Nested-Loop Join}
+
+Index lookups can replace file scans if jion is an equi-jion or natural noin and an index is available on the inner relation's join attribute. For each tuple $t_r$ in the outer relation $r$, use the index to look up tuples in $s$ that satisfy the join condition with tuple $t_r$. The worst case is that the buffer has space for only one page of $r$, and, for ecah tuple in $r$, we perform an index lookup on $s$. The cost of the join is $b_r (t_T + t_s) + n_r \times c$ where $c$ is the cost of traversing index and fetching all matching $s$ tuples for one tuple of $r$. $c$ can be estimated as the cost of a single selection on $s$ using the join condition. If indices are available on join attributes of both $r$ and $s$, use the relation with fewer tuples as the outer relation. 
+
+\subsubsection{Hash-Join}
+
+Hash-join is applicable for equi-joins and natural joins. A hash function $h$ is used to partition tuples of both relations. $h$ maps \emph{JoinAttrs} values to $\{0, 1, \dots , n\}$ where \emph{JoinAttrs} denotes the common attributes of $t$ and $s$ used on the natural join. $r$ tuples in $r_i$ need only to be compared with $s$ tuples in $s_i$ and need not be compared with $s$ tuples in any other partition, since an $r$ tuples and an $s$ tuple that satisfy the join condition will have the same value for the join attributes. 
+
+\subsubsection{Complex Joins}
+
+For joins with \bold{conjunctive} conditions (\emph{or}ed together), either use nested loops/block nested loops or conpute the resolt of one of the simpler joins. \\ 
+
+For joins with a \bold{disjunctive} condition, either use nested block loops/block nested loops or compute as the union of the records in individual joins. \\ 
+
+\subsection{Other Operations}
+
+Duplicate elimination can be implemented via hashing or sorting. On sorting, duplicates will come adjacent to each other, and all but one set of duplicates can be deleted. For optimization, duplicates can be deleted during run generation as well as at intermediate merge steps in external sort-merge. \\ 
+
+\bold{Aggregation} can be implemented in a manner similar to duplicate elimination. Sorting or hasing can be used to bring tuples in the same group together, and then the aggregate functions can be applied on each group. For optimization, combine tuples in the same group during run generation and intermediate merges, by computing partial aggregate values. \\ 
+
+\bold{Set Operations} can either use variant of merge-join after sorting, or variant of hash-join. \\ 
+
+\bold{Outer join} can be computed either as a join followed by addition of null-padded non-participating tuples or by modifying the join algorithms. \\ 
+
+\section{Materialization and Pipelining}
+
+There are some alternatives for evaluating an entire expression tree. In \define{materialization}, we generate results of an expression whose inputs are relations or are already computed, materialize (store) it on disk (and repeat). In \define{pipelining}, pass on tuples to parent operations even as an operation is being executed. \\ 
+
+\subsubsection{Materialization}
+
+\define{Materialized evaluation} will evaluate one operation at a time, starting at the lowest-level. Use intermediate results materialized into temporary relations to evaluate next-level operations. Materialized evaluation is always applicable. However, the costs of writing results to disk and reading them back can be quite high. \define{Double buffering} will use two output buffers for each operation, when one is full write it to disk while the other is getting filled. THis allows overlap of disk writes with computation and reduces execution time.
+
+\subsubsection{Pipelining}
+
+\define{Pipelined evaluation} evalues several operations simulatenously, passing the results of one operation on to the next. This is much cheaper than materialization: there is no need to store a temporary relation to the disk. However, pipelining may not always be possible. For pipelining to be effective, use evaluation algorithms that generate output tuples even as tuples are received for inputs to the operations. Pipelines can be executed in two ways: \bold{demand driven} and \bold{producer driven}. 
+
+\section{Query Optimization}
+
+An \define{evaluation plan} defines exactly what algorithm is used for each operation, and how the execution of the operations is coordinated. The cost difference between evaluation plans for a query can be enormous. There are three steps in \define{cost-based query optimization}:
+\begin{enumerate}
+  \item Generate logically equivalent expressions using \bold{equivalence rules} 
+  \item Annotate resultant expressions to get alternative query plans 
+  \item Choose the cheapest plan based on \bold{estimated cost}
+\end{enumerate}
+The estimation of plan cost is based on 
+\begin{itemize}
+  \item Statistical information about relations (e.g. number of tuples, number of distinct values for an attribute)
+  \item Statistics estimation for intermediate results 
+  \item Cost formulae for algorithms, computed using statistics 
+\end{itemize}
+Some \bold{equivalence rules} include the following:
+\begin{enumerate}
+  \item Conjunctive selection operations can be deconstructed into a sequence of individual selections. 
+  \item Selection oeprations are commutative. 
+  \item Only the last in a sequence of projection operations is needed, the others can be omitted. 
+  \item Selections can be combined with Cartesian products and theta joins.
+  \item Theta-join operations (and natural joins) are commutative.
+  \item Natural join operations are associative.
+  \item The selection operation distributes over the theta join operation under the following two conditions 
+    \begin{itemize}
+      \item When all the attributes in $\theta_0$ involve only the attributes of one of the expressions ($E_1$) being joined. 
+      \item When $\theta_1$ involves only the attributes of $E_1$ and $\theta_2$ involves only the attributes of $E_2$. 
+    \end{itemize}
+  \item The projection operation distributes over the theta join operation in some cases. 
+  \item The set operations union and intersection are commutative. 
+  \item Set union and intersection are associative.
+  \item The selection operations distributes over $\cup , \cap, \textrm{and }-$. 
+  \item The projection operation distributes over union. 
+\end{enumerate}
+
 
 \end{document}
