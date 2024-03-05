@@ -238,4 +238,32 @@ The biggest difference between LSTM and GRU is that GRU is quicker to compute an
 
 RNNs are already \emph{deep} in on dimension, but we can also make them deep in another dimension by applying multiple RNNs---this is a multi-layer RNN. This allows the network to compute more complex representations. High performing RNNs are often multi-layer (but not as deep as convolutional networks). 
 
+\section{CNN, Tokenization}
+
+\subsection{Convolutional Neural Networks}
+
+CNNs are specialized for applications in computer vision where they can accept images as raw input and build up a hierarchy of features. \\ 
+
+Batch normalization is often used in CNNs to transform the convolution output of a batch by scaling the activations to have zero mean and unit variance. 
+
+\subsection{Tokenization}
+
+Tokenization is the first step in any NLP pipeline. It has an important effect on the rest of your pipeline. A \define{tokenizer} breaks unstructured data and natural language text inot chunks of information that can be considered as \bold{discrete elements}. Many NLP models assume the input text has been tokenized and encoded as \bold{numerical vectors}. 
+\begin{itemize}
+  \item \bold{Character tokenization}: the simplest tokenization scheme is to feed each character individually to the model 
+  \item \bold{Word tokenization}: split into words and map each word to an integer. 
+  \item \bold{Subword tokenization}: combine the best aspects of character and word tokenization
+\end{itemize}
+ potential problem of a large vocabulary is that it requires neural networks to have an enormous number of parameters; expensive to train, and larger models are more difficult to maintain. A common approach is to limit the vocabulary and discard rare words by considering, say, the most 100,000 common words in the corpus. \\ 
+
+ The idea with subword tokenization is to combine the best aspects of character and work tokenization. We want to split rare words into smaller units to allow the model to deal with complex words and misspellings. We also want to keep frequent words as unique entitites so that we can keep the length of our inputs to a manageable size. One of the tools used is breaking off affixes. Because prefixes, suffixes, and infixes change the inherent meaning of words, they can also help programs understand a word's function. This can be especially valuable for out of vocabulary words, as identifying an afix can give a program additional insigh into how unknown words function. The \bold{sub word} model will search for these sub words and break down words that include them into distinct parts. \\ 
+
+ \define{Byte pair encoding (BPE)} is a simple, effective strategy for defining a subword vocabulary. 
+ \begin{enumerate}
+   \item Start with a vocabulary containing only characters and an \emph{end of word} symbol. 
+   \item Using a corpus of text, find the most common adjacemt characters, then add as a subword. 
+   \item Replace instances of the character pair with the new subword; repeat until desired vocabulary size. 
+ \end{enumerate}
+All pretrained models use some kind of subword tokenization with a \bold{tuned vocabulary}; usually between 50k and 250k pieces. 
+
 \end{document}
