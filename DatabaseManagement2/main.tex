@@ -391,5 +391,40 @@ Some \bold{equivalence rules} include the following:
   \item The projection operation distributes over union. 
 \end{enumerate}
 
+\begin{remark}
+  \emph{Cost} based optimization selects the execution plan with the lowest cost. A \emph{heuristic} approach to optimization uses logic to select the best execution plan; make the table as small as possible and do so as early as possible.
+\end{remark}
+
+Three strategies used in \define{heuristic optimization} are as follows: 
+\begin{enumerate}
+  \item Push down selection operators (to reduce number of rows) 
+  \item Push down projection operations (to reduce number of columns) 
+  \item Do the most restrictive join first
+\end{enumerate}
+
+\define{Join associativity} is the property that allows us to adjust the order of joins; however, testing to find the most effcient join is expensive and not typically done in practice. \\ 
+
+Query optimizers use equivalence rules to \define{systematically} generate expressions equivalent to the given expression. Space requirements are reduced by sharing common sub-expressions. Time requirements are reduced by not generating all expressions. To determine the cost of each operator, we need the statistics of input relations; these statistics (number of columns/rows, number of distinct values: cardinality) are also stored for each data set. \\ 
+
+We must consider the interaction of evaluation techniques when choose evaluation plans; choosing the cheapest algorithm for each operation independently may not yield the best overall algorithm. Practical query optimizers incorporate elements of the following two broad approaches: 
+\begin{enumerate}
+  \item Search all the plans and choose the best plan in a cost-based fashion. 
+  \item Uses heuristics to choose a plan
+\end{enumerate}
+
+To find the best join tree for a set of $n$ relations\dots Consider all possible plans, recursively compute costs for joining subsets to find the cost of each plan, when a plan for any subset is computed, store it and reuse it when it is required again (instead of recomputing it): \bold{Dynamic Programming}. \\ 
+
+In \define{left-deep join trees}, the right-hand-side input for each join is a relation, not the result of an intermediate join. Cost-based optimization is expensive, even with dynamic programming. Systems may use \emph{heuristics} to reduce the number of choices that must be made in a cost-based fashion. Heuristic optimization transofrms the query-tree by using a set of rules that typically improve execution performance. 
+
+\subsection{Statistics for Cost Estimation}
+
+Some important statistics to keep track of are\dots 
+\begin{itemize}
+  \item $n_r$: number of tuples in a relation $r$ 
+  \item $b_r$: number of blocks containign tuples of $r$
+  \item $I_r$: size of a tuple $r$
+  \item $f_r$: blocking factor of r---i.e. the number of tuples of $r$ that fit into one block 
+  \item $V(A,r)$: number of distinct values that appear in $r$ for attribute $A$; same as the size of $\prod_A (r)$
+\end{itemize}
 
 \end{document}
