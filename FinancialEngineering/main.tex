@@ -149,6 +149,59 @@ It is more convenient to represent the asset returns using matrix forms. Let $R 
 
 The \define{Two Fund Separation Theorem} indicates the efficient set of optimal MV portfolios can be determined by a convex combination of two MV efficient portfolios $w_1$ and $w_2$ $$w_{MV}(\alpha) = \alpha w_1 + (1 - \alpha) w_2$$ for $\alpha \in \mathbb{R}$. \\ 
 
-Since the $w_{GMV}$ is the one associated with the lowest risk, we can think about $\alpha$ as the degree of risk aversion. For $\alpha \in (0,1)$, a higher (lower) value indicates higher risk aversion (tolerance). In the \define{Sharpe Portfolio}, we say that if the agent allocates funds away from the GMVP, then the choice shoudl reflect risk-reward trade off. About all other choices on the MV efficient frontier, the agent would choose the one that yeilds the best risk-reward trade off. The sharpe portfolio can be solved to this solution $$w_{SR} = \frac{\Sigma^{-1} \mu}{1^{T} \Sigma^{-1} \mu}$$ For a sequence of $\alpha$ values, the MV efficient frontier is obtained by plotting $\mu v (\alpha)$ versus $\sigma_{V}^{2}(\alpha)$ For a sequence of $\alpha$ values, the MV efficient frontier is obtained by plotting $\mu v (\alpha)$ versus $\sigma_{V}^{2}(\alpha)$. 
+Since the $w_{GMV}$ is the one associated with the lowest risk, we can think about $\alpha$ as the degree of risk aversion. For $\alpha \in (0,1)$, a higher (lower) value indicates higher risk aversion (tolerance). In the \define{Sharpe Portfolio}, we say that if the agent allocates funds away from the GMVP, then the choice should reflect risk-reward trade off. About all other choices on the MV efficient frontier, the agent would choose the one that yeilds the best risk-reward trade off. The sharpe portfolio can be solved to this solution $$w_{SR} = \frac{\Sigma^{-1} \mu}{1^{T} \Sigma^{-1} \mu}$$ For a sequence of $\alpha$ values, the MV efficient frontier is obtained by plotting $\mu v (\alpha)$ versus $\sigma_{V}^{2}(\alpha)$ For a sequence of $\alpha$ values, the MV efficient frontier is obtained by plotting $\mu v (\alpha)$ versus $\sigma_{V}^{2}(\alpha)$. \\
+
+\section{Forward and Future Contracts}
+
+A \define{forward contrac} is an agreement ot buy or sell an asset 
+\begin{itemize}
+  \item on a fixed date in the future, called the \define{delivery time}
+  \item for a price specified in advance, called the \define{forward price}
+\end{itemize}
+The party to the contract who agrees to sell the asset is said to be taking a \bold{short forward position}. The other party, obliged to buy the asset at delivery, is said to have a \bold{long forwad position}. The principal reason for entering into a forward contract is to become independent of the unknown future price of a risky asset (heding uncertainty). \\ 
+
+\begin{remark}
+  Let us denote the time when the forward contract is exchanged/agreed by $0$, the delivery time by $T$, the forward price by $F(0,T)$, and the market price of the underlying asset by $S(T)$. No payment is made by either party at time 0, when the forward contract is exchanged. At delivery, the party with a long forward position will beenfit if $F(0,T) < S(T)$. On the other hand, the party holding a short forward position will suffer a loss $S(T) - F(O,T) < 0$. 
+\end{remark}
+
+\begin{remark}
+  If the contract is initiated at time $t< T$ rather than $0$, then $F(t,T)$ denotes teh forward price. 
+\end{remark}
+
+Let us denote the value of longing (shorting) the contract as $V_L (t,T)$ ($V_S (t,T)$). We note that $$V_L (t,T) = -V_S (t,T)$$ The major principle is the price of the forward contract should be \emph{fair}. Fair means that if both parties were to participate in the contract, tehn the contract must not be biased against one party. \\ 
+
+Note that the payoff from each contract is stochastic since $S(T)$ in unknown. However, the price of the contract at time $0$ is fixed $F(0,T)$. For the contract to break even, then $$\mathbb{E}[V_L(t,T)] = \mathbb{E}[V_S (t,T)]$$ The breaking even price states that $$\mathbb{E}[S(T) - F(0,T)] \rightarrow F(0,T) = \mathbb{E}[S(T)]$$ The forward price $F(0,T)$, hence, reflects the expected value of the underlying asset. \\ 
+
+Let $r$ dnote the risk-free rate under continuous compounding and assume that it is constant throughout the period in question. The existence of the derivative contract indicates that we can buy the asset via two alternatives 
+\begin{itemize}
+  \item The first alternative is to borrow $S(0)$ dollars to buy the stock at time $0$ and keep it until time $T$. 
+  \item The second alternative is entering a long forward position in stock with a delivery at time $T$ and forward price $F(0,T)$. 
+\end{itemize}
+Since both alternatives are economically equivlent, then the price of the forwad contract is $F(0,T) = S(0) e^{rT}$. \\ 
+
+\subsection{Futures}
+
+One of the two parties to a forward contract will be losing money. There is a risk of default by the party suffering a loss. Futures contracts are designed to eliminate credit risk. Just like a forward contract, a futures contract involves an underlying asset and a specified time of delivery. \\ 
+
+As in the case of a forward contract, it costs nothing to initiate a \define{future}s position. The difference lies in the cash flow during the lifetime of the contract. A futures contract involves a random cash flow, known as \define{marking to market}. Namely, at each time step $n=1,2, \dots, N$ the holder of a long futures position will receive the amount of $$f(n,T) - f(n-1, T)$$ in case it is potiive. If negative, the holder has to pay the amount. \\ 
+
+To ensure that the obligations involved in a futures position are fulfilled, certain practical regulations are enforced. Each investor entering into a futures contract has to pay a deposit, called the \define{initial margin}. In the case of a long futures position, the amount $f(n,T) - f(n-1, T)$ is added to the deposti of positive (or subtracted if negative) on a daily basis (the opposite holds true for a short position). Any excess that builds up above the initial margin can be withdrawn by the investor. If the deposit drops below a certain level, called the \define{maintenance margin}, the clearning house will issue a marign call: requesting the investor to make a payment and restore the deposit to the level of the initial margin. \\ 
+
+To long a forward contract, we enter an agreement today at no cost. At the same time, short a fraction $\theta = e^{-r(T-t)} \in (0,1)$ of the futures. For simplicity suppose that $S(t) > S(0)$, the m2m requires you to pay $$\theta [f(t,T) - f(0,T)] > 0$$ To meet the requirement, you borrow $\theta [f(t,T) - f(0,T)]$ at the risk-free rate. Increase the short position to single unit at no cost. \\ 
+
+A simply way to hedge an exposure to stock price variations is to enter a forward contract. However, a contract of this kind may not be readily available. Another possibility is to hedge using the futures market, which is well developed, liquid, and protected from the risk of default. Heding an asset, we are concerned with the downside. Shorting the futures contract is associated with m2m payments which are invested or borrowed. \\ 
+
+The difference between teh spot and the futures price is called the \define{basis} $$b(t,T) = S(t) - f(f,T)$$ The basis converges to zero as $t \rightarrow T$ since $f(T,T) = S(T)$. According to the no-arbitrage futures price, it follows that $$b(t,T) = S(t) - S(t)e^{r(T-t)} = S(t)[1- e^{r(T-T)}]$$ For zero dividend yield, note the basis since $r>0$. \\ 
+
+Futures are determined by supply and demand; no-arbitrage principles assure prices are efficient. In \define{contango}, investors pay more for the underlying in the futures, i.e., $f(t,T) > S(t)$ for $t<T$; this premium is related to the cost of carry. Contango is also known as fowardation. A market is in \emph{backwardation} when the futures price is below the spot price for a particular asset: $f(t,T) < S(t)$ for $t < T$. Backwardation signals that investors are expecting asset prices to fall over time. \\ 
+
+One way to benefit from contango is through arbitrage strategies. As futures contracts near expiration, this type of arbitrage increases. The spot and futures price actually converge as expiration approaches due to arbitrage, and contango diminsihes. Nonetheless, the shift between contango and backwardation can result in severe losses. \\ 
+
+Basis risk denotes the risk arising after performing heding. For futures, this arises due to 
+\begin{itemize}
+  \item difference between the underlying asset and contract 
+  \item difference between asset delivery and expiration
+\end{itemize}
+The optimal hedge aims to minimize such risk. 
 
 \end{document}
