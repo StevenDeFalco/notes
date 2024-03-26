@@ -266,4 +266,23 @@ Tokenization is the first step in any NLP pipeline. It has an important effect o
  \end{enumerate}
 All pretrained models use some kind of subword tokenization with a \bold{tuned vocabulary}; usually between 50k and 250k pieces. 
 
+\section{Machine Translation and Seq2Seq Models}
+
+\define{Alignment} is the correspondence between particular words in the translated sentence pair. Some words have no counterpart. Alignment can be many-to-one or one-to-many or many-to-many. We learn $P(f, a \vert e)$ as a combination of many factors, including: 
+\begin{itemize}
+  \item Probability of particular words aligning 
+  \item Probability of particular words have particular fertility
+\end{itemize}
+\define{Neural machine translation} uses a single end-to-end neural network where both the input and output are sentences. Seq2seq models are end-to-end models made up of two RNNs; they are often referred to as encoder-decoder models. The \define{decoder} is a text generator. This is different from a simple text generator because the initial states are determined by the encoder. \\ 
+
+\define{Encoding} of the source sentence provides initial hidden state for the Decoder RNN. The \define{Encoder RNN} produces an encoding of the source sentence. The \define{Decoder RNN} is a language model that generates target sentence, conditioned on encoding. \\ 
+
+The seq2seq model is an example of a \bold{conditional language model}: language model because the decoder is predicting the next word of the target sentence $y$ and conditional because its predictions are also conditinoed on the source sentence $x$. \\ 
+
+In \bold{greedy decoding}, usually we decode until the model produces a <END> token. In \bold{beam search decoding}, different hypotheses may produce <END> tokens on different timestamps; when a hypothesis produces <END> that hypothesis is complete; place it aside and continue exploring other hypotheses via beam search. A small beam size $k$ will be very close to greedy decoding which may result in ungrammatical, unnatural, nonsensical, and incorrect results. A larger $k$ means you consider more hypotheses and thus reduce some of the problems which correspond to a small $k$. \\ 
+
+Advantages of NMT is that it has better performance compared to SMT; a single neural network can be optimized end-to-end; and it requires much less human engineering. Disadvantages of NMT is that it is less interpretable and is difficult to control. \\ 
+
+Machine translation can be evaluated using \define{BLEU} (Bilingual Evaluation Understudy) which has n-gram precision plus a penalty for too-short system translations; higher BLEU scores indicate better translation quality. BLEU is useful of imperfect because good translation can still get a poor BLEU score. 
+
 \end{document}
