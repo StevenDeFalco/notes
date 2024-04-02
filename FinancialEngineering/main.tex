@@ -204,4 +204,44 @@ Basis risk denotes the risk arising after performing heding. For futures, this a
 \end{itemize}
 The optimal hedge aims to minimize such risk. 
 
+\section{Options}
+
+A \define{European call} option is a contract giving the holder the right to buy an asset for price $X$ fixed in advance at a specified future time $T$. 
+\begin{itemize}
+  \item The asset is called the underlying 
+  \item The fixed price, $X$, is known as the exercise price 
+  \item The time $T$ is knwon as the exercise or expiry time
+\end{itemize}
+Similar, to European Call, a European put option gives the right to sell the underlying asset for the strike price $X$ at the exercise time $T$. \\ 
+
+An \define{American call} (respectively put) option gives the right to buy (respectively sell) the underlying asset for the strike price $X$ at any time between now and a specified future time $T$, called the expiry time. In other words, an American option can be exercised at any time up to and including expiry.  
+
+\begin{remark}
+  The price of an American option will be greater than that of a European option because it allows for more flexibility
+\end{remark}
+
+The option price is deteremined by its payoff: the higher the payoff, the higher the price (vice versa). For a European call, the payoff is $$S(T) - X$$ if $S(T) > X$, or else it is simply 0. 
+
+\begin{remark}
+  The notation $x^{+}$ is used to denote the max between 0 and $x$
+\end{remark}
+
+Since payoffs are non-negative, a premium must be paid to buy an option. If no premium had to be paid, an investor purchasing an optin could under circumstances lose money and would in fact make a profit whenever the payoff turned out to be positive. This would be contrary to the No-Arbitrage Principle. \\ 
+
+Establishing bounds and some general properties for option prices is the key to price options. The gain of an option buyer is the payoff modified by the premium $C_E$ or $P_E$ paid for the option. At time $T$ the gain of the buyer of a European call is $$(S(T) - X)^+ - C_E e^{rT}$$ which takes into account the time value of the premium. For the buyer of a European put the gain is $$(X - S(T))^+ - P_E e^{rT}$$ Consider a portfolio constructed by writing and selling one put and buying one call option: both have the same strike price $X$ and the same exercise date $T$. Adding the payoffs of the long position in calls and the short position in puts, we obtain the payoff of a \bold{long forward contract} with forward price $X$ and delivery time $T$.\\ 
+
+For a stock that pays no dividends the following relation holds between the prices of European call and put options, both with exercise price $X$ adn exercise time $T$ (\define{Put-Call Parity}) $$C_E - P_E = S(0) - Xe^{-rT}$$ If the asset pays dividend, the option only gives me the right to acquire after the fact, then the price of the options should reflect that too. For a stock paying a single dividend $D$ in the future at time $t$, where $0 < t < T$, the call-put parity indicates that $$C_E - P_E = S(0) - De^{-rT} - Xe^{-r}$$ The prices of American put and call options with the same strike price $X$ and expiry time $T$ on a stock that pays no dividends satisfy $$S(0) - Xe^{-rT} \geq C_A - P_A > S(0) - X$$ We say that at time $t$ a \define{call option} with strike price $X$ is 
+\begin{itemize}
+  \item In the money (ITM) if $S(t) > X$ 
+  \item At the money (ATM) if $S(t) = X$ 
+  \item Out of the money (OTM) if $S(t) < x$
+\end{itemize}
+We say that at time $t$ a \define{put option} with strike price $X$ is 
+\begin{itemize}
+  \item In the money (ITM) if $S(t) < X$ 
+  \item At the money (ATM) if $S(t) = X$ 
+  \item Out of the money (OTM) if $S(t) > x$
+\end{itemize}
+At time $t \leq T$, the \define{instrinsic value} of a call option with strike price $X$ is equal to $(S(t) - X)^+$. The \define{intrinsic value} of a put option with the same strike price is $(X - S(t))^+$. The \define{time value} of an option is the difference between the price of the option and its intrinsic value. 
+
 \end{document}
