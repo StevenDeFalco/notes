@@ -285,4 +285,32 @@ Advantages of NMT is that it has better performance compared to SMT; a single ne
 
 Machine translation can be evaluated using \define{BLEU} (Bilingual Evaluation Understudy) which has n-gram precision plus a penalty for too-short system translations; higher BLEU scores indicate better translation quality. BLEU is useful of imperfect because good translation can still get a poor BLEU score. 
 
+\section{Attention and Transformers}
+
+Attention treats each word's representation as a query to access and incorporate information from a set of values. Attention provides a solution to the bottle neck problem. The core idea of attention is that on each step of the decoder, use direct connection to the encoder to focus on a particular part of the source sequence. \\ 
+
+Use the attention distribution to take a weighted sum of the encoder hidden states. The attention output mostly contains information from the hidden states that received high attention. Then concatenate the attention output with decoder hidden state, then use to compute $\hat{y}$ as before. Sometimes we take the attention output from the previous step, and also feed it into the decoder. \\ 
+
+Writing \define{attention} in equations, we have encoder hidden states $h_1 , \dots , h_N \in \mathbb{R}^{h}$. On timestep $t$, we have decoder hidden state $s_t \in \mathbb{R}^h$. We get the attention scores $e^t$ for this step: $$e^t = [s_t^T h_q , \dots s_t^T h_N] \in \mathbb{R}^N$$ We take softmax to get the attention distribution $\alpha^t$ for this step $$\alpha^t = \textrm{softmax}(e^t) \in \mathbb{R}^N$$ We use $\alpha^t$ to take a weighted sum of the encoder hidden states to get the attnetion outpu $a_t$ $$a_t = \sum_{i=1}^N \alpha_i^t h_i \in \mathbb{R}^h$$ Finally, we concatenate the attnetion output $a_t$ with the decoder hidden state $s_t$ and proceed as in the non-attention seq2seq model $$[a_t ; s_t] \in \mathbb{R}^{2h}$$ Attention significantly improves NMT performance; decoder focuses on certain parts of the source. Attention solves the bottleneck problem; decoder looks directly at source; bypass bottleneck. Attention helps with vanishing gradient problem; provides shortcut to far away states. Attention provides some interpretability. 
+
+\begin{definition}
+  Given a set of vector values, and a vector query, attention is a technique to compute a weighted sum fo the values, dependent on the query. 
+\end{definition}
+
+There are several ways you can compute $e \in \mathbb{R}^N$ from $h_1 , \dots , h_N \in \mathbb{R}^{d_1}$ and $s \in \mathbb{R}^{d_2}$. 
+\begin{itemize}
+  \item Basic dot-product attention: $e_i = s^T h_i \in \mathbb{R}$ 
+  \item Multiplicative attention: $e_i = s^T W h_i \in \mathbb{R}$ where $W \in \mathbb{R}^{d_2 \times d_1}$ is a weight matrix
+  \item Additive attention: $e_i = v^T \textrm{tanh}(W_1 h_i + W_2 s) \in \mathbb{R}$ where $W_1 \in \mathbb{R}^{d_4 \times d_1}$, $W_2 \in \mathbb{R}^{d_3 \times d_2}$ are weight matrices and $v \in \mathbb{R}^{d_3}$ is a weight vector. 
+\end{itemize}
+
+\subsection{Self-Attention}
+
+Every word is both a key and a query simultaneously. Let $w_{i:n}$ be a sequence of words in vocabulary $V$. For each $w_i$, let $x_i = Ew_i$, where $E \in \mathbb{R}^{d \times \vert V \vert}$ is an embedding matrix. 
+\begin{enumerate}
+  \item Transform each word embedding with weight matrices. $$q_i = W^Q x_i$$ $$k_i = W^K x_i$$ $$v_i = W^V x_i$$ 
+  \item Compute pairwise similarities between keys and queries; normalize with softamx $$e_{ij} = \textrm{inner\_product}(q_i, k_j) \alpha_{ij} = \frac{\textrm{exp}(eij)}{\sum_{j'}\textrm{exp}(eij')}$$  
+  \item Compute output for each word as weighted sum of values $$o_i = \sum_j \alpha_{ij} v_j$$
+\end{enumerate}
+
 \end{document}
