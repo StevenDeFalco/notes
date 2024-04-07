@@ -244,4 +244,16 @@ We say that at time $t$ a \define{put option} with strike price $X$ is
 \end{itemize}
 At time $t \leq T$, the \define{instrinsic value} of a call option with strike price $X$ is equal to $(S(t) - X)^+$. The \define{intrinsic value} of a put option with the same strike price is $(X - S(t))^+$. The \define{time value} of an option is the difference between the price of the option and its intrinsic value. 
 
+\section{Binomial Model and Option Pricing}
+
+Suppose that for any contingent claim $D(T)$ there exists a replication strategy. Specifically, an admissible strategy $x(t), y(t)$ with final value $V(T) = D(T)$. The price $D(0)$ of the contingent claim at time 0 must be equal to that of the replicating strategy, $V(0) = D(0)$. \\ 
+
+The contingent claim at time 1 has two potential realizations: $f(S(1)) = f(S^u)$ with proabability $p$ and $f(S(1)) = f(s^d)$ with probability $1-p$. To replicate a general derivative security with payoff $f$, we hold $x$ stocks and $y$ bonds. It follows that $$xS^u = y(1+r) = f(S^u)$$ $$xS^d = y(1+r) = f(S^d)$$ We can derive the values of $x$ and $y$ given the above two equations $$x = \frac{f(S^u) - f(S^d)}{S^u - S^d}$$ $$y = \frac{(1+d)f(S^u) - (1+u)f(S^d)}{(u-d)(1+r)}$$ While the future value of stock can never be known with certainty, it is possible to work out expected stock prices within the binomial tree model. Since $f$ is a contingent claim on $S(1)$, then the realization of $f$ also depends on the probability of $S(1)$ $$\mathbb{E}[f(S(1))] = p \times f(S^u) + (1-p) \times f(S^d)$$ The contingent claim price should reflect future discounted cash flows. In this regard, one expects that the following relationship holds true $$D(0) = \frac{1}{1+r} \mathbb{E}[f(S(1))]$$ The \define{risk-neutral probability} is a probability measure $p^{*} \in (0,1)$ under which it holds true that $$\mathbb{E}^{\mathbb{Q}}[S(1) \vert S(0)] = S(0)(1+r)$$ or alternatively $$\mathbb{E}^{\mathbb{Q}}[R_S] = r$$ is called a risk-neutral probability. 
+
+\begin{remark}
+  It is common to differentiate the risk-neutral from the physical probability using the superscript $\mathbb{Q}$ 
+\end{remark}
+
+According to the one-step binomial model, we know that $$p^{*} = \frac{r-d}{u-d}$$ Hence, the fair price (no-arbitrage) price of the contingent claim is $$D(0) = \frac{1}{1+r} \mathbb{E}^{\mathbb{Q}}[f(S(1))] = \frac{1}{1+r}[p^* f(S^u) + (1-p^*)f(S^d)]$$ For any $n=0,1,2, \dots$, the \define{martingale property} states that $$\mathbb{E}^{\mathbb{Q}}[\tilde{S}(n+1) \vert S(n)] = \tilde{S}(n)$$ The risk neutral probability, $p^*$, is also referred to as the \emph{martingale probability}. Since the pricce of the European option represents the expectation of the discounted payoff computed with respect to the risk-neutral probability, then we know that $$D(0) = \frac{1}{(1+r)^2} \mathbb{E}^{\mathbb{Q}} [f(S(2))]$$ 
+
 \end{document}
