@@ -313,4 +313,60 @@ Every word is both a key and a query simultaneously. Let $w_{i:n}$ be a sequence
   \item Compute output for each word as weighted sum of values $$o_i = \sum_j \alpha_{ij} v_j$$
 \end{enumerate}
 
+\section{LLMS: Pretraining and Finetuning}
+
+The key idea is to use a pretrained dataset that is somewhat related to your finetuning data so that the pretrained model will have some good representations for the finetuning task as well. \\ 
+
+\subsection{Pretraining}
+
+In modern NLP, all parameters in NLP networks are initialized via pretraining. Pretraining methods hide parts of the input from the model, and train the model to reconstruct those parts. Pretraining can improve NLP applications by serving as parameter initialization. The first step is to pretrain using lots of data to learn general things, and the second step is to finetune using not many labels with the goal of adapting the model to the task. \\ 
+
+Pretraining establishes the basis of the abilities of LLMs. LLMs can accquire essential language understanding and generation skills. The scale and quality of the pre-training corpus are critical for LLMs to attain powerful capabilities. Model architectures, acceleration methods, and optimization techniques need to be well designed. \\ 
+
+LLMs rely on the pretraining corpus and how it has been preprocessed. Existing LLMs mainly leverage a mixture of diverse public textual datasets as the pre-training corpus. There are two types of pre-training corpora: 
+\begin{itemize}
+  \item \bold{General data}: with large, diverse, and accessibly nature to enhance the language modeling and generalization abilities of language models 
+  \item \bold{Specialized data}: endowing LLMs with specific task-solving capabilities
+\end{itemize}
+
+Before pretraining, it is important to remove noisy, redundant, irrelevant, and potentially toxic data. 
+\begin{itemize}
+  \item Quality filtering 
+  \item De-duplication 
+  \item Privacy reduction (remove personally identifiable information)
+  \item Tokenization 
+\end{itemize}
+
+There are three types of architectures that we could pretrain:
+\begin{itemize}
+  \item \bold{Encoders} get bidirectional context. The idea is to replace some fraction of words in the input with a special mask token; then predict these words. Only add loss terms from words that are masked out. (e.g. BERT)
+  \item \bold{Encoder-decoders}. The encoder portion benefits from bidirectional context. The decoder portion is used to train the whole model through language modeling. To pretrain, replace different-length spans from the input with unique placeholders; decode out the spans that were removed. (e.g. BART)
+  \item \bold{Decoders}. We can ignore what they were trained to model and we can finetune them by training a classifier on the last word's hidden state. It's natural to pretrain decoders as language models and then use them as generators. (e.g. GPT)
+\end{itemize}
+
+\begin{remark}
+  Pretraining is expensive and impractical on a single GPU. Finetuning is practical and common on a single GPU
+\end{remark}
+
+Pretrained decoders are good at generating sequences. However, BERT and other pretrained encoders don't naturally lead to nice autoregressive (1-word-at-a-time) generation methods. \\ 
+
+BART pre-trains a model combining Bidirectional and Auto-Regressive Transformes. A denoising autoencoder for pretraining sequence-to-sequence models. BART is trained by corrupting text with an arbitrary noising function and learning a model to reconstruct the original text. BART uses a standard transformer-based neural machine translation architecture. \\ 
+
+Very large language models seem to perform some kind of learning without gradient steps simply from examples you provide within their contexts. The \define{in-context} examples seem to specify the task to be performed, and the conditional distributin mocks performing the task to a certain extent. There are three approaches to in-context learning 
+\begin{itemize}
+  \item \define{Few-shot}: includes several examples in the prompt to demonstrate the expected answer format and content. 
+  \item \define{One-shot}: only a single example is provided in the prompt to demonstrate the desired task. 
+  \item \define{Zero-shot}: no examples are provided to the model during the generation call. Instead, only the task or request is given as input. 
+\end{itemize}
+
+\subsection{Finetuning}
+ 
+\define{Full finetuning} means we update all the parameters in the network during the finetuning process. \define{Parameter-efficient finetuning} trains usinga few existing o r new parameters. Paramter-efficient finetuning aims to reduce the number of trainable parameters while retaining good performance. There are four parameter-efficient finetuning methods for transformer language models: 
+\begin{enumerate}
+  \item \define{Adapter tuning} incorporates small neural network modules (called adapter) into each transformer layer. During finetuning, the adapter modules would be optimized according to the specific task goals, freeze the paramters of the original language. 
+  \item \define{Prefix tuning} adds a prefix of parameters, and freezes all pretrained parameters. The prefix is processed by the model just like real words would be. Preprends a sequence of prefixes, which are a set of trainable continuous vectors, to each Transformer layer in language models. 
+  \item \define{Prompt tuning} incorporates trainiable prompt vectors at the input layer. Augments the input text by including a group of soft prompt tokens, then takes the prompt-augmented input to solve specific downstream tasks. During training, only the prompt embeddings would be learned according to task-specific supervisions. 
+  \item \define{Low-Rank Adaptation (LoRa)} learns low-rank "diff" between the pretrained and finetuned weight matrices. This is easier to learn than prefix-tuning. 
+\end{enumerate}
+
 \end{document}
