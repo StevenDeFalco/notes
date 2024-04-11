@@ -446,7 +446,7 @@ A transaction has many states during its execution:
 \end{itemize}
 The \define{recovery-management} component of a database system implements the support for atomicity and durability. The \define{shadow-database scheme} assumes that only one transaction is active at a time. A pointer called \emph{db\_pointer} always points to the current conssitent copy of the database. All updates are made on the \emph{shadow copy} of the database, and \bold{db\_pointer} is made to point at the updated shadow copy only after the transaction reaches partial commit and all updated pages have been flushed to disk. In case transaction fails, old consistent copy pointed to by \bold{db\_pointer} can be used, and the shadow copy can be deleted. \\ 
 
-Multiple transaction are allowed to run concurrnetly in the system. The advantages of this are increased processor and disk utilization and reduced average response time. \define{Concurrency control schemes} are mechanisms to achieve isolation; that is, to control the interaction among the concurrent transactions in order to prevent them from destroying the consistency of the database. \\ 
+Multiple transaction are allowed to run concurrently in the system. The advantages of this are increased processor and disk utilization and reduced average response time. \define{Concurrency control schemes} are mechanisms to achieve isolation; that is, to control the interaction among the concurrent transactions in order to prevent them from destroying the consistency of the database. \\ 
 
 A \define{schedule} is a sequence of instructions that specidfy the chronological order in which instructions of concurrent transactions are executed. A schedule for a set of transactions must consist of all instructions of those transactions and must preserve the order in which the instructions appear in each individual transaction. A transaction that successfully completes its execution will have a commit instructions as the last statement. A transaction that fails to successfully complete its execution will have an abort instructions as the last statement. \\ 
 
@@ -454,6 +454,52 @@ A \define{schedule} is a sequence of instructions that specidfy the chronologica
   \define{Serial} schedules are safe but not efficient. \define{Concurrent} schedules are efficient but can be unsafe. 
 \end{remark}
 
-A schedule is \define{serializable} if it is equivalent to a serial scheduler (i.e. a concurrent schedule that can be transformed into an equivalent serial schedule). Instructions will \bold{conflict} if there are writes in any of the insturctions. 
+A schedule is \define{serializable} if it is equivalent to a serial schedule (i.e. a concurrent schedule that can be transformed into an equivalent serial schedule). Instructions will \bold{conflict} if there are writes in any of the instructions. Different forms of schedule equivalence give rise to the notions of: 
+\begin{itemize}
+  \item Conflict serializability 
+  \item View serializability
+\end{itemize}
+
+If a schedule $S$ can be transformed into a schedule $S'$ by a series of swaps of non-conflicting instructions, we say that $S$ and $S'$ are \define{conflict equivalent}. We say that a schedule $S$ is \define{conflict serializable} if it is conflict equivalent to a serial schedule. \\ 
+
+\begin{remark}
+  For a schedule to be conflict serializable, you must be able to move the order of any instruction which does not include a write. 
+\end{remark}
+
+Let $S$ and $S'$ be two schedules with the same set of transactions. $S$ and $S'$ are \define{view equivalent} if the follownig three conditions are met: 
+\begin{enumerate}
+  \item For each data item $Q$, if transaction $T_i$ reads the initial value of $Q$ in schedule $S$, then transaction $T_i$ must, in schedule $S'$, also read the intial value of $Q$. 
+    \begin{itemize}
+      \item \bold{First to Read Rule}
+      \item Need to know which transaction reads the data item first. 
+      \item 
+    \end{itemize}
+  \item For each data item $Q$ if transaction $T_i$ executes \bold{read}($Q$) in schedule $S$, and that value was produced by transaction $T_j$ (f any), then transaction $T_i$ must in schedule $S'$ also read the value of $Q$ that was produced by transaction $T_j$. 
+    \begin{itemize}
+      \item \bold{Producer-Consumer Rule}
+      \item Between 2 transaction, we need to know which one writes and which one reads. 
+    \end{itemize}
+  \item FOr each data item $Q$, the transaction (if any) that performs the final \bold{write}($Q$) operation in schedule $S$ must perform the final \bold{write}($Q$) operation in schedule $S'$. 
+    \begin{itemize}
+      \item \bold{Last to Write Rule}
+      \item Need to know which transaction is the last to write to the data item.
+    \end{itemize}
+\end{enumerate}
+
+View  equivalence is also based purely on reads and writes alone. A schedule $S$ is \define{view serializable} if it is view equivalent to a serial schedule. Every conflict serializable schedule is also view serializable. 
+
+A \define{precedence graph} is a direct graph where the vertices are the transactions. We draw an arc from $T_i$ to $T_j$ if the two transactions conflict, and $T_i$ accessed the data item on which the conflict arose earlier. We may label the arc by the item that was accessed. \\ 
+
+A schedule is conflict serializable if and only if its precedence graph is acyclic. Cycle-detection algorithms exist which take order $n^2$ time, where $n$ is the number of vertices in the graph. If precedence graph is acycle, the serializability order can be obtained by a \emph{toplogical sorting} of the graph. The precedence graph test for conflict serializability cannot be used directly to test for view serializability. 
+
+\section{Concurrency Control}
+
+A \define{lock} is a mechanism to control concurrent access to a data item. Data items can be locked in two modes: 
+\begin{enumerate}
+  \item \define{exclusive} ($X$) mode. Data item can be both read as well as written. X-lock is requested using \bold{lock-X} instruction. 
+  \item \define{shared} ($S$) mode. Data item can only be read. S-lock is requested using \bold{lock-S} instruction.
+\end{enumerate}
+
+Lock requests are made to concurrency-control manager. Transaction can proceed only after request is granted. 
 
 \end{document}
