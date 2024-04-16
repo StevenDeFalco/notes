@@ -369,4 +369,16 @@ Very large language models seem to perform some kind of learning without gradien
   \item \define{Low-Rank Adaptation (LoRa)} learns low-rank "diff" between the pretrained and finetuned weight matrices. This is easier to learn than prefix-tuning. 
 \end{enumerate}
 
+\section{Dependency Parsing}
+
+There are two views of linguistic structure: \bold{constituency} and \bold{dependency structure}. In the \define{consitituency structure}, phrase structure organizes words into nested constitutents; starting units are words in some category, words are combined into phrases, and phrases can be combined into bigger phrases. \define{Dependency structure} shows which words depend on (modify or are arguments of) which other words. \\ 
+
+We need to understand sentence structures in order to be able to interpret language correctly. \define{Prepositional phrase attachment ambiguity} arises in language when a prepositional phrase can be attacned to more than one part of a sentence, resulting in different possible interpretations of the sentence's meaning. A key parsing decision is how we \emph{attach} different various constitutents. \\ 
+
+\define{Coordination scope ambiguity} is a type of syntactic ambiguity that arises in sentences containing coordinate structures. Coordinate structures are sentences or phrases where two or more elements of similar syntactic type are joined together using conjunctions. The ambiguity occurs when it's not clear which elements are being coordinated with each other. \\ 
+
+Dependency syntax assumes that syntactic structure consists of lexical items, normally binary asymmetric relations (arrows) called \define{dependencies}. The arrows are commonly typed with the name of grammatical relations. The arrow connects a head with a dependent. Usually, dependencies form a tree. \\ 
+
+\define{Dependency parsing} is the process to analyze the grammatical structure in a sentence and find out related words as well as the type of the relationship between them. \define{Distributed representations} represent each word as a $d$-dimensional dense vector; similar words are expected to have close vectors. Meanwhile, part-of-speech tags and dependency labels are also represented as $d$-dimensional vectors; the smaller discrete sets may also exhibit many semantical similarities. \\ 
+
 \end{document}
