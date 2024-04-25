@@ -556,4 +556,43 @@ A system is deadlocked if there is a set of transactions such that every transac
 
 Deadlocks can be described as a \emph{wait-for} graph. The system is in a deadlock state if and only if the wait-for graphy has a cycle. Must invoke a deadlock-detection algorithm periodically to look for cycles. When a deadlock is detected, some transaction will have to be rolled back (made a victim) to break deadlock; select the transaction as victim that will incur minimum cost. Starvation happens if the same transaction is always chosen as victim. Include the number of rollbacks in the cost factor to avoid starvation. 
 
+\section{Recovery System}
+
+\define{Physical blocks} are those blocks residing on the disk. \define{Buffer blocks} are the blocks residing temporarily in main memory. Each transition has its private work-area in which local copies of all data items accessed and updated are kept. \\ 
+
+A \bold{log} is kept on stable storage. The \define{log} is a sequence of log records, and maintains a record of update activities on the database. When a transaction starts, it registers itself by writing a log record. Before the transaction executes, a log record is written where $V$ is the value $X$ before the write, and $V_2$ is the value to be written to $X$. Log record notes that $T_i$ has performed a write on data item $X_j$ which had value $V_1$ before the write, and will have value $V_2$ after the write. When $T_i$ finishes its last statement, the commit statement is written to the log record. We assume, then, that the log records are written directly to stable storage. \\ 
+
+The \define{deferred database modification} scheme records all modificatins to the log, but defers all the writes to after partial commit. Assume that transactions execute serially. A transaction starts by writing \emph{start} to the log. A write operation results in a log record being written with the new value $V$ for $X$. The write is not performed on $X$ at this time, but is deferred. When the transaction partially commits, \emph{commit} is written to the log. Finally, the log records are read and used to actually execute the previously deferred writes. During recovery after a crash, a transaction needs to be redone if and only if both \emph{start} and \emph{commit} are in the log. Redoing a transaction sets the value of all data items updated by hte transaction to the new values. \\ 
+
+The \define{immediate database modification} scheeme allows database updates of an uncommitted transaction to be made as the writes are issued; since undoing may be needed, update logs must have both old value and new value. Update log record must be written before database item is written. We assume that the log record is output directly to stable storage. Also can be extended to postpone log record output, so long as prior to execution of \emph{output} operation for a data block $B$, all log records corresponding to items $B$ must be flushed to stable storage. Output of updated blocks can take place at any time before or after transaction commit. The order in which blocks are output can be different from the order in which they are written. The recovery procedure for immmediate database modification has two operations: 
+\begin{itemize}
+  \item \emph{undo} restores the value of all data items updated by a transaction to their old values, going backwards from the last log record for the transaction 
+  \item \emph{redo} sets the value of all data items updated by a transaction to the new values going forward from the first log record for the transactio 
+\end{itemize}
+Both operations must be \define{idempotent}: that is, even if the operation is executed multiple times, the effect is the same as if it executed once. When recovering after failure 
+\begin{itemize}
+  \item A transaction needs to be undone if the log contains the record \emph{start}, but does not contain the record \emph{commit}. 
+  \item A transaction needs to be redone if the log contains both the record \emph{start} and the record \emph{commit}.
+\end{itemize}
+Undo operations are performed first, then redo operations. \\ 
+
+Some problems in recovery procedure include the following 
+\begin{enumerate}
+  \item Searching the entire log is time-consuming 
+  \item We might unnessarily redo transactions which have already output their updates to the database. 
+\end{enumerate}
+We can streamline the recovery procedure by periodically performing \define{checkpointing}: 
+\begin{enumerate}
+  \item Output all log recrds currently residing in main memory onto stable storage. 
+  \item Output all modified buffer blocks to the disk. 
+  \item Write a log record \emph{checkpoint} onto stable storage. 
+\end{enumerate}
+During recovery we need to consider only hte most recent transaction that started before the checkpoints and transactions that started after that most recent transactions. 
+\begin{enumerate}
+  \item Scan backwards from end of log to find the most recent checkpoint record\item Continue scanning backwards until a record \emph{start} is found 
+  \item Need only consider the part of log following above \emph{start} record. Earlier part of log can be ignored during recovery, and can be erased whenever desired. 
+  \item For all transactions with no \emph{commit} execute undo. 
+  \item Scanning forward in the log, for all transactions starting from the transaction or later with a \emph{commit}, execute redo. 
+\end{enumerate}
+
 \end{document}
