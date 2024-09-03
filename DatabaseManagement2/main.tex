@@ -1,0 +1,598 @@
+% A note-taking template by Steven DeFalco
+% github.com/StevenDeFalco/notes
+
+\documentclass{article}
+
+% import note styles
+\usepackage{../styles}
+
+% Heading information
+\title{CS562: Database Management Systems II Notes}
+\author{Steven DeFalco}
+\date{Spring 2024}
+
+
+\begin{document}
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+
+\section{Indexing}
+
+Indexing methods are used to speed up access to desired data. A \define{search key} is an attribute used to look up records in a file. An \define{index file} consists of records (called \bold{index entries}) of the form. Index files are typically much smaller than the original file. There are two basic kinds of indices:
+\begin{itemize}
+  \item \bold{Ordered indices}: search keys are stored in sorted order 
+  \item \bold{Hash indices}: search keys are distributed uniformly across \emph{buckets} using a \emph{hash function}
+\end{itemize}
+
+\begin{remark}
+  When \emph{optimizing} in database queries, the goal is to have a small search space. 
+\end{remark}
+
+In an \define{ordered index}, index entries are stored sorted on the search key value. In a sequentially ordered file, the \define{primary index} is the index whose search key specifies the sequential order of the file; the search key of a primary index is usually but not necessarily the primary key. The \define{secondary index} is an index whose key specifies an order different from the sequential order of the file (also called non-clustering index). An \define{index-sequential file} is an ordered sequential file with a primary index. 
+
+A \define{dense index} is where an index record appears for every search-key value in the file. \define{Sparse index} contains index records for only some search-key values. To locate a record with search-key value $K$ we: 
+\begin{enumerate}
+  \item Find index record with largest search-key value $<K$ 
+  \item Search file sequentially starting at the record to which the index record points
+\end{enumerate}
+
+\begin{remark}
+  Sparse index must be primary index
+\end{remark}
+Compared to dense indices, sparse indices have less space and less maintenance overhead for insertions and deletions. However, they are generally slower than dense index for locating records. a record with search-key value $K$ we: 
+\begin{enumerate}
+  \item Find index record with largest search-key value $<K$ 
+  \item Search file sequentially starting at the record to which the index record points
+\end{enumerate}
+
+\begin{remark}
+  Sparse index must be primary index
+\end{remark}
+Compared to dense indices, sparse indices have less space and less maintenance overhead for insertions and deletions. However, they are generally slower than dense index for locating records. \\ 
+
+If primary index does not fit in memory, access becomes expensive. A solution to this is to treat primary index kept on disk as a sequential file and construct a sparse index on it. The outer index is a sparse index of primary index. The inner index is the primary index file. If even out index is too large to fit in main memory, yet another level of index can be created and so on. Indices at all levels must be updated on insertion or deletion from the file. 
+
+\subsection{Index Updates}
+
+\subsubsection{Deletion} 
+
+If the deleted record was the only record in the file with its particular search-key value, the seark-key is deleted from the index also. For singl e-level index deletion. 
+\begin{itemize}
+  \item Dense indices---deleetion of search-key 
+  \item Sparse indices--- 
+    \begin{itemize}
+      \item If an entry for the search key exists in the index, it is deleted by replacing the entry in teh index with the next search-key value in the file 
+      \item If the next search-key value already has an index entry, the entry is deleted instead of being replaced
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Insertion}
+
+In single-level index insertion: 
+\begin{itemize}
+  \item Perform a lookup using the searh-key value appearing in the record to be inserted. 
+  \item Dense indices---if the search-key value does not appear in the index, insert it 
+  \item sparse indices---if index stores an entry for each block of the file, no chnage needs to be made to the index unless a new block is created. If a new block is created, the first search-key value appearing in the new block is inserted into the index. 
+\end{itemize}
+In multilevel insertion, algorithms are simple extensiosn of the single-level algorithms. 
+
+Indices offer substantial benefits when searching for records, but updating indices imposes overhead on database modification---when a file is modified, every index on the file must be updated. Sequential scan using primary index is efficient, but a sequential scan using a second index is expensive. 
+
+\section{B+ Tree Index Files}
+
+B$^{+}$-tree indices are an alternative to indexed-sequential files. Some disadvantages of indexed-sequential files are that performance degrades as the file grows (since many overflow blocks get created) and that periodic reorganization of the entire file is required. Advantages of B$^{+}$-tree index files are: 
+\begin{itemize}
+  \item automatically reorganizes itself with small, local changes in the face of insertions and deletions 
+  \item Reorganization of entire file is not required to maintain performance
+\end{itemize}
+One minor disadvantage of B$^{+}$-trees is the extra insertion and deletion overhead (space overhead); however, the advantages outweigh the disadvantages and thus this structure is used extensively. \\ 
+
+A B$^{+}$-tree is a rooted tree satisfying the following properties: 
+\begin{itemize}
+  \item All paths from root to leaf are of the same length 
+  \item Each node that is not a root or a leaf has between $\ceil{n/2}$ and $n$ children 
+  \item A leaf node has between $\ceil{(n-1)/2}$ and $n-1$ values 
+  \item Special cases\dots 
+    \begin{itemize}
+      \item If the root is not a leaf, it has at least 2 children. 
+      \item If the root is a leaf (that is, there are no other nodes in the tree), it can have between $0$ and $(n-1)$ values. 
+    \end{itemize}
+\end{itemize}
+
+\subsection{Types of nodes in B$^{+}$-trees}
+
+The following are properties of a \bold{leaf node}: 
+\begin{itemize}
+  \item For $i=1,2, \dots , n-1$, pointer $P_i$ either points to a file record with search-key value $K_i$, or to a bucket of pointers to file records, each record having search-key value $K_i$. Only need bucket structure if search-key does not form a primary key. 
+  \item If $L_i , L_j$ are leaf nodes and $i < j$, $L_j$'s search-key values are less than $L_j$'s search-key values 
+  \item $P_n$ points to next leaf node in search-key order 
+\end{itemize}
+
+\bold{Nonleaf nodes} form a multi-level sparse index on the leaf nodes. For a non-leaf node with $m$ pointers: 
+\begin{itemize}
+  \item All the search-keys in the subtree to which $P_1$ points are less than $K_{1}$ 
+  \item For $2 \leq i \leq n - 1$, all the search-keys in the substree to which $P_i$ points have values greater than or equal to $K_{i-1}$ and less than $K_i$ 
+  \item All the search-keys in the subtree to which $P_n$ points have values greater than or equal to $K_{n-1}$
+\end{itemize}
+
+Since the inter-node connections are done by pointers, \emph{logically} close blocks need not be \emph{physically} close. The non-leaf levels of the B$^{+}$-tree form a hierarchy of sparse indices. The B$^{+}$-tree contains a relatively small number of levels; level below root has at least $2 \times \ceil{n/2}$ values. If there are $K$ search-key values in the file, the tree height is no more than $\ceil{\textrm{log}_{\ceil{n/2}}(K)}$. Insertions and deletions to the main file can be handled efficiently, as the index can be restructured in logarithmic time. 
+
+\subsection{Queries on a B$^{+}$-tree}
+
+Find all records of a search-key value of $k$. 
+\begin{enumerate}
+  \item $N=\textrm{root}$ 
+  \item Repeat 
+    \begin{enumerate}
+      \item Examine $N$ for the smallest search-key value $>k$. 
+      \item If such a value exists, assume it is $K_i$. THen set $N=P_i$ 
+      \item Otherwise $k \geq K_{n-1}$. Set $N=P_n$
+    \end{enumerate}
+    Until $N$ is a leaf node 
+  \item If for some $i$, key $K_i = k$ follow pointer $P_i$ to the desired record or bucket. 
+  \item Else no record with search-key value $k$ exists
+\end{enumerate}
+
+\subsection{Updates on B$^{+}$-trees}
+
+\subsubsection{Insertion}
+
+To perform insertion on a B$^{+}$-tree\dots 
+\begin{enumerate}
+  \item Find the leaf node in which the search-key value would appear 
+  \item If the search-key value is already present in the leaf node 
+    \begin{enumerate}
+      \item Add record to the file 
+      \item If necessary add a pointer to the bucket 
+    \end{enumerate}
+  \item If the search-key value is not present, then  
+    \begin{enumerate}
+      \item Add the record to the main file (and create a bucket if necessary) 
+      \item If there is room in the leaf node, insert (key-value, pointer) pair in the leaf node 
+      \item Otherwise, split the node (along with new (key-value, pointer) entry) 
+    \end{enumerate}
+\end{enumerate}
+To split a leaf node\dots 
+\begin{itemize}
+  \item Take the $n$ (search-key value, pointer) pairs (including the one being inserted) in sorted order. Place the first $\ceil{n/2}$ in the original node, and the rest in a new node. 
+  \item let the new node by $p$, and let $k$ be the least key value in $p$. Insert $(k,p)$ in the parent of the node being split. 
+  \item If the parent is full, split it and \bold{propagate} the split further up. 
+\end{itemize}
+Splitting of nodes proceeds upwards until a node that is not full is found. In the wrost case, the root node may be split increasing the height of the tree by 1. \\ 
+
+To split a non-leaf node: when inserting $(k,p)$ into an already full internal node $N$ 
+\begin{itemize}
+  \item Copy $N$ to an in-memory area $M$ with space for $n+1$ pointers and $n$ keys 
+  \item Insert $(k,p)$ into $M$ 
+  \item Copy from $M$ back into node $N$ 
+  \item Copy from $M$ into newly allocated node $N'$ 
+  \item Insert $(K_{\ceil{n/2}}, N')$ into parent $N$
+\end{itemize}
+
+\subsubsection{Deletion}
+
+To perform a deletion in a B$^{+}$-tree\dots 
+\begin{itemize}
+  \item Find the record to be deleted, and remove it from the main file and from the bucket (if present)
+  \item Remove (search-key value, pointer) from the leaf node if there is no bucket or if the bucket has become empty 
+  \item If the node has too few entries due to the removal, and the entries in the node and a sibling fit into a single node, then \emph{merge siblings}: 
+    \begin{itemize}
+      \item Insert all the search-key values in the two nodes into a single node (the one on the left), and delete the other node 
+      \item Delete the pair $(K_{i-1}, P_{i})$, where $P_i$ is the pointer to the deleted node, from its parent, recursively using the above procedure. 
+    \end{itemize}
+  \item Otherwise, if the node has too few entries due to the removal, but the entries in the node and a sibling do not fit into a single node, then \emph{redistribute pointers}: 
+    \begin{itemize}
+      \item Redistribute the pointers between the node and a sibling such that both have more than the minimum number of entries 
+      \item Update the corresponding search-key value in the parent of the node
+    \end{itemize}
+  \item The node deletions may cascade upwards until a node which has $\ceil{n/2|}$ or more pointers is found 
+  \item If the root node has only one pointer after deletion, it is deleted and the sole child becomes the root. 
+\end{itemize}
+
+\subsubsection{Indexing}
+
+Variable lenght strings are used as the keys: use space utilization as criterion for splitting, not number of pointers. \define{Prefix compression} is that key values at internal nodes can be prefixes of the full key. For this, must keep enough chraracters to distinguish entries in the subtrees separated by the key value. Keys in the leaf nodes can be compressed by sharing common prefixes. \\ 
+
+\subsubsection{B-Tree Index Files}
+
+B-Tree index files are similar to B$^{+}$-trees, but B-tree allows search-key values to appear only once; eliminates redundant storage of search keys. Search keys in nonleaf nodes appear nowhere else in the B-tree; an additional pointer field for each search key in a nonleaf node must be included. Some advantages of B-tree indices are: 
+\begin{itemize}
+  \item May use less tree nodes than a corresponding B$^{+}$-tree
+  \item Sometimes possible to find search-key value before reaching leaf node 
+\end{itemize}
+Some disadvantages of B-tree indices are: 
+\begin{itemize}
+  \item Only small fraction of all search-key values are found correctly
+  \item Non-leaf nodes are larger, so fan-out is reduced. Thus, B-trees typically have greater depth than corresponding B$^{+}$-tree 
+  \item Insertion and deletion are more complicated than in B$^{+}$-trees 
+  \item Implementation is harder than B$^{+}$-trees 
+\end{itemize}
+Typically, the advantages of B-Trees do not out weigh the disadvantages. 
+
+\define{Covering indices} refers to adding extra attributes to an index so (some) queries can avoid fetching the actual records. If a record moves, all secondary indices that store record pointers have to be updated. Node splits in B$^{+}$-tree file organizations become very expensive; the solution is to use primary-index search keys instead of record pointers in secondary index. 
+
+\section{Hashing}
+
+A \define{bucket} is a unit of storage containing one or more records (a bucket is typically a disk block). In a \define{hash file organization} we obtain a bucket of a record directly from its search-key value using a \bold{hash function}. Hash function $h$ is a function from the set of all search-key values $K$ to the set of all bucket addresses $B$. Hash function is used to locate records for access, insertion as well as deletion. 
+
+\begin{remark}
+  Records with different search-key values may be mapped to the same bucket; thus entire bucket has to be searched sequentially to locate a record.
+\end{remark}
+
+An ideal hash function is \bold{uniform}, i.e., each bucket is assigned the same number of search-key values from the set of all possible values. Ideal hash function is \bold{random}, so each bucket will have the same number of records assigned to it irrespective of the actual distribution of search-key values in the file. \\ 
+
+Bucket overflow can occur because of\dots 
+\begin{itemize}
+  \item Insufficient buckets 
+  \item Skew in distribution of records 
+\end{itemize}
+Although the probability of bucket overflow can be reduced, it cannot be eliminated; it is handled by using \emph{overflow buckets}. In \define{closed hashing} (overflow chaining), the overflow buckets of a given bucket are chained together in a linked list (when bucket is full, just chain/link to a new bucket). An alternative, called \define{closed hashing}, which does not use overflow buckets, is not suitable for database applications.  
+
+\subsection{Bitmap Indices}
+
+Bitmap indices are a special type of index designed for efficient querying on multiple keys. Records in a relation are assumed to be numbered sequentially from say, 0. Given a number $n$ it must be easy to retrieve record $n$; particularly easy if records are of fixed size. This is applicable on attributes that take on a relatively small number of distinct values. A bitmap is simply an array of bits. \\
+
+In its simplest form, a bitmap index on an attribute has a bitmap for each value of th attribute. The bitmap has as many bits as records. In a bitmap for value $v$, the bit for a record is 1 if the record has the value $v$ for the attribute, and is 0 otherwise.  
+
+\begin{remark}
+  To find the number (and location) of records that have two specific attributes, then we \bold{and} together the two bitmaps for each attribute and the resulting bit map will have ones in the locations of every record that shares both those attributes. E.g. all zeroes in the resulting bitmap would indicate that there are no records which have both of those attributes. 
+\end{remark}
+
+\begin{remark}
+  Bitmaps work very well when the \bold{cardinality is low} (i.e. each attribute only has a few possible values that it can take on). If attributes include gender, country, or similar values that don't have many unique values; then a bitmap is an appropriate option. 
+\end{remark}
+
+\section{Query Processing}
+
+The basic stpes in query processing are \bold{parsing and translation}, \bold{optimization}, and \bold{evaluation}. 
+
+\subsection{Optimization}
+
+A relational algebra expression may have many equivalent expressions. Each relational algebra operation can be evaluated using one of several different algorithms. Correspondingly, a relational-algebra expression can be evaluated in many ways. Annotates expression specifying detailed evaluation strategy is called an \define{evaluation-plan}. \\ 
+
+Amongst all equivlaent evaluation plans, chosoe the one with the lowest cost. Cost is estimated using statistical information about the database. 
+
+\subsubsection{Measures of Cost}
+
+Cost is generally measured as total elapsed time for answering query. Typically disk access is the predominant cost, and is also relatively easy to estimate. This is measured by taking into account 
+\begin{itemize}
+  \item Number of seeks times average seek-cost
+  \item Number of blocks read times average block read cost 
+  \item Number of blocks written times average block write cost
+\end{itemize}
+
+\begin{remark}
+  The cost to write a block is greater than the cost to read a block. Data is read back after being written to ensure that the write was successful. 
+\end{remark}
+
+Consider that $t_T$ is the time to transfer one block and $t_S$ is the time for one seek. Thus, the cost for one $b$ block transfers plus $S$ seeks is $b \times t_T + S \times t_S$. 
+
+\subsection{Selection Operation}
+
+\define{File scan} are search algorithms that locate and retrieve records that fulfill a selection condition. Algorithm \bold{A1} (linear search) will scan each file block and test all records to see whether they satisfy the selection condition. The cost estimate for linear search is $b_r$ block transfers + 1 seek ($b_r$ denotes the number of blocks contianing records from relation $r$). If selection is on a key attribute, can stop on finding record. Linear search can be applied regadless of selection condition, ordering of records in the file, or availability of indices. \\ 
+
+\bold{A2} (binary search) is applicable if an equality comparison on the attribute on which file is ordered. Assume that the blocks of a relation are stored contiguously. The cost estimate (number of blocks to be scanned) is the $\ceil{\textrm{log}_2 (b_r)} \times (t_T + t_S)$. \\ 
+
+\define{Index scan} are search algorithms that use an index. The selection condition must be on search-key of index.\\
+
+In \bold{A3} (primary index on candidate key, equality), retrieve a single record that satisfies the corresponding equality condition $$\textrm{Cost} = (h_i + 1) \times (t_T + t_S)$$ where $h_i$ is the height of the index. \\ 
+
+In \bold{A4} (primary index on nonkey, equality), retrieve multiple records. Records will be on consecutive blocks. Let $b$ = number of blocks containing matching records $$\textrm{Cost} = h_i \times (t_T + t_S) + t_S + t_T \times b$$ \\ 
+
+In \bold{A5} (equality on serach-key of secondary index), retrieve a single record if the sarch-key is a candidate key $$\textrm{Cost} = (h_i + 1) \times (t_T + t_S)$$ Retrieve multiple records if search-key is not a candidate key. Each of $n$ matching records may be on a different $$\textrm{Cost} = (h_i + n) \times (t_T + t_S)$$ \\ 
+
+In \bold{A6} (primary index, comparison) (Relation is sorted on A)\dots For $\sigma_{A \geq v}(r)$ use index to find first tuples $\geq v$ and scan relation sequentially from there. For $\sigma_{A \leq v}(r)$ just scan relation sequentially until the first tuple $> v$; do not use index. \\ 
+
+In \bold{A7} (secondary index, comparison)\dots For $\sigma_{A \geq v}(r)$ use index to find first index entry $geq v$ and scan index sequentially from there, to find pointers to records. For $\sigma_{A \leq  v}(r)$ just scan leaf pages of index finding pointers to records, until first entry $> v$. In either case, retrieve records that are pointed to 
+\begin{itemize}
+  \item requires an I/O for each record 
+  \item Linear file scan may be cheapter (use second index iff very few records are selected). 
+\end{itemize}
+
+\bold{Conjunction} is when there are multiple conditions to check for. In \bold{A8} (conjunctive selection using one index), select a combination of $\theta_i$ and algorithms A1 through A7 that results in the least cost for $\sigma_{\theta i}(r)$. Test other conditions on tuple after fetching it into memory buffer. \\
+
+In \bold{A9} (conjunctive selection using multiple-key index), use appropriate composite (multiple-key) index if available. \\ 
+
+\bold{A10} (conjunctive selection by intersection of identifiers) requires indices with record pointers. Use corresponding index for each condition and take intersection of all the obtained sets of record pointers. Then fetch records from file. If some conditions do not have appropriate indices, apply test in memory. \\ 
+
+\bold{Disjunction} is when there are multiple conditions \emph{or}ed together. \bold{A11} (disjunctive selection by union of identifiers) is applicable if all conditions have available indices, otherwise use linear scan. Use corresponding index for each condition, and take union of all the obtained sets of record pointers. Then fetch records from file. When \bold{negation} is present, use linear scan on file. 
+
+\subsection{Join Operations}
+
+There are several different algorithms that can be used to implement joins 
+\begin{itemize}
+  \item Nested-loop join 
+  \item Block nested-loop join 
+  \item Indexed nested-loop join 
+  \item Merge-join 
+  \item Hash-join
+\end{itemize}
+The choice should be made based on cost estimate. \\ 
+
+\subsubsection{Nested-Loop Join}
+
+In the worst case, if there is enough memory only to hold one block of each relation, the estimated cost is $$n_r \times b_s + b_r$$ block transfers, plus $$n_r + b_r$$ seeks. If the smaller relation fits entirely in memory, use that as the inner relation. This reduces the cost to $b_r + b_s$ block transfers and 2 seeks. \\ 
+
+\subsubsection{Block Nested-Loop Join}
+
+\define{Block Nested-Loop Join} is a variant of nest-loop join in which every block of inner relation is paired with every block of outer relation. The worst case estimate is $b_r \times b_s + b_r$ block transfers $+ 2 \times b_r$ seeks. Each block in the inner relation is read once for each block in the outer relation (instead of once for each tuples in the outer relation). The best case is $b_r + b_s$ block transfers $+ 2$ seeks. For each tupel $t_r$ in the outer relation $r$, use the index to look up tuples in $s$ that satisfy the join condition with tuple $t_r$. 
+
+\subsubsection{Index Nested-Loop Join}
+
+Index lookups can replace file scans if jion is an equi-jion or natural noin and an index is available on the inner relation's join attribute. For each tuple $t_r$ in the outer relation $r$, use the index to look up tuples in $s$ that satisfy the join condition with tuple $t_r$. The worst case is that the buffer has space for only one page of $r$, and, for ecah tuple in $r$, we perform an index lookup on $s$. The cost of the join is $b_r (t_T + t_s) + n_r \times c$ where $c$ is the cost of traversing index and fetching all matching $s$ tuples for one tuple of $r$. $c$ can be estimated as the cost of a single selection on $s$ using the join condition. If indices are available on join attributes of both $r$ and $s$, use the relation with fewer tuples as the outer relation. 
+
+\subsubsection{Hash-Join}
+
+Hash-join is applicable for equi-joins and natural joins. A hash function $h$ is used to partition tuples of both relations. $h$ maps \emph{JoinAttrs} values to $\{0, 1, \dots , n\}$ where \emph{JoinAttrs} denotes the common attributes of $t$ and $s$ used on the natural join. $r$ tuples in $r_i$ need only to be compared with $s$ tuples in $s_i$ and need not be compared with $s$ tuples in any other partition, since an $r$ tuples and an $s$ tuple that satisfy the join condition will have the same value for the join attributes. 
+
+\subsubsection{Complex Joins}
+
+For joins with \bold{conjunctive} conditions (\emph{or}ed together), either use nested loops/block nested loops or conpute the resolt of one of the simpler joins. \\ 
+
+For joins with a \bold{disjunctive} condition, either use nested block loops/block nested loops or compute as the union of the records in individual joins. \\ 
+
+\subsection{Other Operations}
+
+Duplicate elimination can be implemented via hashing or sorting. On sorting, duplicates will come adjacent to each other, and all but one set of duplicates can be deleted. For optimization, duplicates can be deleted during run generation as well as at intermediate merge steps in external sort-merge. \\ 
+
+\bold{Aggregation} can be implemented in a manner similar to duplicate elimination. Sorting or hasing can be used to bring tuples in the same group together, and then the aggregate functions can be applied on each group. For optimization, combine tuples in the same group during run generation and intermediate merges, by computing partial aggregate values. \\ 
+
+\bold{Set Operations} can either use variant of merge-join after sorting, or variant of hash-join. \\ 
+
+\bold{Outer join} can be computed either as a join followed by addition of null-padded non-participating tuples or by modifying the join algorithms. \\ 
+
+\section{Materialization and Pipelining}
+
+There are some alternatives for evaluating an entire expression tree. In \define{materialization}, we generate results of an expression whose inputs are relations or are already computed, materialize (store) it on disk (and repeat). In \define{pipelining}, pass on tuples to parent operations even as an operation is being executed. \\ 
+
+\subsubsection{Materialization}
+
+\define{Materialized evaluation} will evaluate one operation at a time, starting at the lowest-level. Use intermediate results materialized into temporary relations to evaluate next-level operations. Materialized evaluation is always applicable. However, the costs of writing results to disk and reading them back can be quite high. \define{Double buffering} will use two output buffers for each operation, when one is full write it to disk while the other is getting filled. THis allows overlap of disk writes with computation and reduces execution time.
+
+\subsubsection{Pipelining}
+
+\define{Pipelined evaluation} evalues several operations simulatenously, passing the results of one operation on to the next. This is much cheaper than materialization: there is no need to store a temporary relation to the disk. However, pipelining may not always be possible. For pipelining to be effective, use evaluation algorithms that generate output tuples even as tuples are received for inputs to the operations. Pipelines can be executed in two ways: \bold{demand driven} and \bold{producer driven}. 
+
+\section{Query Optimization}
+
+An \define{evaluation plan} defines exactly what algorithm is used for each operation, and how the execution of the operations is coordinated. The cost difference between evaluation plans for a query can be enormous. There are three steps in \define{cost-based query optimization}:
+\begin{enumerate}
+  \item Generate logically equivalent expressions using \bold{equivalence rules} 
+  \item Annotate resultant expressions to get alternative query plans 
+  \item Choose the cheapest plan based on \bold{estimated cost}
+\end{enumerate}
+The estimation of plan cost is based on 
+\begin{itemize}
+  \item Statistical information about relations (e.g. number of tuples, number of distinct values for an attribute)
+  \item Statistics estimation for intermediate results 
+  \item Cost formulae for algorithms, computed using statistics 
+\end{itemize}
+Some \bold{equivalence rules} include the following:
+\begin{enumerate}
+  \item Conjunctive selection operations can be deconstructed into a sequence of individual selections. 
+  \item Selection oeprations are commutative. 
+  \item Only the last in a sequence of projection operations is needed, the others can be omitted. 
+  \item Selections can be combined with Cartesian products and theta joins.
+  \item Theta-join operations (and natural joins) are commutative.
+  \item Natural join operations are associative.
+  \item The selection operation distributes over the theta join operation under the following two conditions 
+    \begin{itemize}
+      \item When all the attributes in $\theta_0$ involve only the attributes of one of the expressions ($E_1$) being joined. 
+      \item When $\theta_1$ involves only the attributes of $E_1$ and $\theta_2$ involves only the attributes of $E_2$. 
+    \end{itemize}
+  \item The projection operation distributes over the theta join operation in some cases. 
+  \item The set operations union and intersection are commutative. 
+  \item Set union and intersection are associative.
+  \item The selection operations distributes over $\cup , \cap, \textrm{and }-$. 
+  \item The projection operation distributes over union. 
+\end{enumerate}
+
+\begin{remark}
+  \emph{Cost} based optimization selects the execution plan with the lowest cost. A \emph{heuristic} approach to optimization uses logic to select the best execution plan; make the table as small as possible and do so as early as possible.
+\end{remark}
+
+Three strategies used in \define{heuristic optimization} are as follows: 
+\begin{enumerate}
+  \item Push down selection operators (to reduce number of rows) 
+  \item Push down projection operations (to reduce number of columns) 
+  \item Do the most restrictive join first
+\end{enumerate}
+
+\define{Join associativity} is the property that allows us to adjust the order of joins; however, testing to find the most effcient join is expensive and not typically done in practice. \\ 
+
+Query optimizers use equivalence rules to \define{systematically} generate expressions equivalent to the given expression. Space requirements are reduced by sharing common sub-expressions. Time requirements are reduced by not generating all expressions. To determine the cost of each operator, we need the statistics of input relations; these statistics (number of columns/rows, number of distinct values: cardinality) are also stored for each data set. \\ 
+
+We must consider the interaction of evaluation techniques when choose evaluation plans; choosing the cheapest algorithm for each operation independently may not yield the best overall algorithm. Practical query optimizers incorporate elements of the following two broad approaches: 
+\begin{enumerate}
+  \item Search all the plans and choose the best plan in a cost-based fashion. 
+  \item Uses heuristics to choose a plan
+\end{enumerate}
+
+To find the best join tree for a set of $n$ relations\dots Consider all possible plans, recursively compute costs for joining subsets to find the cost of each plan, when a plan for any subset is computed, store it and reuse it when it is required again (instead of recomputing it): \bold{Dynamic Programming}. \\ 
+
+In \define{left-deep join trees}, the right-hand-side input for each join is a relation, not the result of an intermediate join. Cost-based optimization is expensive, even with dynamic programming. Systems may use \emph{heuristics} to reduce the number of choices that must be made in a cost-based fashion. Heuristic optimization transofrms the query-tree by using a set of rules that typically improve execution performance. 
+
+\subsection{Statistics for Cost Estimation}
+
+Some important statistics to keep track of are\dots 
+\begin{itemize}
+  \item $n_r$: number of tuples in a relation $r$ 
+  \item $b_r$: number of blocks containign tuples of $r$
+  \item $I_r$: size of a tuple $r$
+  \item $f_r$: blocking factor of r---i.e. the number of tuples of $r$ that fit into one block 
+  \item $V(A,r)$: number of distinct values that appear in $r$ for attribute $A$; same as the size of $\prod_A (r)$
+\end{itemize}
+
+\section{Transactions}
+
+A \define{transaction} is a unit of program execution that accesses and possibly updates various data items. To preserve the integrity of data, the database system must ensure:
+\begin{itemize}
+  \item \bold{Atomic}: either all operations of the transaction are properly reflected in the database or none are
+  \item \bold{Consistency}: execution of a transaction in isolation preserves the consistency of the database
+  \item \bold{Isolation}: Although multiple transactions may execute concurrently, each transaction must be unaware of other concurrently executing transactions
+  \item \bold{Durability}: After a transaction completes successfully, the changes it has made to the database perist, even if there are system failures. 
+\end{itemize}
+A transaction has many states during its execution: 
+\begin{itemize}
+  \item \bold{active}---the initial state; the transaction stays in this state while it is executing 
+  \item \bold{partially committed}---after the final statement has been executed 
+  \item \bold{failed}---after the discovery that normal execution can no longer proceed 
+  \item \bold{abored}---after the transaction has been rolled back and the database restored to its state prior to the start of the transaction (restart or kill) 
+  \item \bold{committed}---after successful completion
+\end{itemize}
+The \define{recovery-management} component of a database system implements the support for atomicity and durability. The \define{shadow-database scheme} assumes that only one transaction is active at a time. A pointer called \emph{db\_pointer} always points to the current conssitent copy of the database. All updates are made on the \emph{shadow copy} of the database, and \bold{db\_pointer} is made to point at the updated shadow copy only after the transaction reaches partial commit and all updated pages have been flushed to disk. In case transaction fails, old consistent copy pointed to by \bold{db\_pointer} can be used, and the shadow copy can be deleted. \\ 
+
+Multiple transaction are allowed to run concurrently in the system. The advantages of this are increased processor and disk utilization and reduced average response time. \define{Concurrency control schemes} are mechanisms to achieve isolation; that is, to control the interaction among the concurrent transactions in order to prevent them from destroying the consistency of the database. \\ 
+
+A \define{schedule} is a sequence of instructions that specidfy the chronological order in which instructions of concurrent transactions are executed. A schedule for a set of transactions must consist of all instructions of those transactions and must preserve the order in which the instructions appear in each individual transaction. A transaction that successfully completes its execution will have a commit instructions as the last statement. A transaction that fails to successfully complete its execution will have an abort instructions as the last statement. \\ 
+
+\begin{remark}
+  \define{Serial} schedules are safe but not efficient. \define{Concurrent} schedules are efficient but can be unsafe. 
+\end{remark}
+
+A schedule is \define{serializable} if it is equivalent to a serial schedule (i.e. a concurrent schedule that can be transformed into an equivalent serial schedule). Instructions will \bold{conflict} if there are writes in any of the instructions. Different forms of schedule equivalence give rise to the notions of: 
+\begin{itemize}
+  \item Conflict serializability 
+  \item View serializability
+\end{itemize}
+
+If a schedule $S$ can be transformed into a schedule $S'$ by a series of swaps of non-conflicting instructions, we say that $S$ and $S'$ are \define{conflict equivalent}. We say that a schedule $S$ is \define{conflict serializable} if it is conflict equivalent to a serial schedule. \\ 
+
+\begin{remark}
+  For a schedule to be conflict serializable, you must be able to move the order of any instruction which does not include a write. 
+\end{remark}
+
+Let $S$ and $S'$ be two schedules with the same set of transactions. $S$ and $S'$ are \define{view equivalent} if the follownig three conditions are met: 
+\begin{enumerate}
+  \item For each data item $Q$, if transaction $T_i$ reads the initial value of $Q$ in schedule $S$, then transaction $T_i$ must, in schedule $S'$, also read the intial value of $Q$. 
+    \begin{itemize}
+      \item \bold{First to Read Rule}
+      \item Need to know which transaction reads the data item first. 
+    \end{itemize}
+  \item For each data item $Q$ if transaction $T_i$ executes \bold{read}($Q$) in schedule $S$, and that value was produced by transaction $T_j$ (f any), then transaction $T_i$ must in schedule $S'$ also read the value of $Q$ that was produced by transaction $T_j$. 
+    \begin{itemize}
+      \item \bold{Producer-Consumer Rule}
+      \item Between 2 transaction, we need to know which one writes and which one reads. 
+    \end{itemize}
+  \item For each data item $Q$, the transaction (if any) that performs the final \bold{write}($Q$) operation in schedule $S$ must perform the final \bold{write}($Q$) operation in schedule $S'$. 
+    \begin{itemize}
+      \item \bold{Last to Write Rule}
+      \item Need to know which transaction is the last to write to the data item.
+    \end{itemize}
+\end{enumerate}
+
+View  equivalence is also based purely on reads and writes alone. A schedule $S$ is \define{view serializable} if it is view equivalent to a serial schedule. Every conflict serializable schedule is also view serializable. 
+
+A \define{precedence graph} is a direct graph where the vertices are the transactions. We draw an arc from $T_i$ to $T_j$ if the two transactions conflict, and $T_i$ accessed the data item on which the conflict arose earlier. We may label the arc by the item that was accessed. \\ 
+
+A schedule is conflict serializable if and only if its precedence graph is acyclic. Cycle-detection algorithms exist which take order $n^2$ time, where $n$ is the number of vertices in the graph. If precedence graph is acycle, the serializability order can be obtained by a \emph{toplogical sorting} of the graph. The precedence graph test for conflict serializability cannot be used directly to test for view serializability. \\ 
+
+A schedule is \define{recoverable} if a transaction $T_j$ reads a data item previously written by a transaction $T_i$, then the commit operation of $T_i$ appears before the commit operation of $T_j$. \define{Cascading rollback} occurs when a single transaction failure leads to a series of transaction rollbacks; this can lead to the undoing of a significant amount of work. \define{Cascadeless schedules} are those where cascading rollbacks cannot occur: for each pair of transactions $T_i$ and $T_j$ such that $T_j$ reads a data item previously written by $T_i$, the commit operation of $T_i$ appears before the read operation of $T_j$. Every cascadeless schedule is also recoverable. It is desirable to restrict the schedules to those that are cascadeless. 
+
+\section{Concurrency Control}
+
+A \define{lock} is a mechanism to control concurrent access to a data item. Data items can be locked in two modes: 
+\begin{enumerate}
+  \item \define{exclusive} ($X$) mode. Data item can be both read as well as written. X-lock is requested using \bold{lock-X} instruction. 
+  \item \define{shared} ($S$) mode. Data item can only be read. S-lock is requested using \bold{lock-S} instruction.
+\end{enumerate}
+
+Lock requests are made to concurrency-control manager. Transaction can proceed only after request is granted. A transaction may be granted a lock on an item if the requested lock is compatible with locks already held on the item by other transactions. Any number of transactions can hold shared locks on an item, but if any transaction holds an exclusive onthe item, no other transaction may hold any lock on the item. If a lock cannot be granted, the requesting transaction is made to wait till all incompatible locks held by other transactions have been released; the lock is then granted. \\ 
+
+A \define{locking protocol} is a set of rules followed by all transactions while requesting and releasing locks. Locking protocls restrict the set of possible schedules. \\ 
+
+The potential for deadlock exists in most locking protocolrs. \define{Starvation} is also possible if concurrency control manager is badly designed. For example, a transaction may be waiting for an exclusive lock on an item, while a sequence of other transactions request and are granted a share lock on the same item; the same transaction is repeatedly rolled back due to deadlocks. Concurrency control manager can be designed to prevent starvation. 
+
+\begin{remark}
+  The pitfalls of lock-based protocols are deadlocks and starvation. 
+\end{remark}
+
+\define{Two-phase locking protocol} is a protocol which ensures conflict-serializable schedules. 
+\begin{enumerate}
+  \item \bold{Growing phase}
+  \begin{itemize}
+    \item transaction may obtain locks 
+    \item transaction may not release locks
+  \end{itemize}
+  \item \bold{Shrinking phase}
+  \begin{itemize}
+    \item transaction may release locks 
+    \item transaction may not obtain locks
+  \end{itemize}
+\end{enumerate}
+The protocol assures serializability. It can be proved that transactions can be serialized in the order of their \bold{lock points} (i.e. the point where a trnasaction acquired its final lock). Two-phase locking does not ensure freedom from deadlocks. Cascading roll-back is possible under two-phase locking. To avoid this, follow a modified protocol called \bold{strict two-phase locking}. Here a transaction must hold all its exclusive locks till it commits/aborts. \bold{Rigoroous two-phase locking} is even stricter: here all locks are held till commit/abort. In this protocol, transactions can be serialized in the order in which they commit. \\ 
+
+Two-phase locking with lock conversions works as follows: 
+\begin{enumerate}
+  \item \bold{First phase} 
+  \begin{itemize}
+    \item can acquire a lock-S on item 
+    \item can acquire a lock-X on item 
+    \item can convert a lock-S to a lock-X
+  \end{itemize}
+  \item \bold{Second phase}
+  \begin{itemize}
+    \item can release a lock-S 
+    \item can release a lock-X 
+    \item can convert a lock-X to a lock-S
+  \end{itemize}
+\end{enumerate}
+This protocol assures serializability, but still relies on the programmer to insert the various locking instructions. \\ 
+
+A \define{lock manager} can be implemented as a separate process to which transactions send lock and unlock requests. The lock manager replies to a lock request by sending a lock grant messages. The requesting transaction awaits until its request is answered. The lock manager maintains a data-strucutre called a \bold{lock table} to record granted locks and pending requests. The lock table is usually implemented as an in-memory hash table and indexed on the name of the data item being locked. \\ 
+
+A system is deadlocked if there is a set of transactions such that every transaction in the set is waiting for another transaction in the set. \define{Deadlock prevention} protocols ensure that the system will never enter into a deadlock state. The following are some prevention strategies.
+\begin{itemize}
+  \item \bold{Predeclaration}: require that each transaction locks all its data items before it begins execution 
+  \item \bold{Graph-based protocol}: impose partial ordering of all data items and require that a transaction can lock data items only in the order specified by the partial order
+  \item \bold{Wait-die scheme---non-preemptive}: older transactions may wait for younger one to release data item. Younger transactions never wait for older ones; they are rolled back instead. A transaction may die several times before acquiring needed data. 
+  \item \bold{Wound-wait scheme---preemptive}: older transaction wounds (forces rollback) of younger transaction instead of waiting for it. Younger transactions may wait for older ones; may be fewer rollbacks than wait-die scheme.
+  \item \bold{Timeout-based schemes}: a transaction waits for a lock only for a specified amount of time. After that, the wait times out and the transaction is rolled back; thus, deadlocks are not possible. 
+\end{itemize}
+
+Deadlocks can be described as a \emph{wait-for} graph. The system is in a deadlock state if and only if the wait-for graphy has a cycle. Must invoke a deadlock-detection algorithm periodically to look for cycles. When a deadlock is detected, some transaction will have to be rolled back (made a victim) to break deadlock; select the transaction as victim that will incur minimum cost. Starvation happens if the same transaction is always chosen as victim. Include the number of rollbacks in the cost factor to avoid starvation. 
+
+\section{Recovery System}
+
+\define{Physical blocks} are those blocks residing on the disk. \define{Buffer blocks} are the blocks residing temporarily in main memory. Each transition has its private work-area in which local copies of all data items accessed and updated are kept. \\ 
+
+A \bold{log} is kept on stable storage. The \define{log} is a sequence of log records, and maintains a record of update activities on the database. When a transaction starts, it registers itself by writing a log record. Before the transaction executes, a log record is written where $V$ is the value $X$ before the write, and $V_2$ is the value to be written to $X$. Log record notes that $T_i$ has performed a write on data item $X_j$ which had value $V_1$ before the write, and will have value $V_2$ after the write. When $T_i$ finishes its last statement, the commit statement is written to the log record. We assume, then, that the log records are written directly to stable storage. \\ 
+
+The \define{deferred database modification} scheme records all modificatins to the log, but defers all the writes to after partial commit. Assume that transactions execute serially. A transaction starts by writing \emph{start} to the log. A write operation results in a log record being written with the new value $V$ for $X$. The write is not performed on $X$ at this time, but is deferred. When the transaction partially commits, \emph{commit} is written to the log. Finally, the log records are read and used to actually execute the previously deferred writes. During recovery after a crash, a transaction needs to be redone if and only if both \emph{start} and \emph{commit} are in the log. Redoing a transaction sets the value of all data items updated by hte transaction to the new values. \\ 
+
+The \define{immediate database modification} scheeme allows database updates of an uncommitted transaction to be made as the writes are issued; since undoing may be needed, update logs must have both old value and new value. Update log record must be written before database item is written. We assume that the log record is output directly to stable storage. Also can be extended to postpone log record output, so long as prior to execution of \emph{output} operation for a data block $B$, all log records corresponding to items $B$ must be flushed to stable storage. Output of updated blocks can take place at any time before or after transaction commit. The order in which blocks are output can be different from the order in which they are written. The recovery procedure for immmediate database modification has two operations: 
+\begin{itemize}
+  \item \emph{undo} restores the value of all data items updated by a transaction to their old values, going backwards from the last log record for the transaction 
+  \item \emph{redo} sets the value of all data items updated by a transaction to the new values going forward from the first log record for the transactio 
+\end{itemize}
+Both operations must be \define{idempotent}: that is, even if the operation is executed multiple times, the effect is the same as if it executed once. When recovering after failure 
+\begin{itemize}
+  \item A transaction needs to be undone if the log contains the record \emph{start}, but does not contain the record \emph{commit}. 
+  \item A transaction needs to be redone if the log contains both the record \emph{start} and the record \emph{commit}.
+\end{itemize}
+Undo operations are performed first, then redo operations. \\ 
+
+Some problems in recovery procedure include the following 
+\begin{enumerate}
+  \item Searching the entire log is time-consuming 
+  \item We might unnessarily redo transactions which have already output their updates to the database. 
+\end{enumerate}
+We can streamline the recovery procedure by periodically performing \define{checkpointing}: 
+\begin{enumerate}
+  \item Output all log recrds currently residing in main memory onto stable storage. 
+  \item Output all modified buffer blocks to the disk. 
+  \item Write a log record \emph{checkpoint} onto stable storage. 
+\end{enumerate}
+During recovery we need to consider only hte most recent transaction that started before the checkpoints and transactions that started after that most recent transactions. 
+\begin{enumerate}
+  \item Scan backwards from end of log to find the most recent checkpoint record\item Continue scanning backwards until a record \emph{start} is found 
+  \item Need only consider the part of log following above \emph{start} record. Earlier part of log can be ignored during recovery, and can be erased whenever desired. 
+  \item For all transactions with no \emph{commit} execute undo. 
+  \item Scanning forward in the log, for all transactions starting from the transaction or later with a \emph{commit}, execute redo. 
+\end{enumerate}
+
+\end{document}
